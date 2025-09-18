@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 
-from .models import ContactMessage, FAQ, SiteSettings, Newsletter, BlogPost
+from .models import ContactMessage, FAQ, SiteSettings, Newsletter, BlogPost, PageContent
 from .forms import ContactForm, NewsletterForm, SearchForm
 from apps.jobs.models import Job, JobCategory
 from apps.accounts.models import CandidateProfile
@@ -58,7 +58,7 @@ def about(request):
     """Page à propos"""
     try:
         page_content = PageContent.objects.get(page_type='about', is_active=True)
-    except SiteSettings.DoesNotExist:
+    except PageContent.DoesNotExist:
         page_content = None
     
     try:
