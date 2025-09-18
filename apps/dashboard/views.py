@@ -7,6 +7,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.core.paginator import Paginator
 import json
+from django.shortcuts import get_object_or_404
 
 # Import des modèles
 from apps.accounts.models import User, CandidateProfile
