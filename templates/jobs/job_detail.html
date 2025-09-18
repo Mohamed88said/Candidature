@@ -20,7 +20,7 @@
             <!-- Job Header -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3 flex-column flex-md-row">
                         <div>
                             <h1 class="fw-bold mb-2">{{ job.title }}</h1>
                             <h5 class="text-muted mb-2">
@@ -33,7 +33,7 @@
                                 {% endif %}
                             </p>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end text-md-end text-start mt-3 mt-md-0">
                             {% if job.featured %}
                                 <span class="badge bg-primary mb-2 d-block">Offre en vedette</span>
                             {% endif %}
@@ -47,7 +47,7 @@
                     </div>
 
                     <!-- Job Meta -->
-                    <div class="row mb-3">
+                    <div class="row mb-3 job-meta">
                         <div class="col-md-3">
                             <small class="text-muted d-block">Type de contrat</small>
                             <strong>{{ job.get_job_type_display }}</strong>
@@ -67,31 +67,42 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="d-flex gap-2 flex-wrap">
+                    <div class="d-flex gap-2 flex-wrap job-actions">
                         {% if user.is_authenticated and user.user_type == 'candidate' %}
                             {% if not user_applied %}
                                 <a href="{% url 'applications:apply_to_job' job.id %}" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-paper-plane me-2"></i>Postuler maintenant
+                                    <i class="fas fa-paper-plane me-2 d-none d-md-inline"></i>
+                                    <i class="fas fa-paper-plane d-md-none"></i>
+                                    <span class="d-none d-md-inline">Postuler maintenant</span>
                                 </a>
                             {% else %}
                                 <button class="btn btn-success btn-lg" disabled>
-                                    <i class="fas fa-check me-2"></i>Candidature envoyée
+                                    <i class="fas fa-check me-2 d-none d-md-inline"></i>
+                                    <i class="fas fa-check d-md-none"></i>
+                                    <span class="d-none d-md-inline">Candidature envoyée</span>
                                 </button>
                             {% endif %}
                             <button class="btn btn-outline-primary save-job-btn" data-job-id="{{ job.id }}">
-                                <i class="{% if is_saved %}fas{% else %}far{% endif %} fa-heart me-2"></i>
-                                {% if is_saved %}Sauvegardé{% else %}Sauvegarder{% endif %}
+                                <i class="{% if is_saved %}fas{% else %}far{% endif %} fa-heart me-2 d-none d-md-inline"></i>
+                                <i class="{% if is_saved %}fas{% else %}far{% endif %} fa-heart d-md-none"></i>
+                                <span class="d-none d-md-inline">{% if is_saved %}Sauvegardé{% else %}Sauvegarder{% endif %}</span>
                             </button>
                         {% else %}
                             <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>Connectez-vous pour postuler
+                                <i class="fas fa-sign-in-alt me-2 d-none d-md-inline"></i>
+                                <i class="fas fa-sign-in-alt d-md-none"></i>
+                                <span class="d-none d-md-inline">Connectez-vous pour postuler</span>
                             </a>
                         {% endif %}
                         <button class="btn btn-outline-secondary" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>Imprimer
+                            <i class="fas fa-print me-2 d-none d-md-inline"></i>
+                            <i class="fas fa-print d-md-none"></i>
+                            <span class="d-none d-md-inline">Imprimer</span>
                         </button>
                         <button class="btn btn-outline-secondary" onclick="shareJob()">
-                            <i class="fas fa-share me-2"></i>Partager
+                            <i class="fas fa-share me-2 d-none d-md-inline"></i>
+                            <i class="fas fa-share d-md-none"></i>
+                            <span class="d-none d-md-inline">Partager</span>
                         </button>
                     </div>
                 </div>
