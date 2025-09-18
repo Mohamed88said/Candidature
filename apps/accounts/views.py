@@ -25,8 +25,9 @@ def register(request):
             messages.success(request, f'Compte créé pour {username}!')
             
             # Créer automatiquement un profil candidat si c'est un candidat
+            # Utiliser get_or_create pour éviter les doublons
             if user.user_type == 'candidate':
-                CandidateProfile.objects.create(user=user)
+                CandidateProfile.objects.get_or_create(user=user)
             
             # Connecter automatiquement l'utilisateur
             login(request, user)
