@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Candidature - {{ application.job.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Accueil</a></li>
+            {% if user.user_type == 'candidate' %}
+                <li class="breadcrumb-item"><a href="{% url 'applications:my_applications' %}">Mes candidatures</a></li>
+            {% else %}
+                <li class="breadcrumb-item"><a href="{% url 'applications:applications_list' %}">Candidatures</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ application.job.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8 mb-4">
+            <!-- Application Header -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="fw-bold mb-2">{{ application.job.title }}</h2>
+                            <h5 class="text-muted mb-2">
+                                <i class="fas fa-building me-2"></i>{{ application.job.company }}
+                            </h5>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-map-marker-alt me-2"></i>{{ application.job.location }}
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge 
+                                {% if application.status == 'pending' %}bg-warning
+                                {% elif application.status == 'reviewing' %}bg-info
+                                {% elif application.status == 'shortlisted' %}bg-success
+                                {% elif application.status == 'interview_scheduled' %}bg-primary
+                                {% elif application.status == 'accepted' %}bg-success
+                                {% elif application.status == 'rejected' %}bg-danger
+                                {% else %}bg-secondary{% endif %} fs-6 mb-2 d-block">
+                                {{ application.get_status_display }}
+                            </span>
+                            <small class="text-muted">
+                                Candidature du {{ application.applied_at|date:"d F Y" }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Application Meta -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Priorité</small>
+                            <strong class="
+                                {% if application.priority == 'high' %}text-danger
+                                {% elif application.priority == 'urgent' %}text-danger
+                                {% elif application.priority == 'low' %}text-secondary
+                                {% else %}text-primary{% endif %}">
+                                {{ application.get_priority_display }}
+                            </strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Salaire souhaité</small>
+                            <strong>
+                                {% if application.expected_salary %}
+                                    {{ application.expected_salary }} €
+                                {% else %}
+                                    Non renseigné
+                                {% endif %}
+                            </strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Disponibilité</small>
+                            <strong>
+                                {% if application.availability_date %}
+                                    {{ application.availability_date|date:"d F Y" }}
+                                {% else %}
+                                    Immédiate
+                                {% endif %}
+                            </strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Mobilité</small>
+                            <strong>
+                                {% if application.willing_to_relocate %}
+                                    <span class="text-success">Oui</span>
+                                {% else %}
+                                    <span class="text-muted">Non</span>
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <!-- Admin Actions -->
+                    {% if can_edit %}
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'applications:update_status' application.pk %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Modifier le statut
+                        </a>
+                        <a href="{% url 'applications:add_comment' application.pk %}" class="btn btn-outline-primary">
+                            <i class="fas fa-comment me-2"></i>Ajouter un commentaire
+                        </a>
+                        <a href="{% url 'applications:rate_application' application.pk %}" class="btn btn-outline-success">
+                            <i class="fas fa-star me-2"></i>Évaluer
+                        </a>
+                        <a href="{% url 'applications:schedule_interview' application.pk %}" class="btn btn-outline-info">
+                            <i class="fas fa-calendar me-2"></i>Programmer un entretien
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Cover Letter -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Lettre de motivation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="cover-letter-content">
+                        {{ application.cover_letter|linebreaks }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            {% if comments %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>Commentaires et feedback
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for comment in comments %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="fw-bold mb-0">{{ comment.author.full_name }}</h6>
+                                <small class="text-muted">{{ comment.created_at|date:"d F Y à H:i" }}</small>
+                            </div>
+                            <span class="badge bg-secondary mb-2">{{ comment.get_comment_type_display }}</span>
+                            <p class="mb-0">{{ comment.content|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Interviews -->
+            {% if interviews %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-handshake me-2"></i>Entretiens
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for interview in interviews %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ interview.get_interview_type_display }}</h6>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-clock me-2"></i>{{ interview.scheduled_date|date:"d F Y à H:i" }}
+                                ({{ interview.duration_minutes }} min)
+                            </p>
+                            {% if interview.location %}
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-map-marker-alt me-2"></i>{{ interview.location }}
+                            </p>
+                            {% endif %}
+                            <span class="badge 
+                                {% if interview.status == 'scheduled' %}bg-primary
+                                {% elif interview.status == 'completed' %}bg-success
+                                {% elif interview.status == 'cancelled' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ interview.get_status_display }}
+                            </span>
+                            
+                            {% if interview.overall_rating %}
+                            <div class="mt-2">
+                                <small class="text-muted">Note: </small>
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= interview.overall_rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-muted"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Status History -->
+            {% if status_history %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Historique des statuts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for history in status_history %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">{{ history.get_new_status_display }}</h6>
+                                <p class="text-muted mb-1">
+                                    Par {{ history.changed_by.full_name }} le {{ history.changed_at|date:"d F Y à H:i" }}
+                                </p>
+                                {% if history.reason %}
+                                <p class="small mb-0">{{ history.reason }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Candidate Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Informations candidat</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if application.candidate.profile_picture %}
+                            <img src="{{ application.candidate.profile_picture.url }}" 
+                                 alt="Photo" class="rounded-circle" 
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-primary text-white rounded-circle mx-auto d-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-user fa-2x"></i>
+                            </div>
+                        {% endif %}
+                        <h6 class="fw-bold mt-2 mb-1">{{ application.candidate.user.full_name }}</h6>
+                        <p class="text-muted small">{{ application.candidate.current_position|default:"Candidat" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Email</small>
+                        <strong>{{ application.candidate.user.email }}</strong>
+                    </div>
+                    
+                    {% if application.candidate.mobile_phone %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Téléphone</small>
+                        <strong>{{ application.candidate.mobile_phone }}</strong>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Expérience</small>
+                        <strong>{{ application.candidate.years_of_experience }} ans</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Profil complété</small>
+                        <div class="progress mt-1" style="height: 6px;">
+                            <div class="progress-bar bg-success" 
+                                 style="width: {{ application.candidate.profile_completion }}%"></div>
+                        </div>
+                        <small class="text-success">{{ application.candidate.profile_completion }}%</small>
+                    </div>
+                    
+                    {% if can_edit %}
+                    <a href="{% url 'dashboard:candidate_profile' application.candidate.id %}" 
+                       class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-user me-2"></i>Voir le profil complet
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Documents</h6>
+                </div>
+                <div class="card-body">
+                    {% if application.resume_file %}
+                    <p class="mb-2">
+                        <i class="fas fa-file-pdf me-2 text-danger"></i>
+                        <a href="{{ application.resume_file.url }}" target="_blank">CV</a>
+                    </p>
+                    {% endif %}
+                    
+                    {% if application.candidate.cv_file %}
+                    <p class="mb-2">
+                        <i class="fas fa-file-pdf me-2 text-danger"></i>
+                        <a href="{{ application.candidate.cv_file.url }}" target="_blank">CV du profil</a>
+                    </p>
+                    {% endif %}
+                    
+                    {% if application.additional_documents %}
+                    <p class="mb-2">
+                        <i class="fas fa-file-alt me-2 text-primary"></i>
+                        <a href="{{ application.additional_documents.url }}" target="_blank">Documents supplémentaires</a>
+                    </p>
+                    {% endif %}
+                    
+                    {% if not application.resume_file and not application.candidate.cv_file and not application.additional_documents %}
+                    <p class="text-muted mb-0">Aucun document</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Ratings -->
+            {% if ratings %}
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Évaluations</h6>
+                    {% if avg_rating %}
+                        <span class="badge bg-warning">{{ avg_rating|floatformat:1 }}/5</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% for rating in ratings %}
+                    <div class="mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="small">{{ rating.get_criteria_display }}</strong>
+                            <span class="badge bg-primary">{{ rating.score }}/{{ rating.max_score }}</span>
+                        </div>
+                        {% if rating.comments %}
+                        <p class="small text-muted mb-0">{{ rating.comments }}</p>
+                        {% endif %}
+                        <small class="text-muted">Par {{ rating.evaluator.full_name }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Job Link -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="fw-bold mb-3">Offre d'emploi</h6>
+                    <a href="{% url 'jobs:job_detail' application.job.slug %}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-external-link-alt me-2"></i>Voir l'offre complète
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.cover-letter-content {
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -31px;
+    top: 15px;
+    width: 2px;
+    height: calc(100% + 10px);
+    background-color: #dee2e6;
+}
+</style>
+{% endblock %}

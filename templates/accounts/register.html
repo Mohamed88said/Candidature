@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Inscription - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">Créer un compte</h2>
+                        <p class="text-muted">Rejoignez notre plateforme de recrutement</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                J'accepte les <a href="{% url 'core:terms' %}" target="_blank">conditions d'utilisation</a>
+                                et la <a href="{% url 'core:privacy' %}" target="_blank">politique de confidentialité</a>
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Créer mon compte
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <hr>
+                        <p class="mb-0">
+                            Déjà un compte ? 
+                            <a href="{% url 'accounts:login' %}" class="text-decoration-none fw-bold">
+                                Se connecter
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 15px;
+}
+.btn-lg {
+    padding: 12px 30px;
+    border-radius: 8px;
+}
+</style>
+{% endblock %}

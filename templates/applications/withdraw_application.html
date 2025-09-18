@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Retirer la candidature{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-lg border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Retirer la candidature
+                    </h3>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-file-times fa-4x text-warning mb-3"></i>
+                        <h4>Êtes-vous sûr ?</h4>
+                        <p class="text-muted">
+                            Vous êtes sur le point de retirer votre candidature pour :
+                        </p>
+                        <div class="alert alert-info">
+                            <strong>{{ application.job.title }}</strong><br>
+                            <small class="text-muted">{{ application.job.company }}</small>
+                        </div>
+                        <p class="text-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Vous ne pourrez plus postuler à nouveau à cette offre !
+                        </p>
+                    </div>
+                    
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <a href="{% url 'applications:application_detail' application.pk %}" class="btn btn-outline-secondary me-3">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-file-times me-2"></i>Retirer ma candidature
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

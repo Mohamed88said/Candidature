@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Conditions d'utilisation - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="mb-0">Conditions d'utilisation</h1>
+                    <small>Dernière mise à jour : {{ last_updated|default:"1er janvier 2024" }}</small>
+                </div>
+                <div class="card-body p-5">
+                    <div class="terms-content">
+                        <h2>1. Acceptation des conditions</h2>
+                        <p>
+                            En accédant et en utilisant cette plateforme de recrutement, vous acceptez d'être lié par ces conditions d'utilisation. 
+                            Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre service.
+                        </p>
+
+                        <h2>2. Description du service</h2>
+                        <p>
+                            Notre plateforme met en relation les candidats à la recherche d'emploi avec les entreprises qui recrutent. 
+                            Nous fournissons des outils pour :
+                        </p>
+                        <ul>
+                            <li>Créer et gérer des profils candidats</li>
+                            <li>Publier et consulter des offres d'emploi</li>
+                            <li>Postuler aux offres</li>
+                            <li>Gérer le processus de recrutement</li>
+                        </ul>
+
+                        <h2>3. Inscription et compte utilisateur</h2>
+                        <h3>3.1 Conditions d'inscription</h3>
+                        <p>
+                            Pour utiliser notre service, vous devez :
+                        </p>
+                        <ul>
+                            <li>Être âgé d'au moins 16 ans</li>
+                            <li>Fournir des informations exactes et complètes</li>
+                            <li>Maintenir la sécurité de votre mot de passe</li>
+                            <li>Notifier immédiatement toute utilisation non autorisée</li>
+                        </ul>
+
+                        <h3>3.2 Responsabilité du compte</h3>
+                        <p>
+                            Vous êtes responsable de toutes les activités qui se produisent sous votre compte. 
+                            Nous ne sommes pas responsables des pertes résultant de l'utilisation non autorisée de votre compte.
+                        </p>
+
+                        <h2>4. Utilisation acceptable</h2>
+                        <h3>4.1 Comportement autorisé</h3>
+                        <p>Vous pouvez utiliser notre service pour :</p>
+                        <ul>
+                            <li>Rechercher des opportunités d'emploi légitimes</li>
+                            <li>Publier des offres d'emploi authentiques</li>
+                            <li>Communiquer professionnellement avec d'autres utilisateurs</li>
+                        </ul>
+
+                        <h3>4.2 Comportement interdit</h3>
+                        <p>Il est strictement interdit de :</p>
+                        <ul>
+                            <li>Publier du contenu faux, trompeur ou illégal</li>
+                            <li>Harceler, menacer ou discriminer d'autres utilisateurs</li>
+                            <li>Utiliser le service à des fins de spam ou de sollicitation</li>
+                            <li>Tenter de contourner les mesures de sécurité</li>
+                            <li>Collecter des données d'autres utilisateurs sans autorisation</li>
+                        </ul>
+
+                        <h2>5. Contenu utilisateur</h2>
+                        <h3>5.1 Propriété du contenu</h3>
+                        <p>
+                            Vous conservez la propriété du contenu que vous publiez sur notre plateforme. 
+                            Cependant, vous nous accordez une licence pour utiliser, afficher et distribuer ce contenu 
+                            dans le cadre de notre service.
+                        </p>
+
+                        <h3>5.2 Responsabilité du contenu</h3>
+                        <p>
+                            Vous êtes seul responsable du contenu que vous publiez. Nous nous réservons le droit 
+                            de supprimer tout contenu qui viole ces conditions ou qui est inapproprié.
+                        </p>
+
+                        <h2>6. Confidentialité et données personnelles</h2>
+                        <p>
+                            La collecte et l'utilisation de vos données personnelles sont régies par notre 
+                            <a href="{% url 'core:privacy' %}">Politique de confidentialité</a>, 
+                            qui fait partie intégrante de ces conditions.
+                        </p>
+
+                        <h2>7. Services payants</h2>
+                        <p>
+                            Certains services peuvent être payants. Les conditions de paiement, 
+                            de remboursement et d'annulation seront clairement indiquées avant tout achat.
+                        </p>
+
+                        <h2>8. Limitation de responsabilité</h2>
+                        <p>
+                            Notre service est fourni "en l'état". Nous ne garantissons pas que le service sera 
+                            ininterrompu ou exempt d'erreurs. Notre responsabilité est limitée dans la mesure 
+                            permise par la loi.
+                        </p>
+
+                        <h2>9. Résiliation</h2>
+                        <h3>9.1 Résiliation par l'utilisateur</h3>
+                        <p>
+                            Vous pouvez fermer votre compte à tout moment en nous contactant ou 
+                            en utilisant les paramètres de votre compte.
+                        </p>
+
+                        <h3>9.2 Résiliation par nous</h3>
+                        <p>
+                            Nous pouvons suspendre ou fermer votre compte si vous violez ces conditions 
+                            ou si nous cessons d'offrir le service.
+                        </p>
+
+                        <h2>10. Modifications des conditions</h2>
+                        <p>
+                            Nous nous réservons le droit de modifier ces conditions à tout moment. 
+                            Les modifications importantes vous seront notifiées par email ou 
+                            via une notification sur la plateforme.
+                        </p>
+
+                        <h2>11. Droit applicable</h2>
+                        <p>
+                            Ces conditions sont régies par le droit français. Tout litige sera soumis 
+                            à la juridiction des tribunaux français.
+                        </p>
+
+                        <h2>12. Contact</h2>
+                        <p>
+                            Pour toute question concernant ces conditions d'utilisation, 
+                            vous pouvez nous contacter :
+                        </p>
+                        <ul>
+                            <li>Par email : legal@recrutementpro.com</li>
+                            <li>Par courrier : Service Juridique, 123 Avenue des Champs-Élysées, 75008 Paris</li>
+                            <li>Via notre <a href="{% url 'core:contact' %}">formulaire de contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.terms-content h2 {
+    color: #007bff;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.terms-content h3 {
+    color: #495057;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.terms-content p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.terms-content ul {
+    margin-bottom: 1rem;
+}
+
+.terms-content li {
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+</style>
+{% endblock %}

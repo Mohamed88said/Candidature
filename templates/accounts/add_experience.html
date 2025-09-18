@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Ajouter une expérience - Mon Profil{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-briefcase me-2"></i>Ajouter une expérience professionnelle
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour au profil
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save me-2"></i>Ajouter l'expérience
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Conseils pour une expérience complète
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle text-success me-2"></i>Description</h6>
+                            <ul class="small text-muted">
+                                <li>Décrivez vos missions principales</li>
+                                <li>Utilisez des verbes d'action</li>
+                                <li>Soyez précis et concret</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle text-success me-2"></i>Réalisations</h6>
+                            <ul class="small text-muted">
+                                <li>Quantifiez vos résultats</li>
+                                <li>Mentionnez les projets importants</li>
+                                <li>Mettez en avant votre impact</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

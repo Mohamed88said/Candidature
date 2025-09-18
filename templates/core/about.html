@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}À propos - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    {% if page_content %}{{ page_content.title }}{% else %}À propos de nous{% endif %}
+                </h1>
+                <p class="lead">
+                    {% if site_settings.about_content %}
+                        {{ site_settings.about_content|truncatewords:30 }}
+                    {% else %}
+                        Nous connectons les talents aux opportunités depuis plus de 10 ans, 
+                        en révolutionnant le processus de recrutement grâce à la technologie.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-lg-6 text-center">
+                {% if site_settings.hero_image %}
+                    <img src="{{ site_settings.hero_image.url }}" 
+                         alt="Notre équipe" class="img-fluid rounded shadow">
+                {% else %}
+                    <img src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=600" 
+                     alt="Notre équipe" class="img-fluid rounded shadow">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-4">
+                    {% if site_settings.about_mission %}Notre Mission{% else %}Notre Mission{% endif %}
+                </h2>
+                <p class="lead text-muted mb-5">
+                    {% if site_settings.about_mission %}
+                        {{ site_settings.about_mission }}
+                    {% else %}
+                        Simplifier et optimiser le processus de recrutement en offrant une plateforme 
+                        intuitive qui met en relation les meilleurs talents avec les entreprises 
+                        qui partagent leurs valeurs et ambitions.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h5 class="fw-bold">Pour les Candidats</h5>
+                        <p class="text-muted">
+                            Nous aidons les professionnels à trouver des opportunités 
+                            qui correspondent à leurs compétences et aspirations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <i class="fas fa-building fa-3x text-success mb-3"></i>
+                        <h5 class="fw-bold">Pour les Entreprises</h5>
+                        <p class="text-muted">
+                            Nous permettons aux entreprises de trouver les talents 
+                            qui feront la différence dans leur croissance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <i class="fas fa-handshake fa-3x text-info mb-3"></i>
+                        <h5 class="fw-bold">Ensemble</h5>
+                        <p class="text-muted">
+                            Nous créons des connexions durables qui bénéficient 
+                            à tous les acteurs du marché de l'emploi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-12 mb-5">
+                <h2 class="fw-bold">Nos Résultats</h2>
+                <p class="text-muted">Des chiffres qui parlent de notre impact</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold text-primary">{{ stats.jobs_posted|default:"1,250" }}</h3>
+                    <p class="text-muted">Offres publiées</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                    <div class="bg-success text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold text-success">{{ stats.candidates_registered|default:"15,000" }}</h3>
+                    <p class="text-muted">Candidats inscrits</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                    <div class="bg-info text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-handshake fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold text-info">{{ stats.successful_placements|default:"3,200" }}</h3>
+                    <p class="text-muted">Embauches réussies</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                    <div class="bg-warning text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-building fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold text-warning">{{ stats.companies_served|default:"850" }}</h3>
+                    <p class="text-muted">Entreprises partenaires</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="fw-bold">Nos Valeurs</h2>
+                <p class="text-muted">Les principes qui guident notre action au quotidien</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0 me-4">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Transparence</h5>
+                        <p class="text-muted">
+                            Nous croyons en une communication claire et honnête avec tous nos utilisateurs, 
+                            candidats comme recruteurs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0 me-4">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Innovation</h5>
+                        <p class="text-muted">
+                            Nous investissons constamment dans les nouvelles technologies pour améliorer 
+                            l'expérience de recrutement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0 me-4">
+                        <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Équité</h5>
+                        <p class="text-muted">
+                            Nous promouvons l'égalité des chances et luttons contre toute forme 
+                            de discrimination dans le processus de recrutement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0 me-4">
+                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Sécurité</h5>
+                        <p class="text-muted">
+                            La protection des données personnelles et la confidentialité 
+                            sont au cœur de nos préoccupations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="fw-bold">Notre Équipe</h2>
+                <p class="text-muted">Des experts passionnés au service de votre réussite</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=300" 
+                             alt="CEO" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        <h5 class="fw-bold">Marie Dubois</h5>
+                        <p class="text-primary mb-2">CEO & Fondatrice</p>
+                        <p class="text-muted small">
+                            15 ans d'expérience dans les RH et la technologie. 
+                            Passionnée par l'innovation dans le recrutement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=300" 
+                             alt="CTO" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        <h5 class="fw-bold">Thomas Martin</h5>
+                        <p class="text-success mb-2">CTO</p>
+                        <p class="text-muted small">
+                            Expert en développement web et intelligence artificielle. 
+                            Architecte de notre plateforme technologique.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=300" 
+                             alt="Head of HR" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        <h5 class="fw-bold">Sophie Laurent</h5>
+                        <p class="text-info mb-2">Directrice RH</p>
+                        <p class="text-muted small">
+                            Spécialiste en gestion des talents et développement RH. 
+                            Garante de l'expérience utilisateur optimale.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="fw-bold mb-3">Rejoignez notre communauté</h2>
+                <p class="lead mb-4">
+                    Que vous soyez candidat ou recruteur, découvrez comment notre plateforme 
+                    peut transformer votre approche du recrutement.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Créer un compte
+                    </a>
+                    <a href="{% url 'core:contact' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-envelope me-2"></i>Nous contacter
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

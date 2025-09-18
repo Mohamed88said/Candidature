@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmer la suppression{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-lg border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmer la suppression
+                    </h3>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-trash-alt fa-4x text-danger mb-3"></i>
+                        <h4>Êtes-vous sûr ?</h4>
+                        <p class="text-muted">
+                            Vous êtes sur le point de supprimer cette {{ object_type }} :
+                        </p>
+                        <div class="alert alert-warning">
+                            <strong>{{ object }}</strong>
+                        </div>
+                        <p class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Cette action est irréversible !
+                        </p>
+                    </div>
+                    
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary me-3">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Supprimer définitivement
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

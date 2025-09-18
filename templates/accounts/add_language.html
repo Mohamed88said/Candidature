@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Ajouter une langue - Mon Profil{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-language me-2"></i>Ajouter une langue
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="language-form">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour au profil
+                            </a>
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-plus me-2"></i>Ajouter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Language Levels Info -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Niveaux de langue (CECR)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Débutant</h6>
+                            <ul class="small text-muted">
+                                <li><strong>A1:</strong> Découverte</li>
+                                <li><strong>A2:</strong> Survie</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success">Avancé</h6>
+                            <ul class="small text-muted">
+                                <li><strong>C1:</strong> Autonome</li>
+                                <li><strong>C2:</strong> Maîtrise</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

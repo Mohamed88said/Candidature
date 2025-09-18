@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Blog{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Article -->
+            <article class="card shadow-lg border-0">
+                {% if post.featured_image %}
+                <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" 
+                     style="height: 300px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body p-5">
+                    <!-- Article Meta -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-2"></i>{{ post.published_at|date:"d F Y" }}
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-user me-2"></i>{{ post.author.full_name }}
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-eye me-2"></i>{{ post.views_count }} vues
+                            </small>
+                        </div>
+                        <div class="social-share">
+                            <button class="btn btn-sm btn-outline-primary" onclick="shareArticle()">
+                                <i class="fas fa-share me-2"></i>Partager
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Article Title -->
+                    <h1 class="fw-bold mb-4">{{ post.title }}</h1>
+
+                    <!-- Article Content -->
+                    <div class="article-content">
+                        {{ post.content|linebreaks }}
+                    </div>
+
+                    <!-- Tags -->
+                    {% if post.tags %}
+                    <div class="mt-4 pt-4 border-top">
+                        <h6 class="mb-3">Tags :</h6>
+                        {% for tag in post.tags|split:"," %}
+                            <a href="{% url 'core:blog_by_tag' tag.strip %}" class="badge bg-light text-dark me-2 mb-2 text-decoration-none">
+                                {{ tag.strip }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </article>
+
+            <!-- Similar Posts -->
+            {% if similar_posts %}
+            <div class="mt-5">
+                <h3 class="fw-bold mb-4">Articles similaires</h3>
+                <div class="row">
+                    {% for similar_post in similar_posts %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            {% if similar_post.featured_image %}
+                            <img src="{{ similar_post.featured_image.url }}" class="card-img-top" 
+                                 alt="{{ similar_post.title }}" style="height: 150px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <a href="{% url 'core:blog_detail' similar_post.slug %}" class="text-decoration-none">
+                                        {{ similar_post.title|truncatewords:8 }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">{{ similar_post.published_at|date:"d F Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Recent Posts -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Articles récents</h6>
+                </div>
+                <div class="card-body">
+                    {% for recent_post in recent_posts %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">
+                                <a href="{% url 'core:blog_detail' recent_post.slug %}" class="text-decoration-none">
+                                    {{ recent_post.title|truncatewords:8 }}
+                                </a>
+                            </h6>
+                            <small class="text-muted">{{ recent_post.published_at|date:"d F Y" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Newsletter -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">Newsletter</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Recevez nos derniers articles par email</p>
+                    <form id="newsletter-form">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="email" class="form-control" name="email" placeholder="Votre email" required>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Back to Blog -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <a href="{% url 'core:blog' %}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-arrow-left me-2"></i>Retour au blog
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.article-content {
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.article-content h2, .article-content h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #007bff;
+}
+
+.article-content p {
+    margin-bottom: 1.5rem;
+}
+
+.article-content ul, .article-content ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+.social-share button {
+    transition: all 0.3s ease;
+}
+
+.social-share button:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function shareArticle() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ post.title }}',
+            text: '{{ post.excerpt|default:post.content|truncatewords:20 }}',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copier l'URL
+        navigator.clipboard.writeText(window.location.href).then(function() {
+            alert('Lien copié dans le presse-papiers !');
+        });
+    }
+}
+</script>
+{% endblock %}

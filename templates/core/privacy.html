@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+
+{% block title %}Politique de confidentialité - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h1 class="mb-0">Politique de confidentialité</h1>
+                    <small>Dernière mise à jour : {{ last_updated|default:"1er janvier 2024" }}</small>
+                </div>
+                <div class="card-body p-5">
+                    <div class="privacy-content">
+                        <div class="alert alert-info">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Votre vie privée nous tient à cœur.</strong> 
+                            Cette politique explique comment nous collectons, utilisons et protégeons vos données personnelles.
+                        </div>
+
+                        <h2>1. Responsable du traitement</h2>
+                        <p>
+                            Le responsable du traitement de vos données personnelles est :
+                        </p>
+                        <div class="bg-light p-3 rounded">
+                            <strong>RecrutementPro SAS</strong><br>
+                            123 Avenue des Champs-Élysées<br>
+                            75008 Paris, France<br>
+                            Email : privacy@recrutementpro.com<br>
+                            Téléphone : +33 1 23 45 67 89
+                        </div>
+
+                        <h2>2. Données collectées</h2>
+                        <h3>2.1 Données d'identification</h3>
+                        <ul>
+                            <li>Nom et prénom</li>
+                            <li>Adresse email</li>
+                            <li>Numéro de téléphone</li>
+                            <li>Date de naissance</li>
+                            <li>Adresse postale</li>
+                        </ul>
+
+                        <h3>2.2 Données professionnelles</h3>
+                        <ul>
+                            <li>CV et lettre de motivation</li>
+                            <li>Expériences professionnelles</li>
+                            <li>Formation et diplômes</li>
+                            <li>Compétences et certifications</li>
+                            <li>Préférences d'emploi</li>
+                        </ul>
+
+                        <h3>2.3 Données techniques</h3>
+                        <ul>
+                            <li>Adresse IP</li>
+                            <li>Type de navigateur</li>
+                            <li>Pages visitées</li>
+                            <li>Durée de visite</li>
+                            <li>Cookies et technologies similaires</li>
+                        </ul>
+
+                        <h2>3. Finalités du traitement</h2>
+                        <p>Nous utilisons vos données pour :</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-primary">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary">
+                                            <i class="fas fa-user-check me-2"></i>Gestion des comptes
+                                        </h5>
+                                        <ul class="small">
+                                            <li>Création et gestion de votre profil</li>
+                                            <li>Authentification et sécurité</li>
+                                            <li>Support client</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">
+                                            <i class="fas fa-handshake me-2"></i>Mise en relation
+                                        </h5>
+                                        <ul class="small">
+                                            <li>Matching candidats/employeurs</li>
+                                            <li>Recommandations d'offres</li>
+                                            <li>Gestion des candidatures</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-info">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-info">
+                                            <i class="fas fa-chart-line me-2"></i>Amélioration du service
+                                        </h5>
+                                        <ul class="small">
+                                            <li>Analyses statistiques</li>
+                                            <li>Optimisation de la plateforme</li>
+                                            <li>Développement de nouvelles fonctionnalités</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-warning">
+                                            <i class="fas fa-envelope me-2"></i>Communication
+                                        </h5>
+                                        <ul class="small">
+                                            <li>Notifications importantes</li>
+                                            <li>Newsletter (avec consentement)</li>
+                                            <li>Alertes emploi</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>4. Base légale du traitement</h2>
+                        <p>Nous traitons vos données sur la base de :</p>
+                        <ul>
+                            <li><strong>Contrat :</strong> Pour fournir nos services de recrutement</li>
+                            <li><strong>Intérêt légitime :</strong> Pour améliorer nos services et assurer la sécurité</li>
+                            <li><strong>Consentement :</strong> Pour les communications marketing</li>
+                            <li><strong>Obligation légale :</strong> Pour respecter nos obligations réglementaires</li>
+                        </ul>
+
+                        <h2>5. Partage des données</h2>
+                        <h3>5.1 Avec qui partageons-nous vos données ?</h3>
+                        <ul>
+                            <li><strong>Employeurs :</strong> Lorsque vous postulez à leurs offres</li>
+                            <li><strong>Prestataires techniques :</strong> Pour l'hébergement et la maintenance</li>
+                            <li><strong>Partenaires :</strong> Avec votre consentement explicite</li>
+                        </ul>
+
+                        <h3>5.2 Transferts internationaux</h3>
+                        <p>
+                            Vos données peuvent être transférées vers des pays hors UE uniquement 
+                            avec des garanties appropriées (clauses contractuelles types, décision d'adéquation).
+                        </p>
+
+                        <h2>6. Durée de conservation</h2>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Type de données</th>
+                                        <th>Durée de conservation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Données de profil actif</td>
+                                        <td>Tant que le compte est actif</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Données de profil inactif</td>
+                                        <td>3 ans après la dernière connexion</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Candidatures</td>
+                                        <td>5 ans après la candidature</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Données de connexion</td>
+                                        <td>1 an</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h2>7. Vos droits</h2>
+                        <p>Conformément au RGPD, vous disposez des droits suivants :</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-eye text-primary me-2"></i>Droit d'accès
+                                        </h6>
+                                        <p class="card-text small">
+                                            Obtenir une copie de vos données personnelles
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-edit text-success me-2"></i>Droit de rectification
+                                        </h6>
+                                        <p class="card-text small">
+                                            Corriger des données inexactes ou incomplètes
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-trash text-danger me-2"></i>Droit d'effacement
+                                        </h6>
+                                        <p class="card-text small">
+                                            Demander la suppression de vos données
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-download text-info me-2"></i>Droit à la portabilité
+                                        </h6>
+                                        <p class="card-text small">
+                                            Récupérer vos données dans un format structuré
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>8. Sécurité des données</h2>
+                        <p>Nous mettons en place des mesures techniques et organisationnelles pour protéger vos données :</p>
+                        <ul>
+                            <li>Chiffrement des données sensibles</li>
+                            <li>Accès restreint aux données personnelles</li>
+                            <li>Surveillance continue de la sécurité</li>
+                            <li>Formation régulière de nos équipes</li>
+                            <li>Audits de sécurité périodiques</li>
+                        </ul>
+
+                        <h2>9. Cookies et technologies similaires</h2>
+                        <p>
+                            Nous utilisons des cookies pour améliorer votre expérience. 
+                            Vous pouvez gérer vos préférences de cookies dans les paramètres de votre navigateur.
+                        </p>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-cookie-bite me-2"></i>
+                            <strong>Gestion des cookies :</strong> 
+                            Vous pouvez accepter ou refuser les cookies non essentiels via notre bandeau de cookies.
+                        </div>
+
+                        <h2>10. Modifications de cette politique</h2>
+                        <p>
+                            Nous pouvons modifier cette politique de confidentialité. 
+                            Les modifications importantes vous seront notifiées par email ou 
+                            via une notification sur la plateforme.
+                        </p>
+
+                        <h2>11. Contact et réclamations</h2>
+                        <p>Pour exercer vos droits ou pour toute question :</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-primary">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-primary">
+                                            <i class="fas fa-envelope me-2"></i>Nous contacter
+                                        </h6>
+                                        <p class="small mb-1">Email : privacy@recrutementpro.com</p>
+                                        <p class="small mb-1">Téléphone : +33 1 23 45 67 89</p>
+                                        <a href="{% url 'core:contact' %}" class="btn btn-sm btn-outline-primary">
+                                            Formulaire de contact
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-warning">
+                                            <i class="fas fa-balance-scale me-2"></i>Réclamation CNIL
+                                        </h6>
+                                        <p class="small">
+                                            Vous pouvez déposer une réclamation auprès de la CNIL 
+                                            si vous estimez que vos droits ne sont pas respectés.
+                                        </p>
+                                        <a href="https://www.cnil.fr" target="_blank" class="btn btn-sm btn-outline-warning">
+                                            Site de la CNIL
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.privacy-content h2 {
+    color: #28a745;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.privacy-content h3 {
+    color: #495057;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.privacy-content p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.privacy-content ul {
+    margin-bottom: 1rem;
+}
+
+.privacy-content li {
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+</style>
+{% endblock %}

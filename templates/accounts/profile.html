@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - {{ user.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header Profile -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            {% if profile.profile_picture %}
+                                <img src="{{ profile.profile_picture.url }}" alt="Photo de profil" 
+                                     class="rounded-circle img-fluid" style="width: 120px; height: 120px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                     style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h2 class="fw-bold mb-2">{{ user.full_name }}</h2>
+                            <p class="mb-1">
+                                <i class="fas fa-briefcase me-2"></i>
+                                {{ profile.current_position|default:"Poste non renseigné" }}
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-building me-2"></i>
+                                {{ profile.current_company|default:"Entreprise non renseignée" }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                {{ profile.city|default:"Ville non renseignée" }}
+                            </p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="mb-3">
+                                <h4>{{ profile.profile_completion }}%</h4>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: {{ profile.profile_completion }}%"></div>
+                                </div>
+                                <small>Profil complété</small>
+                            </div>
+                            <a href="{% url 'accounts:edit_profile' %}" class="btn btn-light">
+                                <i class="fas fa-edit me-2"></i>Modifier
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-4 mb-4">
+            <!-- Quick Stats -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistiques</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ profile.applications.count }}</h4>
+                            <small class="text-muted">Candidatures</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ profile.years_of_experience }}</h4>
+                            <small class="text-muted">Années d'exp.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-address-card me-2"></i>Contact</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <i class="fas fa-envelope me-2 text-muted"></i>
+                        {{ user.email }}
+                    </p>
+                    {% if profile.mobile_phone %}
+                    <p class="mb-2">
+                        <i class="fas fa-phone me-2 text-muted"></i>
+                        {{ profile.mobile_phone }}
+                    </p>
+                    {% endif %}
+                    {% if profile.linkedin_url %}
+                    <p class="mb-2">
+                        <i class="fab fa-linkedin me-2 text-muted"></i>
+                        <a href="{{ profile.linkedin_url }}" target="_blank">LinkedIn</a>
+                    </p>
+                    {% endif %}
+                    {% if profile.website_url %}
+                    <p class="mb-0">
+                        <i class="fas fa-globe me-2 text-muted"></i>
+                        <a href="{{ profile.website_url }}" target="_blank">Site web</a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Documents</h5>
+                </div>
+                <div class="card-body">
+                    {% if profile.cv_file %}
+                    <p class="mb-2">
+                        <i class="fas fa-file-pdf me-2 text-danger"></i>
+                        <a href="{{ profile.cv_file.url }}" target="_blank">CV</a>
+                    </p>
+                    {% endif %}
+                    {% if profile.cover_letter %}
+                    <p class="mb-0">
+                        <i class="fas fa-file-alt me-2 text-primary"></i>
+                        <a href="{{ profile.cover_letter.url }}" target="_blank">Lettre de motivation</a>
+                    </p>
+                    {% endif %}
+                    {% if not profile.cv_file and not profile.cover_letter %}
+                    <p class="text-muted mb-0">Aucun document uploadé</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Experience -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Expérience Professionnelle</h5>
+                    <a href="{% url 'accounts:add_experience' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% for experience in experiences %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-building"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ experience.position }}</h6>
+                            <p class="text-muted mb-1">{{ experience.company }}</p>
+                            <p class="small text-muted mb-2">
+                                {{ experience.start_date|date:"M Y" }} - 
+                                {% if experience.is_current %}Présent{% else %}{{ experience.end_date|date:"M Y" }}{% endif %}
+                            </p>
+                            <p class="mb-0">{{ experience.description|truncatewords:20 }}</p>
+                            <div class="mt-2">
+                                <a href="{% url 'accounts:edit_experience' experience.id %}" class="btn btn-sm btn-outline-secondary me-2">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'accounts:delete_experience' experience.id %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-briefcase fa-2x mb-3 d-block"></i>
+                        Aucune expérience ajoutée
+                    </p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Formation</h5>
+                    <a href="{% url 'accounts:add_education' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% for education in educations %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ education.degree }}</h6>
+                            <p class="text-muted mb-1">{{ education.institution }}</p>
+                            <p class="small text-muted mb-2">
+                                {{ education.start_date|date:"Y" }} - 
+                                {% if education.is_current %}En cours{% else %}{{ education.end_date|date:"Y" }}{% endif %}
+                            </p>
+                            <div class="mt-2">
+                                <a href="{% url 'accounts:edit_education' education.id %}" class="btn btn-sm btn-outline-secondary me-2">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'accounts:delete_education' education.id %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-graduation-cap fa-2x mb-3 d-block"></i>
+                        Aucune formation ajoutée
+                    </p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Compétences</h5>
+                    <a href="{% url 'accounts:add_skill' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if skills %}
+                    <div class="row">
+                        {% for skill in skills %}
+                        <div class="col-md-6 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary me-2">{{ skill.name }}</span>
+                                <small class="text-muted">{{ skill.get_level_display }}</small>
+                                <button class="btn btn-sm btn-outline-danger delete-skill-btn" 
+                                        data-skill-id="{{ skill.id }}" 
+                                        href="{% url 'accounts:delete_skill' skill.id %}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-cogs fa-2x mb-3 d-block"></i>
+                        Aucune compétence ajoutée
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Languages -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-language me-2"></i>Langues</h5>
+                    <a href="{% url 'accounts:add_language' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if languages %}
+                    <div class="row">
+                        {% for language in languages %}
+                        <div class="col-md-6 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info me-2">{{ language.language }}</span>
+                                <small class="text-muted">{{ language.get_proficiency_display }}</small>
+                                <button class="btn btn-sm btn-outline-danger delete-language-btn" 
+                                        data-language-id="{{ language.id }}"
+                                        href="{% url 'accounts:delete_language' language.id %}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-language fa-2x mb-3 d-block"></i>
+                        Aucune langue ajoutée
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Projects -->
+            {% if projects %}
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Projets</h5>
+                    <a href="{% url 'accounts:add_project' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% for project in projects %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ project.title }}</h6>
+                            <p class="text-muted mb-1">{{ project.get_project_type_display }}</p>
+                            <p class="small text-muted mb-2">
+                                {{ project.start_date|date:"M Y" }} - 
+                                {% if project.is_ongoing %}En cours{% else %}{{ project.end_date|date:"M Y" }}{% endif %}
+                            </p>
+                            <p class="mb-0">{{ project.description|truncatewords:15 }}</p>
+                            {% if project.project_url %}
+                                <a href="{{ project.project_url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                                    <i class="fas fa-external-link-alt me-1"></i>Voir le projet
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Certifications -->
+            {% if certifications %}
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-certificate me-2"></i>Certifications</h5>
+                    <a href="{% url 'accounts:add_certification' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% for certification in certifications %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ certification.name }}</h6>
+                            <p class="text-muted mb-1">{{ certification.issuing_organization }}</p>
+                            <p class="small text-muted mb-0">
+                                {{ certification.issue_date|date:"M Y" }}
+                                {% if certification.expiration_date %} - {{ certification.expiration_date|date:"M Y" }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.progress {
+    background-color: rgba(255,255,255,0.3);
+}
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

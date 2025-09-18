@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Créer une alerte emploi{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Créer une alerte emploi
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Alerte intelligente :</strong> Vous recevrez des notifications uniquement pour les offres qui correspondent exactement à vos critères.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'jobs:job_alerts' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour aux alertes
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-bell me-2"></i>Créer l'alerte
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Conseils pour des alertes efficaces
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle text-success me-2"></i>Mots-clés</h6>
+                            <ul class="small text-muted">
+                                <li>Utilisez des termes spécifiques</li>
+                                <li>Séparez par des virgules</li>
+                                <li>Incluez des synonymes</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle text-success me-2"></i>Fréquence</h6>
+                            <ul class="small text-muted">
+                                <li>Quotidien pour les recherches urgentes</li>
+                                <li>Hebdomadaire pour un suivi régulier</li>
+                                <li>Mensuel pour une veille passive</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

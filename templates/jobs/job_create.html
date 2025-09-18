@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Créer une offre d'emploi{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Créer une nouvelle offre d'emploi
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour au dashboard
+                            </a>
+                            <div>
+                                <button type="submit" name="status" value="draft" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-save me-2"></i>Enregistrer en brouillon
+                                </button>
+                                <button type="submit" name="status" value="published" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Publier l'offre
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Conseils pour une offre attractive
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle text-success me-2"></i>Titre</h6>
+                            <ul class="small text-muted">
+                                <li>Soyez précis et descriptif</li>
+                                <li>Incluez le niveau d'expérience</li>
+                                <li>Évitez les abréviations</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle text-success me-2"></i>Description</h6>
+                            <ul class="small text-muted">
+                                <li>Décrivez clairement le poste</li>
+                                <li>Mentionnez l'équipe et l'environnement</li>
+                                <li>Soyez authentique</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 15px;
+}
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+</style>
+{% endblock %}

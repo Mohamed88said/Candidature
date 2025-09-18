@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Catégories d'emploi{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="fw-bold mb-2">Catégories d'emploi</h1>
+            <p class="text-muted">Explorez les opportunités par domaine d'activité</p>
+        </div>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <a href="{% url 'jobs:jobs_by_category' category.id %}" class="text-decoration-none">
+                <div class="card category-card h-100 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="category-icon mx-auto mb-3" style="color: {{ category.color }}">
+                            <i class="{{ category.icon }} fa-3x"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">{{ category.name }}</h5>
+                        <p class="text-muted mb-3">{{ category.description|truncatewords:15 }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary">{{ category.job_count }} offres</span>
+                            {% if category.subcategories_count > 0 %}
+                                <small class="text-muted">{{ category.subcategories_count }} sous-catégories</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- CTA Section -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <div class="card bg-light">
+                <div class="card-body p-5">
+                    <h3 class="fw-bold mb-3">Vous ne trouvez pas votre domaine ?</h3>
+                    <p class="text-muted mb-4">
+                        Utilisez notre recherche avancée pour trouver des offres dans tous les secteurs
+                    </p>
+                    <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>Recherche avancée
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.category-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.category-card:hover {
+    border-color: var(--bs-primary);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.category-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,123,255,0.1);
+    border-radius: 50%;
+}
+</style>
+{% endblock %}

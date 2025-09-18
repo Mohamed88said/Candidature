@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Statistiques - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="fw-bold mb-2">Statistiques Détaillées</h1>
+            <p class="text-muted">Analyse approfondie des données de recrutement</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <form method="get" class="d-inline-block">
+                <select name="period" class="form-select" onchange="this.form.submit()">
+                    {% for value, label in period_choices %}
+                        <option value="{{ value }}" {% if selected_period == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="fw-bold">{{ stats.total_applications }}</h3>
+                            <p class="mb-0">Candidatures</p>
+                        </div>
+                        <i class="fas fa-file-alt fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="fw-bold">{{ conversion_rates.hired|floatformat:1 }}%</h3>
+                            <p class="mb-0">Taux d'embauche</p>
+                        </div>
+                        <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="fw-bold">{{ conversion_rates.shortlisted|floatformat:1 }}%</h3>
+                            <p class="mb-0">Taux de présélection</p>
+                        </div>
+                        <i class="fas fa-filter fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="fw-bold">{{ conversion_rates.interviewed|floatformat:1 }}%</h3>
+                            <p class="mb-0">Taux d'entretien</p>
+                        </div>
+                        <i class="fas fa-handshake fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Évolution mensuelle des candidatures
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Top 5 Catégories
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for category in top_categories %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-1">{{ category.name }}</h6>
+                            <small class="text-muted">{{ category.job_count }} offres</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary">{{ category.app_count }}</span>
+                            <br>
+                            <small class="text-muted">candidatures</small>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Stats -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-funnel-dollar me-2"></i>Entonnoir de conversion
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="conversion-funnel">
+                        <div class="funnel-step">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Candidatures reçues</span>
+                                <strong>{{ stats.total_applications }}</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="funnel-step">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Présélectionnés</span>
+                                <strong>{{ stats.shortlisted_applications }}</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 8px;">
+                                <div class="progress-bar bg-info" style="width: {{ conversion_rates.shortlisted }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="funnel-step">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Entretiens</span>
+                                <strong>{{ stats.interviewed_applications }}</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 8px;">
+                                <div class="progress-bar bg-warning" style="width: {{ conversion_rates.interviewed }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="funnel-step">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Embauches</span>
+                                <strong>{{ stats.hired_applications }}</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: {{ conversion_rates.hired }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Temps de traitement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-4">
+                            <h3 class="text-primary">{{ avg_processing_time|floatformat:1 }}</h3>
+                            <p class="text-muted mb-0">Jours moyens</p>
+                            <small class="text-muted">Temps de traitement</small>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <h3 class="text-success">{{ avg_hiring_time|floatformat:1 }}</h3>
+                            <p class="text-muted mb-0">Jours moyens</p>
+                            <small class="text-muted">Temps d'embauche</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Répartition par délai</h6>
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>< 7 jours</span>
+                                <span>{{ quick_processing_rate|floatformat:1 }}%</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: {{ quick_processing_rate }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>7-30 jours</span>
+                                <span>{{ medium_processing_rate|floatformat:1 }}%</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-warning" style="width: {{ medium_processing_rate }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>> 30 jours</span>
+                                <span>{{ slow_processing_rate|floatformat:1 }}%</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-danger" style="width: {{ slow_processing_rate }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Chart
+const monthlyData = {{ monthly_data|safe }};
+const ctx = document.getElementById('monthlyChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: monthlyData.map(item => item.month),
+        datasets: [{
+            label: 'Candidatures',
+            data: monthlyData.map(item => item.count),
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

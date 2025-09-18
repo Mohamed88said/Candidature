@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Administrateur{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="fw-bold mb-2">Dashboard Administrateur</h1>
+            <p class="text-muted">Vue d'ensemble de la plateforme de recrutement</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-primary text-white dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="fw-bold dashboard-stat">{{ stats.total_applications }}</h3>
+                            <p class="mb-0">Candidatures</p>
+                            <small class="opacity-75">+{{ stats.new_applications_week }} cette semaine</small>
+                        </div>
+                        <i class="fas fa-file-alt fa-3x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-success text-white dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="fw-bold dashboard-stat">{{ stats.total_candidates }}</h3>
+                            <p class="mb-0">Candidats</p>
+                            <small class="opacity-75">+{{ stats.new_candidates_week }} cette semaine</small>
+                        </div>
+                        <i class="fas fa-users fa-3x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-info text-white dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="fw-bold dashboard-stat">{{ stats.total_jobs }}</h3>
+                            <p class="mb-0">Offres d'emploi</p>
+                            <small class="opacity-75">+{{ stats.new_jobs_week }} cette semaine</small>
+                        </div>
+                        <i class="fas fa-briefcase fa-3x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card bg-warning text-white dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3 class="fw-bold dashboard-stat">{{ stats.upcoming_interviews }}</h3>
+                            <p class="mb-0">Entretiens à venir</p>
+                            <small class="opacity-75">{{ stats.interviews_today }} aujourd'hui</small>
+                        </div>
+                        <i class="fas fa-calendar fa-3x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Candidatures par jour (30 derniers jours)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="applicationsChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Statuts des candidatures
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Recent Applications -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Candidatures récentes
+                    </h5>
+                    <a href="{% url 'applications:applications_list' %}" class="btn btn-sm btn-outline-primary">
+                        Voir tout
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_applications %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Candidat</th>
+                                    <th>Poste</th>
+                                    <th>Statut</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for application in recent_applications %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if application.candidate.profile_picture %}
+                                                <img src="{{ application.candidate.profile_picture.url }}" 
+                                                     class="rounded-circle me-2" 
+                                                     style="width: 32px; height: 32px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                                     style="width: 32px; height: 32px; font-size: 12px;">
+                                                    {{ application.candidate.user.first_name|first }}{{ application.candidate.user.last_name|first }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <strong>{{ application.candidate.user.full_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ application.candidate.user.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ application.job.title }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ application.job.company }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if application.status == 'pending' %}bg-warning
+                                            {% elif application.status == 'reviewing' %}bg-info
+                                            {% elif application.status == 'shortlisted' %}bg-success
+                                            {% elif application.status == 'rejected' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ application.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ application.applied_at|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'applications:application_detail' application.pk %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucune candidature récente</h5>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Actions rapides
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'jobs:create_job' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Créer une offre
+                        </a>
+                        <a href="{% url 'dashboard:candidates' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-users me-2"></i>Gérer les candidats
+                        </a>
+                        <a href="{% url 'dashboard:export_data' %}?type=applications" class="btn btn-outline-success">
+                            <i class="fas fa-download me-2"></i>Export Excel
+                        </a>
+                        <a href="{% url 'dashboard:statistics' %}" class="btn btn-outline-info">
+                            <i class="fas fa-chart-bar me-2"></i>Statistiques
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Jobs -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star me-2"></i>Offres populaires
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if top_jobs %}
+                    {% for job in top_jobs %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div>
+                            <h6 class="mb-1">{{ job.title }}</h6>
+                            <small class="text-muted">{{ job.company }}</small>
+                        </div>
+                        <span class="badge bg-primary">{{ job.app_count }}</span>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted text-center">Aucune donnée disponible</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            {% if notifications %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for notification in notifications %}
+                    <div class="d-flex align-items-start mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-{{ notification.notification_type }} text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 32px; height: 32px;">
+                                <i class="fas fa-bell fa-sm"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ notification.title }}</h6>
+                            <p class="small text-muted mb-1">{{ notification.message|truncatewords:10 }}</p>
+                            <small class="text-muted">{{ notification.created_at|timesince }}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary mark-notification-read" 
+                                data-notification-id="{{ notification.id }}">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Applications Chart
+const applicationsData = {{ applications_by_day|safe }};
+const ctx1 = document.getElementById('applicationsChart').getContext('2d');
+new Chart(ctx1, {
+    type: 'line',
+    data: {
+        labels: applicationsData.map(item => item.date),
+        datasets: [{
+            label: 'Candidatures',
+            data: applicationsData.map(item => item.count),
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Status Chart
+const statusData = {{ applications_by_status|safe }};
+const ctx2 = document.getElementById('statusChart').getContext('2d');
+new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: statusData.map(item => item.status),
+        datasets: [{
+            data: statusData.map(item => item.count),
+            backgroundColor: [
+                '#ffc107', '#17a2b8', '#28a745', '#007bff', '#dc3545', '#6c757d'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+</script>
+{% endblock %}

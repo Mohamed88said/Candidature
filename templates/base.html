@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_settings.site_name|default:"Plateforme de Recrutement" }}{% endblock %}</title>
+    
+    {% if site_settings.favicon %}
+        <link rel="icon" type="image/x-icon" href="{{ site_settings.favicon.url }}">
+    {% endif %}
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% load static %}{% static 'css/custom.css' %}" rel="stylesheet">
+    
+    <!-- Dynamic Theme Colors -->
+    {% if active_theme %}
+    <style>
+        :root {
+            --bs-primary: {{ active_theme.primary_color }};
+            --bs-secondary: {{ active_theme.secondary_color }};
+            --bs-success: {{ active_theme.success_color }};
+            --bs-info: {{ active_theme.info_color }};
+            --bs-warning: {{ active_theme.warning_color }};
+            --bs-danger: {{ active_theme.danger_color }};
+            --bs-light: {{ active_theme.light_color }};
+            --bs-dark: {{ active_theme.dark_color }};
+            --bs-border-radius: {{ active_theme.border_radius }}px;
+            --bs-font-family: {{ active_theme.font_family }};
+            --bs-font-size-base: {{ active_theme.font_size_base }}px;
+        }
+        
+        body {
+            font-family: var(--bs-font-family);
+            font-size: var(--bs-font-size-base);
+        }
+        
+        .btn, .card, .form-control, .modal-content {
+            border-radius: var(--bs-border-radius);
+        }
+        
+        {{ active_theme.custom_css|safe }}
+    </style>
+    {% endif %}
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'core:home' %}">
+                {% if site_settings.site_logo %}
+                    <img src="{{ site_settings.site_logo.url }}" alt="Logo" style="height: 30px;" class="me-2">
+                {% else %}
+                    <i class="fas fa-briefcase me-2"></i>
+                {% endif %}
+                {{ site_settings.site_name|default:"RecrutementPro" }}
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:home' %}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'jobs:job_list' %}">Offres d'emploi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'jobs:job_categories' %}">Catégories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:about' %}">À propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:contact' %}">Contact</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ user.first_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                {% if user.user_type == 'candidate' %}
+                                    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                        <i class="fas fa-user me-2"></i>Mon Profil
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'applications:my_applications' %}">
+                                        <i class="fas fa-file-alt me-2"></i>Mes Candidatures
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'jobs:saved_jobs' %}">
+                                        <i class="fas fa-heart me-2"></i>Favoris
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'jobs:job_alerts' %}">
+                                        <i class="fas fa-bell me-2"></i>Alertes Emploi
+                                    </a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item" href="{% url 'dashboard:admin_dashboard' %}">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'applications:applications_list' %}">
+                                        <i class="fas fa-file-alt me-2"></i>Candidatures
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'jobs:create_job' %}">
+                                        <i class="fas fa-plus me-2"></i>Créer une offre
+                                    </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Connexion
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-outline-light ms-2 px-3" href="{% url 'accounts:register' %}">
+                                Inscription
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="fw-bold mb-3">
+                        {% if site_settings.site_logo %}
+                            <img src="{{ site_settings.site_logo.url }}" alt="Logo" style="height: 25px;" class="me-2">
+                        {% else %}
+                            <i class="fas fa-briefcase me-2"></i>
+                        {% endif %}
+                        {{ site_settings.site_name|default:"RecrutementPro" }}
+                    </h5>
+                    <p class="text-muted">
+                        {% if site_settings.footer_text %}
+                            {{ site_settings.footer_text }}
+                        {% else %}
+                            Plateforme complète de gestion de recrutement pour connecter 
+                            les talents aux opportunités.
+                        {% endif %}
+                    </p>
+                    {% if site_settings.show_social_links %}
+                    <div class="social-links">
+                        {% if site_settings.facebook_url %}
+                            <a href="{{ site_settings.facebook_url }}" class="text-light me-3" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        {% endif %}
+                        {% if site_settings.twitter_url %}
+                            <a href="{{ site_settings.twitter_url }}" class="text-light me-3" target="_blank"><i class="fab fa-twitter"></i></a>
+                        {% endif %}
+                        {% if site_settings.linkedin_url %}
+                            <a href="{{ site_settings.linkedin_url }}" class="text-light me-3" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                        {% endif %}
+                        {% if site_settings.instagram_url %}
+                            <a href="{{ site_settings.instagram_url }}" class="text-light me-3" target="_blank"><i class="fab fa-instagram"></i></a>
+                        {% endif %}
+                        {% if site_settings.youtube_url %}
+                            <a href="{{ site_settings.youtube_url }}" class="text-light" target="_blank"><i class="fab fa-youtube"></i></a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3">Candidats</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'jobs:job_list' %}" class="text-muted text-decoration-none">Offres d'emploi</a></li>
+                        <li><a href="{% url 'jobs:job_categories' %}" class="text-muted text-decoration-none">Catégories</a></li>
+                        <li><a href="{% url 'accounts:register' %}" class="text-muted text-decoration-none">Créer un compte</a></li>
+                        <li><a href="{% url 'core:faq' %}" class="text-muted text-decoration-none">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3">Entreprises</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'jobs:create_job' %}" class="text-muted text-decoration-none">Publier une offre</a></li>
+                        <li><a href="{% url 'dashboard:admin_dashboard' %}" class="text-muted text-decoration-none">Dashboard</a></li>
+                        <li><a href="{% url 'core:contact' %}" class="text-muted text-decoration-none">Nous contacter</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3">Ressources</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'core:blog' %}" class="text-muted text-decoration-none">Blog</a></li>
+                        <li><a href="{% url 'core:about' %}" class="text-muted text-decoration-none">À propos</a></li>
+                        <li><a href="{% url 'core:terms' %}" class="text-muted text-decoration-none">Conditions</a></li>
+                        <li><a href="{% url 'core:privacy' %}" class="text-muted text-decoration-none">Confidentialité</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3">Newsletter</h6>
+                    <p class="text-muted small">Recevez les dernières offres d'emploi</p>
+                    <form id="newsletter-form">
+                        {% csrf_token %}
+                        <div class="input-group input-group-sm">
+                            <input type="email" class="form-control" name="email" placeholder="Email" required>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-muted small mb-0">
+                        © 2024 {{ site_settings.site_name|default:"RecrutementPro" }}. Tous droits réservés.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{% url 'core:sitemap' %}" class="text-muted text-decoration-none small">Plan du site</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Analytics -->
+    {% if site_settings.enable_tracking and site_settings.google_analytics_id %}
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.google_analytics_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ site_settings.google_analytics_id }}');
+    </script>
+    {% endif %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% load static %}{% static 'js/custom.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

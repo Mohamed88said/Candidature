@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Modifier l'alerte - {{ alert.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Modifier l'alerte emploi
+                    </h3>
+                    <small>{{ alert.title }}</small>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'jobs:job_alerts' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour aux alertes
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-save me-2"></i>Mettre à jour
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Alert Stats -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiques de l'alerte
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h4 class="text-primary">{{ alert.matches_count|default:0 }}</h4>
+                            <small class="text-muted">Offres correspondantes</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-success">{{ alert.notifications_sent|default:0 }}</h4>
+                            <small class="text-muted">Notifications envoyées</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-info">{{ alert.created_at|timesince }}</h4>
+                            <small class="text-muted">Créée depuis</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

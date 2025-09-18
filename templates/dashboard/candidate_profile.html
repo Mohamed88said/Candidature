@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profil Candidat - {{ candidate.user.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:candidates' %}">Candidats</a></li>
+            <li class="breadcrumb-item active">{{ candidate.user.full_name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Candidate Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            {% if candidate.profile_picture %}
+                                <img src="{{ candidate.profile_picture.url }}" alt="Photo de profil" 
+                                     class="rounded-circle img-fluid border border-3 border-white" 
+                                     style="width: 120px; height: 120px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center border border-3 border-white" 
+                                     style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h2 class="fw-bold mb-2">{{ candidate.user.full_name }}</h2>
+                            <p class="mb-1">
+                                <i class="fas fa-briefcase me-2"></i>
+                                {{ candidate.current_position|default:"Poste non renseigné" }}
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-building me-2"></i>
+                                {{ candidate.current_company|default:"Entreprise non renseignée" }}
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                {{ candidate.city|default:"Ville non renseignée" }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-envelope me-2"></i>{{ candidate.user.email }}
+                            </p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="mb-3">
+                                <h4>{{ candidate.profile_completion }}%</h4>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: {{ candidate.profile_completion }}%"></div>
+                                </div>
+                                <small>Profil complété</small>
+                            </div>
+                            <div class="d-flex flex-column gap-2">
+                                <span class="badge bg-light text-dark">{{ candidate.years_of_experience }} ans d'exp.</span>
+                                {% if candidate.willing_to_relocate %}
+                                    <span class="badge bg-success">Mobile</span>
+                                {% endif %}
+                                {% if candidate.is_active %}
+                                    <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactif</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8 mb-4">
+            <!-- Applications -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Candidatures ({{ applications.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if applications %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Poste</th>
+                                    <th>Entreprise</th>
+                                    <th>Statut</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for application in applications %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ application.job.title }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ application.job.category.name }}</small>
+                                    </td>
+                                    <td>{{ application.job.company }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if application.status == 'pending' %}bg-warning
+                                            {% elif application.status == 'reviewing' %}bg-info
+                                            {% elif application.status == 'shortlisted' %}bg-success
+                                            {% elif application.status == 'accepted' %}bg-success
+                                            {% elif application.status == 'rejected' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ application.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ application.applied_at|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'applications:application_detail' application.pk %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucune candidature</h5>
+                        <p class="text-muted">Ce candidat n'a pas encore postulé</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-briefcase me-2"></i>Expérience Professionnelle
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for experience in candidate.experiences.all %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-building"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ experience.position }}</h6>
+                            <p class="text-muted mb-1">{{ experience.company }}</p>
+                            <p class="small text-muted mb-2">
+                                {{ experience.start_date|date:"M Y" }} - 
+                                {% if experience.is_current %}Présent{% else %}{{ experience.end_date|date:"M Y" }}{% endif %}
+                                <span class="badge bg-info ms-2">{{ experience.duration_in_years }} ans</span>
+                            </p>
+                            <p class="mb-0">{{ experience.description|truncatewords:20 }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center py-4">Aucune expérience renseignée</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>Formation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for education in candidate.educations.all %}
+                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ education.degree }}</h6>
+                            <p class="text-muted mb-1">{{ education.institution }}</p>
+                            <p class="small text-muted mb-2">
+                                {{ education.start_date|date:"Y" }} - 
+                                {% if education.is_current %}En cours{% else %}{{ education.end_date|date:"Y" }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center py-4">Aucune formation renseignée</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Stats -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <h4 class="text-primary">{{ candidate_stats.total_applications }}</h4>
+                            <small class="text-muted">Candidatures</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h4 class="text-success">{{ candidate_stats.interviews }}</h4>
+                            <small class="text-muted">Entretiens</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-info">{{ candidate_stats.pending_applications }}</h4>
+                            <small class="text-muted">En attente</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-warning">{{ candidate_stats.offers }}</h4>
+                            <small class="text-muted">Offres</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Contact</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <i class="fas fa-envelope me-2 text-muted"></i>
+                        <a href="mailto:{{ candidate.user.email }}">{{ candidate.user.email }}</a>
+                    </p>
+                    {% if candidate.mobile_phone %}
+                    <p class="mb-2">
+                        <i class="fas fa-phone me-2 text-muted"></i>
+                        <a href="tel:{{ candidate.mobile_phone }}">{{ candidate.mobile_phone }}</a>
+                    </p>
+                    {% endif %}
+                    {% if candidate.linkedin_url %}
+                    <p class="mb-2">
+                        <i class="fab fa-linkedin me-2 text-muted"></i>
+                        <a href="{{ candidate.linkedin_url }}" target="_blank">LinkedIn</a>
+                    </p>
+                    {% endif %}
+                    {% if candidate.website_url %}
+                    <p class="mb-0">
+                        <i class="fas fa-globe me-2 text-muted"></i>
+                        <a href="{{ candidate.website_url }}" target="_blank">Site web</a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Compétences</h6>
+                </div>
+                <div class="card-body">
+                    {% for skill in candidate.skills.all %}
+                        <span class="badge bg-primary me-1 mb-1">{{ skill.name }}</span>
+                    {% empty %}
+                        <p class="text-muted">Aucune compétence renseignée</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Documents</h6>
+                </div>
+                <div class="card-body">
+                    {% if candidate.cv_file %}
+                    <p class="mb-2">
+                        <i class="fas fa-file-pdf me-2 text-danger"></i>
+                        <a href="{{ candidate.cv_file.url }}" target="_blank">CV</a>
+                    </p>
+                    {% endif %}
+                    {% if candidate.cover_letter %}
+                    <p class="mb-2">
+                        <i class="fas fa-file-alt me-2 text-primary"></i>
+                        <a href="{{ candidate.cover_letter.url }}" target="_blank">Lettre de motivation</a>
+                    </p>
+                    {% endif %}
+                    {% if not candidate.cv_file and not candidate.cover_letter %}
+                    <p class="text-muted mb-0">Aucun document</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

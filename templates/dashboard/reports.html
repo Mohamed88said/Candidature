@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rapports - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="fw-bold mb-2">Rapports et Analytics</h1>
+            <p class="text-muted">Analyses détaillées et rapports de performance</p>
+        </div>
+    </div>
+
+    <!-- Export Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-download me-2"></i>Exports de données
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                                    <h6>Candidatures</h6>
+                                    <p class="text-muted small">Export complet des candidatures avec détails</p>
+                                    <a href="{% url 'dashboard:export_data' %}?type=applications" class="btn btn-primary">
+                                        <i class="fas fa-download me-2"></i>Télécharger
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-3x text-success mb-3"></i>
+                                    <h6>Candidats</h6>
+                                    <p class="text-muted small">Base de données complète des candidats</p>
+                                    <a href="{% url 'dashboard:export_data' %}?type=candidates" class="btn btn-success">
+                                        <i class="fas fa-download me-2"></i>Télécharger
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-briefcase fa-3x text-info mb-3"></i>
+                                    <h6>Offres d'emploi</h6>
+                                    <p class="text-muted small">Toutes les offres avec statistiques</p>
+                                    <a href="{% url 'dashboard:export_data' %}?type=jobs" class="btn btn-info">
+                                        <i class="fas fa-download me-2"></i>Télécharger
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Reports -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-tie me-2"></i>Performance des recruteurs
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recruiters %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Recruteur</th>
+                                    <th>Offres créées</th>
+                                    <th>Candidatures examinées</th>
+                                    <th>Entretiens menés</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for recruiter in recruiters %}
+                                <tr>
+                                    <td>{{ recruiter.full_name }}</td>
+                                    <td><span class="badge bg-primary">{{ recruiter.jobs_created }}</span></td>
+                                    <td><span class="badge bg-info">{{ recruiter.applications_reviewed }}</span></td>
+                                    <td><span class="badge bg-success">{{ recruiter.interviews_conducted }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">Aucune donnée disponible</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Performance des offres
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if job_performance %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Offre</th>
+                                    <th>Candidatures</th>
+                                    <th>Note moyenne</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in job_performance %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ job.title|truncatechars:30 }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ job.company }}</small>
+                                    </td>
+                                    <td><span class="badge bg-primary">{{ job.applications_count }}</span></td>
+                                    <td>
+                                        {% if job.avg_rating %}
+                                            <span class="badge bg-warning">{{ job.avg_rating|floatformat:1 }}/5</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if job.status == 'published' %}bg-success
+                                            {% elif job.status == 'draft' %}bg-secondary
+                                            {% else %}bg-danger{% endif %}">
+                                            {{ job.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">Aucune donnée disponible</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Summary -->
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-3x mb-3 opacity-75"></i>
+                    <h3 class="fw-bold">{{ avg_processing_time }} jours</h3>
+                    <p class="mb-0">Temps moyen de traitement</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-3x mb-3 opacity-75"></i>
+                    <h3 class="fw-bold">{{ conversion_rate|floatformat:1 }}%</h3>
+                    <p class="mb-0">Taux de conversion global</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-3x mb-3 opacity-75"></i>
+                    <h3 class="fw-bold">{{ satisfaction_rate|floatformat:1 }}%</h3>
+                    <p class="mb-0">Taux de satisfaction</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analytics -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Tendances mensuelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendsChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Top métriques
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="text-primary">Meilleure catégorie</h6>
+                        <p class="mb-1"><strong>{{ top_category.name }}</strong></p>
+                        <small class="text-muted">{{ top_category.applications_count }} candidatures</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-success">Recruteur le plus actif</h6>
+                        <p class="mb-1"><strong>{{ top_recruiter.full_name }}</strong></p>
+                        <small class="text-muted">{{ top_recruiter.total_activity }} actions</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-info">Offre la plus populaire</h6>
+                        <p class="mb-1"><strong>{{ top_job.title|truncatechars:25 }}</strong></p>
+                        <small class="text-muted">{{ top_job.applications_count }} candidatures</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Trends Chart
+const trendsData = {
+    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+    datasets: [{
+        label: 'Candidatures',
+        data: [65, 59, 80, 81, 56, 55, 40, 65, 75, 85, 90, 95],
+        borderColor: '#007bff',
+        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+        tension: 0.4,
+        fill: true
+    }, {
+        label: 'Embauches',
+        data: [5, 8, 12, 15, 10, 8, 6, 10, 12, 15, 18, 20],
+        borderColor: '#28a745',
+        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+        tension: 0.4,
+        fill: true
+    }]
+};
+
+const ctx = document.getElementById('trendsChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: trendsData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

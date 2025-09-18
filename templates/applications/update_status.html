@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Modifier le statut - {{ application.candidate.user.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Modifier le statut de la candidature
+                    </h3>
+                    <small>{{ application.candidate.user.full_name }} - {{ application.job.title }}</small>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Current Status -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Statut actuel</h6>
+                        <span class="badge bg-primary fs-6">{{ application.get_status_display }}</span>
+                        {% if application.priority != 'medium' %}
+                            <span class="badge bg-warning fs-6 ms-2">{{ application.get_priority_display }}</span>
+                        {% endif %}
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'applications:application_detail' application.pk %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à la candidature
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Mettre à jour le statut
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Status Guide -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Guide des statuts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-warning">En attente</h6>
+                            <small class="text-muted">Candidature reçue, pas encore examinée</small>
+                            
+                            <h6 class="text-info mt-3">En cours d'examen</h6>
+                            <small class="text-muted">Candidature en cours d'évaluation</small>
+                            
+                            <h6 class="text-success mt-3">Présélectionné</h6>
+                            <small class="text-muted">Candidat retenu pour la suite du processus</small>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Entretien programmé</h6>
+                            <small class="text-muted">Entretien planifié avec le candidat</small>
+                            
+                            <h6 class="text-success mt-3">Accepté</h6>
+                            <small class="text-muted">Candidat sélectionné pour le poste</small>
+                            
+                            <h6 class="text-danger mt-3">Rejeté</h6>
+                            <small class="text-muted">Candidature non retenue</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

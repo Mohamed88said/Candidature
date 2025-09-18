@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Articles avec le tag "{{ tag }}" - Blog{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:blog' %}">Blog</a></li>
+                    <li class="breadcrumb-item active">Tag: {{ tag }}</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold mb-2">Articles avec le tag "{{ tag }}"</h1>
+            <p class="text-muted">{{ page_obj.paginator.count }} article{{ page_obj.paginator.count|pluralize }} trouvé{{ page_obj.paginator.count|pluralize }}</p>
+        </div>
+    </div>
+
+    <!-- Blog Posts -->
+    <div class="row">
+        {% for post in page_obj %}
+        <div class="col-lg-6 mb-4">
+            <div class="card blog-card h-100 shadow-sm">
+                {% if post.featured_image %}
+                <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" 
+                     style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">{{ post.published_at|date:"d F Y" }}</small>
+                        <span class="badge bg-primary">{{ post.views_count }} vues</span>
+                    </div>
+                    <h5 class="card-title">
+                        <a href="{% url 'core:blog_detail' post.slug %}" class="text-decoration-none">
+                            {{ post.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted">
+                        {{ post.excerpt|default:post.content|truncatewords:20 }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Par {{ post.author.full_name }}</small>
+                        <a href="{% url 'core:blog_detail' post.slug %}" class="btn btn-outline-primary btn-sm">
+                            Lire la suite
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-tag fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">Aucun article avec ce tag</h4>
+            <p class="text-muted">Explorez d'autres tags ou retournez au blog principal</p>
+            <a href="{% url 'core:blog' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Retour au blog
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Navigation des pages">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.blog-card {
+    transition: all 0.3s ease;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

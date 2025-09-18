@@ -1,0 +1,200 @@
+[
+  {
+    "model": "core.sitesettings",
+    "pk": 1,
+    "fields": {
+      "site_name": "RecrutementPro",
+      "site_description": "Plateforme complète de gestion de recrutement pour connecter les talents aux opportunités",
+      "contact_email": "contact@recrutementpro.com",
+      "contact_phone": "+33 1 23 45 67 89",
+      "address": "123 Avenue des Champs-Élysées, 75008 Paris, France",
+      "facebook_url": "https://facebook.com/recrutementpro",
+      "twitter_url": "https://twitter.com/recrutementpro",
+      "linkedin_url": "https://linkedin.com/company/recrutementpro",
+      "max_applications_per_day": 5,
+      "application_deadline_days": 30,
+      "email_notifications_enabled": true,
+      "admin_notification_email": "admin@recrutementpro.com",
+      "maintenance_mode": false,
+      "maintenance_message": ""
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 1,
+    "fields": {
+      "name": "Informatique & Technologies",
+      "description": "Développement, cybersécurité, data science, DevOps",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 2,
+    "fields": {
+      "name": "Marketing & Communication",
+      "description": "Marketing digital, communication, relations publiques",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 3,
+    "fields": {
+      "name": "Ressources Humaines",
+      "description": "Recrutement, formation, gestion des talents",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 4,
+    "fields": {
+      "name": "Finance & Comptabilité",
+      "description": "Comptabilité, audit, contrôle de gestion, finance",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 5,
+    "fields": {
+      "name": "Commercial & Vente",
+      "description": "Vente, business development, relation client",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 6,
+    "fields": {
+      "name": "Design & Créatif",
+      "description": "Design graphique, UX/UI, création de contenu",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 7,
+    "fields": {
+      "name": "Ingénierie",
+      "description": "Ingénierie mécanique, électrique, civil",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 8,
+    "fields": {
+      "name": "Santé & Médical",
+      "description": "Médecine, soins infirmiers, pharmacie",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 9,
+    "fields": {
+      "name": "Éducation & Formation",
+      "description": "Enseignement, formation professionnelle",
+      "is_active": true
+    }
+  },
+  {
+    "model": "jobs.jobcategory",
+    "pk": 10,
+    "fields": {
+      "name": "Juridique",
+      "description": "Droit des affaires, droit social, contentieux",
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.faq",
+    "pk": 1,
+    "fields": {
+      "question": "Comment créer un compte candidat ?",
+      "answer": "Cliquez sur 'Inscription' en haut à droite, remplissez le formulaire avec vos informations personnelles et validez votre email.",
+      "category": "account",
+      "order": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.faq",
+    "pk": 2,
+    "fields": {
+      "question": "Comment postuler à une offre d'emploi ?",
+      "answer": "Connectez-vous à votre compte, consultez les offres, cliquez sur celle qui vous intéresse et cliquez sur 'Postuler'. Complétez votre candidature avec une lettre de motivation.",
+      "category": "applications",
+      "order": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.faq",
+    "pk": 3,
+    "fields": {
+      "question": "Comment suivre mes candidatures ?",
+      "answer": "Dans votre espace personnel, allez dans 'Mes Candidatures' pour voir le statut de toutes vos candidatures en cours.",
+      "category": "applications",
+      "order": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.faq",
+    "pk": 4,
+    "fields": {
+      "question": "Puis-je modifier mon profil après inscription ?",
+      "answer": "Oui, vous pouvez modifier votre profil à tout moment en allant dans 'Mon Profil' puis 'Modifier le profil'.",
+      "category": "account",
+      "order": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.faq",
+    "pk": 5,
+    "fields": {
+      "question": "Comment créer une alerte emploi ?",
+      "answer": "Dans votre espace personnel, allez dans 'Alertes Emploi' et créez une nouvelle alerte en définissant vos critères de recherche.",
+      "category": "jobs",
+      "order": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.faq",
+    "pk": 6,
+    "fields": {
+      "question": "Les entreprises peuvent-elles voir mon profil ?",
+      "answer": "Seules les informations que vous choisissez de rendre publiques sont visibles. Vos données personnelles restent confidentielles.",
+      "category": "general",
+      "order": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.faq",
+    "pk": 7,
+    "fields": {
+      "question": "Comment publier une offre d'emploi ?",
+      "answer": "Les comptes entreprise peuvent publier des offres via le dashboard administrateur. Contactez-nous pour créer un compte entreprise.",
+      "category": "jobs",
+      "order": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "core.faq",
+    "pk": 8,
+    "fields": {
+      "question": "Que faire si j'ai oublié mon mot de passe ?",
+      "answer": "Cliquez sur 'Mot de passe oublié' sur la page de connexion et suivez les instructions envoyées par email.",
+      "category": "technical",
+      "order": 1,
+      "is_active": true
+    }
+  }
+]

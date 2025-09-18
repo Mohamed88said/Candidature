@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Plan du site{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="fw-bold mb-3">Plan du site</h1>
+            <p class="lead text-muted">
+                Navigation complète de la plateforme
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Pages -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-home me-2"></i>Pages principales
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for url in main_urls %}
+                    <a href="{% url url.url %}" class="list-group-item list-group-item-action">
+                        {{ url.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Categories -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tags me-2"></i>Catégories d'emploi
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for category in categories %}
+                    <a href="{% url 'jobs:jobs_by_category' category.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        {{ category.name }}
+                        <span class="badge bg-primary rounded-pill">{{ category.jobs_count }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Blog Posts -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-newspaper me-2"></i>Articles récents
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for post in recent_posts %}
+                    <a href="{% url 'core:blog_detail' post.slug %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>{{ post.title|truncatewords:6 }}</strong>
+                                <br>
+                                <small class="text-muted">{{ post.published_at|date:"d F Y" }}</small>
+                            </div>
+                            <span class="badge bg-info">{{ post.views_count }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Areas -->
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Espace candidat
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'accounts:register' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user-plus me-2"></i>Créer un compte
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                    </a>
+                    <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user me-2"></i>Mon profil
+                    </a>
+                    <a href="{% url 'applications:my_applications' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-file-alt me-2"></i>Mes candidatures
+                    </a>
+                    <a href="{% url 'jobs:saved_jobs' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-heart me-2"></i>Favoris
+                    </a>
+                    <a href="{% url 'jobs:job_alerts' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-bell me-2"></i>Alertes emploi
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-tie me-2"></i>Espace recruteur
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard:admin_dashboard' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="{% url 'jobs:create_job' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus me-2"></i>Créer une offre
+                    </a>
+                    <a href="{% url 'applications:applications_list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-file-alt me-2"></i>Candidatures
+                    </a>
+                    <a href="{% url 'dashboard:candidates' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-users me-2"></i>Candidats
+                    </a>
+                    <a href="{% url 'dashboard:statistics' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiques
+                    </a>
+                    <a href="{% url 'dashboard:reports' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-file-chart me-2"></i>Rapports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

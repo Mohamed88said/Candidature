@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Modifier l'offre - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Modifier l'offre d'emploi
+                    </h3>
+                    <small>{{ job.title }} - {{ job.company }}</small>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'jobs:job_detail' job.slug %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à l'offre
+                            </a>
+                            <div>
+                                <button type="submit" name="status" value="draft" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-save me-2"></i>Enregistrer en brouillon
+                                </button>
+                                <button type="submit" name="status" value="published" class="btn btn-warning">
+                                    <i class="fas fa-paper-plane me-2"></i>Mettre à jour et publier
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Job Stats -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiques de l'offre
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h4 class="text-primary">{{ job.views_count }}</h4>
+                            <small class="text-muted">Vues</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-success">{{ job.applications_count }}</h4>
+                            <small class="text-muted">Candidatures</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-info">{{ job.created_at|timesince }}</h4>
+                            <small class="text-muted">Publié depuis</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4 class="text-warning">{{ job.get_status_display }}</h4>
+                            <small class="text-muted">Statut</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 15px;
+}
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+</style>
+{% endblock %}
