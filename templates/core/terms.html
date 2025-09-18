@@ -8,11 +8,16 @@
         <div class="col-lg-8 mx-auto">
             <div class="card shadow-lg border-0">
                 <div class="card-header bg-primary text-white">
-                    <h1 class="mb-0">Conditions d'utilisation</h1>
+                    <h1 class="mb-0">
+                        {% if terms_content.title %}{{ terms_content.title }}{% else %}Conditions d'utilisation{% endif %}
+                    </h1>
                     <small>Dernière mise à jour : {{ last_updated|default:"1er janvier 2024" }}</small>
                 </div>
                 <div class="card-body p-5">
                     <div class="terms-content">
+                        {% if terms_content.content %}
+                            {{ terms_content.content|linebreaks }}
+                        {% else %}
                         <h2>1. Acceptation des conditions</h2>
                         <p>
                             En accédant et en utilisant cette plateforme de recrutement, vous acceptez d'être lié par ces conditions d'utilisation. 
@@ -138,6 +143,7 @@
                             <li>Par courrier : Service Juridique, 123 Avenue des Champs-Élysées, 75008 Paris</li>
                             <li>Via notre <a href="{% url 'core:contact' %}">formulaire de contact</a></li>
                         </ul>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -1,0 +1,861 @@
+/* Mobile-First Responsive Design for Recruitment Platform */
+
+/* Base Mobile Styles */
+@media (max-width: 767.98px) {
+    /* Typography */
+    body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    h2 {
+        font-size: 1.6rem;
+    }
+    
+    h3 {
+        font-size: 1.4rem;
+    }
+    
+    h4 {
+        font-size: 1.2rem;
+    }
+    
+    h5 {
+        font-size: 1.1rem;
+    }
+    
+    /* Navigation */
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .navbar-nav .nav-link:last-child {
+        border-bottom: none;
+    }
+    
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Containers and Spacing */
+    .container, .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .py-4 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    /* Cards */
+    .card {
+        margin-bottom: 1rem;
+        border-radius: 12px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+        border-radius: 12px 12px 0 0 !important;
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        min-height: 44px; /* Touch target minimum */
+    }
+    
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+    
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        min-height: 36px;
+    }
+    
+    /* Forms */
+    .form-control {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        min-height: 44px;
+    }
+    
+    .form-select {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Search Forms */
+    .search-form {
+        padding: 1rem;
+        margin: 0 -15px;
+        border-radius: 0;
+    }
+    
+    .search-form .row {
+        margin: 0;
+    }
+    
+    .search-form .col-md-4 {
+        padding: 0;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Job Cards */
+    .job-card {
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    .job-card .card-body {
+        padding: 1rem;
+    }
+    
+    .job-card .row {
+        margin: 0;
+    }
+    
+    .job-card .col-md-8,
+    .job-card .col-md-4 {
+        padding: 0;
+    }
+    
+    .job-card .col-md-4 {
+        margin-top: 1rem;
+        text-align: left !important;
+    }
+    
+    /* Application Cards */
+    .application-card .col-md-8,
+    .application-card .col-md-4 {
+        padding: 0;
+    }
+    
+    .application-card .col-md-4 {
+        margin-top: 1rem;
+        text-align: left !important;
+    }
+    
+    /* Tables */
+    .table-responsive {
+        border: none;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+        vertical-align: middle;
+    }
+    
+    /* Hide table on very small screens, show cards instead */
+    @media (max-width: 575.98px) {
+        .table-responsive table {
+            display: none;
+        }
+        
+        .mobile-card-view {
+            display: block !important;
+        }
+    }
+    
+    /* Profile Picture */
+    .profile-picture-mobile {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    /* Stats Cards */
+    .stat-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 1.2rem !important;
+    }
+    
+    .dashboard-stat h3 {
+        font-size: 1.8rem !important;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+        min-height: 400px;
+        padding: 2rem 0;
+        text-align: center;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero-section .lead {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-section .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .hero-section .d-flex {
+        display: block !important;
+    }
+    
+    .hero-section .gap-3 > * {
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Category Cards */
+    .category-card {
+        margin-bottom: 1rem;
+    }
+    
+    .category-icon {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 1.5rem !important;
+    }
+    
+    /* Modals */
+    .modal-dialog {
+        margin: 1rem;
+    }
+    
+    .modal-content {
+        border-radius: 12px;
+    }
+    
+    /* Alerts */
+    .alert {
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    /* Badges */
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    /* Progress Bars */
+    .progress {
+        height: 6px;
+        border-radius: 3px;
+    }
+    
+    /* Pagination */
+    .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .pagination .page-link {
+        padding: 0.5rem 0.75rem;
+        margin: 0.1rem;
+        min-width: 44px;
+        text-align: center;
+    }
+    
+    /* Footer */
+    footer .row > div {
+        margin-bottom: 2rem;
+    }
+    
+    footer .social-links a {
+        width: 44px;
+        height: 44px;
+        line-height: 44px;
+        margin: 0.25rem;
+    }
+    
+    /* Form Layouts */
+    .form-row .col-md-6,
+    .form-row .col-md-4,
+    .form-row .col-md-3 {
+        margin-bottom: 1rem;
+    }
+    
+    /* Dashboard */
+    .dashboard-card {
+        margin-bottom: 1rem;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 1rem;
+    }
+    
+    /* Profile Sections */
+    .profile-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-section .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    /* Floating Action Button */
+    .fab-mobile {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 1000;
+    }
+    
+    /* Touch Improvements */
+    .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Swipe Indicators */
+    .swipe-indicator {
+        text-align: center;
+        padding: 0.5rem;
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+    
+    /* Mobile-specific utilities */
+    .mobile-only {
+        display: block !important;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+    
+    /* Improved spacing for mobile */
+    .mb-mobile {
+        margin-bottom: 1rem !important;
+    }
+    
+    .mt-mobile {
+        margin-top: 1rem !important;
+    }
+    
+    .p-mobile {
+        padding: 1rem !important;
+    }
+    
+    /* Better text readability */
+    .text-mobile {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    /* Improved form groups */
+    .form-group-mobile {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group-mobile label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    /* Better card layouts */
+    .card-mobile {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 12px;
+    }
+    
+    /* Improved list groups */
+    .list-group-item {
+        padding: 1rem;
+        border-left: none;
+        border-right: none;
+    }
+    
+    .list-group-item:first-child {
+        border-top: none;
+        border-radius: 0;
+    }
+    
+    .list-group-item:last-child {
+        border-bottom: none;
+        border-radius: 0;
+    }
+    
+    /* Better accordion */
+    .accordion-button {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .accordion-body {
+        padding: 1rem;
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+    
+    /* Improved tabs */
+    .nav-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Better breadcrumbs */
+    .breadcrumb {
+        background: none;
+        padding: 0.5rem 0;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Improved timeline */
+    .timeline {
+        padding-left: 20px;
+    }
+    
+    .timeline-marker {
+        left: -25px !important;
+        width: 8px !important;
+        height: 8px !important;
+    }
+    
+    .timeline-item:not(:last-child)::before {
+        left: -21px !important;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .container {
+        max-width: 720px;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+    }
+    
+    .job-card .col-md-4 {
+        text-align: right;
+    }
+    
+    .application-card .col-md-4 {
+        text-align: right;
+    }
+}
+
+/* Large Mobile Styles */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .container {
+        max-width: 540px;
+    }
+    
+    .hero-section .btn {
+        display: inline-block;
+        width: auto;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .search-form .col-md-4 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .search-form .col-md-4:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Extra Small Mobile Styles */
+@media (max-width: 575.98px) {
+    /* Hide desktop elements */
+    .desktop-only {
+        display: none !important;
+    }
+    
+    /* Show mobile elements */
+    .mobile-only {
+        display: block !important;
+    }
+    
+    /* Full width buttons */
+    .btn-mobile-full {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Stack form elements */
+    .form-row > div {
+        margin-bottom: 1rem;
+    }
+    
+    /* Better spacing */
+    .mb-xs-3 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .mt-xs-3 {
+        margin-top: 1rem !important;
+    }
+    
+    /* Improved cards for mobile */
+    .mobile-card-view {
+        display: none;
+    }
+    
+    .mobile-card-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .mobile-card-item h6 {
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    
+    .mobile-card-item .badge {
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Better profile layout */
+    .profile-header-mobile {
+        text-align: center;
+        padding: 1.5rem 1rem;
+    }
+    
+    .profile-header-mobile img,
+    .profile-header-mobile .profile-placeholder {
+        width: 80px !important;
+        height: 80px !important;
+        margin-bottom: 1rem;
+    }
+    
+    /* Improved sidebar */
+    .sidebar-mobile {
+        margin-top: 2rem;
+    }
+    
+    /* Better job detail layout */
+    .job-detail-mobile .job-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .job-detail-mobile .job-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Improved application form */
+    .application-form-mobile .form-section {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .application-form-mobile .form-section h6 {
+        color: #495057;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    /* Better dashboard layout */
+    .dashboard-mobile .stat-card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .dashboard-mobile .stat-card h3 {
+        font-size: 1.5rem;
+    }
+    
+    /* Improved filters */
+    .filters-mobile {
+        background: #f8f9fa;
+        padding: 1rem;
+        margin: 0 -15px 1rem -15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .filters-mobile .form-control,
+    .filters-mobile .form-select {
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Better pagination */
+    .pagination-mobile {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .pagination-mobile .page-link {
+        padding: 0.5rem;
+        margin: 0.1rem;
+        min-width: 40px;
+        text-align: center;
+    }
+    
+    /* Improved modals */
+    .modal-mobile .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    .modal-mobile .modal-content {
+        border-radius: 12px;
+    }
+    
+    .modal-mobile .modal-header,
+    .modal-mobile .modal-footer {
+        padding: 1rem;
+    }
+    
+    .modal-mobile .modal-body {
+        padding: 1rem;
+    }
+}
+
+/* Touch and Gesture Improvements */
+.touch-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+}
+
+.touch-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+/* Improved tap targets */
+a, button, .btn, .nav-link, .dropdown-item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+/* Better focus states for mobile */
+.form-control:focus,
+.form-select:focus,
+.btn:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Improved loading states */
+.loading-mobile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.loading-mobile .spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Better error states */
+.error-mobile {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.error-mobile i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+/* Improved empty states */
+.empty-state-mobile {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-state-mobile i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.empty-state-mobile h5 {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-mobile p {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+/* Sticky elements for mobile */
+.sticky-mobile {
+    position: sticky;
+    top: 76px; /* Height of navbar */
+    z-index: 100;
+    background: white;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+}
+
+/* Improved file upload */
+.file-upload-mobile {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem 1rem;
+    text-align: center;
+    background: #f8f9fa;
+}
+
+.file-upload-mobile i {
+    font-size: 2rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+/* Better form validation */
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.invalid-feedback {
+    display: block;
+    font-size: 0.8rem;
+    color: #dc3545;
+    margin-top: 0.25rem;
+}
+
+/* Improved accessibility */
+.sr-only-mobile {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Dark mode support for mobile */
+@media (prefers-color-scheme: dark) {
+    .mobile-device {
+        background-color: #121212;
+        color: #ffffff;
+    }
+    
+    .mobile-device .card {
+        background-color: #1e1e1e;
+        border-color: #333;
+    }
+    
+    .mobile-device .form-control {
+        background-color: #2d2d2d;
+        border-color: #444;
+        color: #ffffff;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 767.98px) and (orientation: landscape) {
+    .hero-section {
+        min-height: 300px;
+        padding: 1rem 0;
+    }
+    
+    .hero-section h1 {
+        font-size: 1.8rem;
+    }
+    
+    .modal-dialog {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .mobile-device img {
+        image-rendering: -webkit-optimize-contrast;
+    }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .mobile-device * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

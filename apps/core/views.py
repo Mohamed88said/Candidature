@@ -57,9 +57,9 @@ def home(request):
 def about(request):
     """Page à propos"""
     try:
-        page_content = PageContent.objects.get(page_type='about', is_active=True)
+        about_content = PageContent.objects.get(page_type='about', is_active=True)
     except PageContent.DoesNotExist:
-        page_content = None
+        about_content = None
     
     try:
         site_settings = SiteSettings.objects.first()
@@ -75,7 +75,7 @@ def about(request):
     }
     
     context = {
-        'page_content': page_content,
+        'about_content': about_content,
         'site_settings': site_settings,
         'stats': stats,
     }
@@ -124,12 +124,32 @@ def faq(request):
 
 def terms(request):
     """Conditions d'utilisation"""
-    return render(request, 'core/terms.html')
+    try:
+        terms_content = PageContent.objects.get(page_type='terms', is_active=True)
+    except PageContent.DoesNotExist:
+        terms_content = None
+    
+    context = {
+        'terms_content': terms_content,
+        'last_updated': '1er janvier 2024'
+    }
+    
+    return render(request, 'core/terms.html', context)
 
 
 def privacy(request):
     """Politique de confidentialité"""
-    return render(request, 'core/privacy.html')
+    try:
+        privacy_content = PageContent.objects.get(page_type='privacy', is_active=True)
+    except PageContent.DoesNotExist:
+        privacy_content = None
+    
+    context = {
+        'privacy_content': privacy_content,
+        'last_updated': '1er janvier 2024'
+    }
+    
+    return render(request, 'core/privacy.html', context)
 
 
 @require_http_methods(["POST"])

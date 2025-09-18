@@ -8,20 +8,20 @@
 <section class="bg-primary text-white py-5">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-lg-6 mb-4 mb-lg-0 text-center text-lg-start">
                 <h1 class="display-4 fw-bold mb-4">
-                    {% if page_content %}{{ page_content.title }}{% else %}À propos de nous{% endif %}
+                    {% if about_content.title %}{{ about_content.title }}{% else %}À propos de nous{% endif %}
                 </h1>
                 <p class="lead">
-                    {% if site_settings.about_content %}
-                        {{ site_settings.about_content|truncatewords:30 }}
+                    {% if about_content.content %}
+                        {{ about_content.content|truncatewords:30 }}
                     {% else %}
                         Nous connectons les talents aux opportunités depuis plus de 10 ans, 
                         en révolutionnant le processus de recrutement grâce à la technologie.
                     {% endif %}
                 </p>
             </div>
-            <div class="col-lg-6 text-center">
+            <div class="col-lg-6 text-center d-none d-lg-block">
                 {% if site_settings.hero_image %}
                     <img src="{{ site_settings.hero_image.url }}" 
                          alt="Notre équipe" class="img-fluid rounded shadow">

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>{% block title %}{{ site_settings.site_name|default:"Plateforme de Recrutement" }}{% endblock %}</title>
     
     {% if site_settings.favicon %}
@@ -15,6 +18,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% load static %}{% static 'css/custom.css' %}" rel="stylesheet">
+    <!-- Mobile Optimizations -->
+    <link href="{% load static %}{% static 'css/mobile.css' %}" rel="stylesheet">
     
     <!-- Dynamic Theme Colors -->
     {% if active_theme %}
@@ -48,9 +53,9 @@
     
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if request.user_agent.is_mobile %}mobile-device{% endif %}">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{% url 'core:home' %}">
                 {% if site_settings.site_logo %}
@@ -128,7 +133,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-outline-light ms-2 px-3" href="{% url 'accounts:register' %}">
+                            <a class="nav-link btn btn-outline-light ms-lg-2 px-3 mt-2 mt-lg-0" href="{% url 'accounts:register' %}">
                                 Inscription
                             </a>
                         </li>

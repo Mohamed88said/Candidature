@@ -15,11 +15,10 @@ class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)
-    user_type = forms.ChoiceField(choices=User.USER_TYPES, initial='candidate')
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'user_type', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,7 +31,6 @@ class CustomUserCreationForm(UserCreationForm):
             ),
             'username',
             'email',
-            'user_type',
             'password1',
             'password2',
             Submit('submit', 'S\'inscrire', css_class='btn btn-primary btn-lg w-100')
@@ -47,6 +45,7 @@ class CustomUserCreationForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
+        user.user_type = 'candidate'  # Force le type candidat
         if commit:
             user.save()
         return user

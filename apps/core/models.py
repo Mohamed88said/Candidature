@@ -233,10 +233,12 @@ class PageContent(models.Model):
         ('faq', 'FAQ'),
         ('contact', 'Contact'),
         ('home', 'Accueil'),
+        ('hero_section', 'Section héro'),
+        ('footer_content', 'Contenu du footer'),
         ('custom', 'Page personnalisée'),
     )
 
-    page_type = models.CharField(max_length=20, choices=PAGE_TYPES, unique=True)
+    page_type = models.CharField(max_length=20, choices=PAGE_TYPES)
     title = models.CharField(max_length=200)
     content = models.TextField()
     meta_description = models.CharField(max_length=160, blank=True)
@@ -256,6 +258,7 @@ class PageContent(models.Model):
         verbose_name = 'Contenu de page'
         verbose_name_plural = 'Contenus de pages'
         ordering = ['order', 'title']
+        unique_together = [['page_type', 'slug']]
 
     def __str__(self):
         return f"{self.get_page_type_display()} - {self.title}"
@@ -263,7 +266,9 @@ class PageContent(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             from django.utils.text import slugify
-            self.slug = slugify(self.title)
+            import uuid
+            base_slug = slugify(self.title) or self.page_type
+            self.slug = f"{base_slug}-{str(uuid.uuid4())[:8]}"
         super().save(*args, **kwargs)
 
 

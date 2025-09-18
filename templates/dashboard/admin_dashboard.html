@@ -15,61 +15,61 @@
 
     <!-- Stats Cards -->
     <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 col-6 mb-4">
             <div class="card bg-primary text-white dashboard-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h3 class="fw-bold dashboard-stat">{{ stats.total_applications }}</h3>
                             <p class="mb-0">Candidatures</p>
-                            <small class="opacity-75">+{{ stats.new_applications_week }} cette semaine</small>
+                            <small class="opacity-75 d-none d-md-block">+{{ stats.new_applications_week }} cette semaine</small>
                         </div>
-                        <i class="fas fa-file-alt fa-3x opacity-75"></i>
+                        <i class="fas fa-file-alt fa-2x fa-md-3x opacity-75"></i>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 col-6 mb-4">
             <div class="card bg-success text-white dashboard-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h3 class="fw-bold dashboard-stat">{{ stats.total_candidates }}</h3>
                             <p class="mb-0">Candidats</p>
-                            <small class="opacity-75">+{{ stats.new_candidates_week }} cette semaine</small>
+                            <small class="opacity-75 d-none d-md-block">+{{ stats.new_candidates_week }} cette semaine</small>
                         </div>
-                        <i class="fas fa-users fa-3x opacity-75"></i>
+                        <i class="fas fa-users fa-2x fa-md-3x opacity-75"></i>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 col-6 mb-4">
             <div class="card bg-info text-white dashboard-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h3 class="fw-bold dashboard-stat">{{ stats.total_jobs }}</h3>
                             <p class="mb-0">Offres d'emploi</p>
-                            <small class="opacity-75">+{{ stats.new_jobs_week }} cette semaine</small>
+                            <small class="opacity-75 d-none d-md-block">+{{ stats.new_jobs_week }} cette semaine</small>
                         </div>
-                        <i class="fas fa-briefcase fa-3x opacity-75"></i>
+                        <i class="fas fa-briefcase fa-2x fa-md-3x opacity-75"></i>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 col-6 mb-4">
             <div class="card bg-warning text-white dashboard-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h3 class="fw-bold dashboard-stat">{{ stats.upcoming_interviews }}</h3>
                             <p class="mb-0">Entretiens à venir</p>
-                            <small class="opacity-75">{{ stats.interviews_today }} aujourd'hui</small>
+                            <small class="opacity-75 d-none d-md-block">{{ stats.interviews_today }} aujourd'hui</small>
                         </div>
-                        <i class="fas fa-calendar fa-3x opacity-75"></i>
+                        <i class="fas fa-calendar fa-2x fa-md-3x opacity-75"></i>
                     </div>
                 </div>
             </div>

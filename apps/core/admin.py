@@ -123,6 +123,12 @@ class PageContentAdmin(admin.ModelAdmin):
         }),
     )
     
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # Utiliser un widget de texte riche pour le contenu
+        form.base_fields['content'].widget = forms.Textarea(attrs={'rows': 20, 'cols': 80})
+        return form
+    
     def save_model(self, request, obj, form, change):
         obj.updated_by = request.user
         super().save_model(request, obj, form, change)

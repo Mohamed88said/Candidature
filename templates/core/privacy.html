@@ -8,16 +8,22 @@
         <div class="col-lg-8 mx-auto">
             <div class="card shadow-lg border-0">
                 <div class="card-header bg-success text-white">
-                    <h1 class="mb-0">Politique de confidentialité</h1>
+                    <h1 class="mb-0">
+                        {% if privacy_content.title %}{{ privacy_content.title }}{% else %}Politique de confidentialité{% endif %}
+                    </h1>
                     <small>Dernière mise à jour : {{ last_updated|default:"1er janvier 2024" }}</small>
                 </div>
                 <div class="card-body p-5">
                     <div class="privacy-content">
+                        {% if privacy_content.content %}
+                            {{ privacy_content.content|linebreaks }}
+                        {% else %}
                         <div class="alert alert-info">
                             <i class="fas fa-shield-alt me-2"></i>
                             <strong>Votre vie privée nous tient à cœur.</strong> 
                             Cette politique explique comment nous collectons, utilisons et protégeons vos données personnelles.
                         </div>
+                        {% endif %}
 
                         <h2>1. Responsable du traitement</h2>
                         <p>
