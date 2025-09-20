@@ -23,3 +23,10 @@ django-tinymce==3.6.1
 django-import-export==3.3.1
 django-activity-stream==2.0.0
 django-notifications-hq==1.8.3
+
+# Email et templates
+django-template-email==0.1.0
+premailer==3.10.0
+
+# Pour les pièces jointes
+python-magic==0.4.27

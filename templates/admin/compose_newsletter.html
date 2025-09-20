@@ -1,0 +1,73 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+.form-row {
+    margin-bottom: 20px;
+}
+.form-row label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.vTextField, .vSelect {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.help {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+.submit-row {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{% trans "Composer une newsletter" %}</h1>
+    
+    <form method="post" id="compose-newsletter-form">
+        {% csrf_token %}
+        
+        <div class="form-row">
+            {{ form.subject.label_tag }}
+            {{ form.subject }}
+            {% if form.subject.errors %}
+                <div class="error">{{ form.subject.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-row">
+            {{ form.template_name.label_tag }}
+            {{ form.template_name }}
+            {% if form.template_name.errors %}
+                <div class="error">{{ form.template_name.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-row">
+            {{ form.preview }}
+            {{ form.preview.label_tag }}
+            {% if form.preview.errors %}
+                <div class="error">{{ form.preview.errors }}</div>
+            {% endif %}
+            <p class="help">{{ form.preview.help_text }}</p>
+        </div>
+        
+        <div class="submit-row">
+            <input type="submit" value="{% trans 'Envoyer un email de test' %}" name="_preview" class="default">
+            <input type="submit" value="{% trans 'Envoyer à tous les destinataires' %}" name="_send" style="background: #ba2121; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
+        </div>
+    </form>
+</div>
+{% endblock %}

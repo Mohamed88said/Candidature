@@ -13,6 +13,10 @@ from .forms import (
     CustomUserCreationForm, CandidateProfileForm, EducationForm, 
     ExperienceForm, SkillForm, LanguageForm, CertificationForm, ReferenceForm
 )
+# Ajout des imports pour les emails
+from django.core.mail import send_mail
+from django.conf import settings
+from apps.core.tasks import send_welcome_email, send_password_reset_email
 
 
 def register(request):
@@ -25,9 +29,11 @@ def register(request):
             messages.success(request, f'Compte créé pour {username}!')
             
             # Créer automatiquement un profil candidat si c'est un candidat
-            # Utiliser get_or_create pour éviter les doublons
             if user.user_type == 'candidate':
                 CandidateProfile.objects.get_or_create(user=user)
+            
+            # Envoyer l'email de bienvenue de manière asynchrone
+            send_welcome_email.delay(user.email, user.full_name)
             
             # Connecter automatiquement l'utilisateur
             login(request, user)
@@ -431,9 +437,6 @@ def dashboard(request):
         return redirect('dashboard:admin_dashboard')
 
 
-
-# AJOUTEZ CES FONCTIONS À LA FIN DE VOTRE FICHIER views.py
-
 @login_required
 def add_project(request):
     """Ajouter un projet"""
@@ -444,12 +447,9 @@ def add_project(request):
     profile = get_object_or_404(CandidateProfile, user=request.user)
     
     if request.method == 'POST':
-        # Vous devrez créer un ProjectForm similaire aux autres formulaires
-        # Pour l'instant, redirigez simplement
         messages.success(request, 'Fonctionnalité projet à implémenter!')
         return redirect('accounts:profile')
     else:
-        # Retournez une réponse temporaire
         return render(request, 'accounts/under_construction.html', {
             'message': 'La fonctionnalité d\'ajout de projet sera bientôt disponible'
         })
@@ -466,7 +466,6 @@ def edit_project(request, project_id):
     project = get_object_or_404(Project, id=project_id, candidate=profile)
     
     if request.method == 'POST':
-        # Implémentez la logique de modification
         messages.success(request, 'Projet modifié avec succès!')
         return redirect('accounts:profile')
     else:
@@ -507,7 +506,6 @@ def add_award(request):
     profile = get_object_or_404(CandidateProfile, user=request.user)
     
     if request.method == 'POST':
-        # Implémentez la logique d'ajout
         messages.success(request, 'Prix ajouté avec succès!')
         return redirect('accounts:profile')
     else:
@@ -548,7 +546,6 @@ def add_social_profile(request):
     profile = get_object_or_404(CandidateProfile, user=request.user)
     
     if request.method == 'POST':
-        # Implémentez la logique d'ajout
         messages.success(request, 'Profil social ajouté avec succès!')
         return redirect('accounts:profile')
     else:

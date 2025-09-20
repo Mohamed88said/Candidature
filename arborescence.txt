@@ -1,0 +1,173 @@
+Arborescence du projet :
+├── .
+│   ├── .bolt/
+│   │   ├── config.json
+│   ├── .env
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── Dockerfile
+│   ├── README.md
+│   ├── apps/
+│   │   ├── __init__.py
+│   │   ├── accounts/
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── forms.py
+│   │   │   ├── models.py
+│   │   │   ├── signals.py
+│   │   │   ├── urls.py
+│   │   │   ├── utils.py
+│   │   │   ├── views.py
+│   │   ├── applications/
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── forms.py
+│   │   │   ├── models.py
+│   │   │   ├── urls.py
+│   │   │   ├── views.py
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── context_processors.py
+│   │   │   ├── emails.py
+│   │   │   ├── forms.py
+│   │   │   ├── management/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── commands/
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── send_newsletter.py
+│   │   │   │   │   ├── setup_initial_content.py
+│   │   │   ├── models.py
+│   │   │   ├── tasks.py
+│   │   │   ├── urls.py
+│   │   │   ├── utils/
+│   │   │   │   ├── email_utils.py
+│   │   │   ├── views.py
+│   │   ├── dashboard/
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── models.py
+│   │   │   ├── urls.py
+│   │   │   ├── utils.py
+│   │   │   ├── views.py
+│   │   ├── jobs/
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── forms.py
+│   │   │   ├── models.py
+│   │   │   ├── signals.py
+│   │   │   ├── urls.py
+│   │   │   ├── views.py
+│   ├── arborescence.txt
+│   ├── celerybeat-schedule
+│   ├── celerybeat-schedule-shm
+│   ├── celerybeat-schedule-wal
+│   ├── db.sqlite3
+│   ├── deployment_guide.md
+│   ├── docker-compose.yml
+│   ├── docker-entrypoint.sh
+│   ├── dump.rdb
+│   ├── fixtures/
+│   │   ├── initial_data.json
+│   ├── gen_arbo.py
+│   ├── index.js
+│   ├── manage.py
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── recruitment_platform/
+│   │   ├── __init__.py
+│   │   ├── asgi.py
+│   │   ├── celery.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   ├── wsgi.py
+│   ├── requirements.txt
+│   ├── static/
+│   │   ├── css/
+│   │   │   ├── custom.css
+│   │   │   ├── mobile.css
+│   │   ├── images/
+│   │   ├── js/
+│   │   │   ├── custom.js
+│   ├── templates/
+│   │   ├── accounts/
+│   │   │   ├── add_certification.html
+│   │   │   ├── add_education.html
+│   │   │   ├── add_experience.html
+│   │   │   ├── add_language.html
+│   │   │   ├── add_reference.html
+│   │   │   ├── add_skill.html
+│   │   │   ├── confirm_delete.html
+│   │   │   ├── dashboard.html
+│   │   │   ├── edit_education.html
+│   │   │   ├── edit_experience.html
+│   │   │   ├── login.html
+│   │   │   ├── password_reset.html
+│   │   │   ├── profile.html
+│   │   │   ├── profile_edit.html
+│   │   │   ├── register.html
+│   │   ├── admin/
+│   │   │   ├── compose_newsletter.html
+│   │   ├── applications/
+│   │   │   ├── add_comment.html
+│   │   │   ├── application_detail.html
+│   │   │   ├── application_form.html
+│   │   │   ├── application_list.html
+│   │   │   ├── applications_list.html
+│   │   │   ├── apply.html
+│   │   │   ├── interview_feedback.html
+│   │   │   ├── my_applications.html
+│   │   │   ├── rate_application.html
+│   │   │   ├── schedule_interview.html
+│   │   │   ├── update_status.html
+│   │   │   ├── withdraw_application.html
+│   │   ├── base/
+│   │   ├── base.html
+│   │   ├── core/
+│   │   │   ├── 404.html
+│   │   │   ├── 500.html
+│   │   │   ├── about.html
+│   │   │   ├── blog.html
+│   │   │   ├── blog_by_tag.html
+│   │   │   ├── blog_detail.html
+│   │   │   ├── contact.html
+│   │   │   ├── faq.html
+│   │   │   ├── home.html
+│   │   │   ├── privacy.html
+│   │   │   ├── search.html
+│   │   │   ├── sitemap.html
+│   │   │   ├── terms.html
+│   │   ├── dashboard/
+│   │   │   ├── admin_dashboard.html
+│   │   │   ├── candidate_profile.html
+│   │   │   ├── candidates.html
+│   │   │   ├── reports.html
+│   │   │   ├── statistics.html
+│   │   ├── emails/
+│   │   │   ├── application_received.html
+│   │   │   ├── contact_confirmation.html
+│   │   │   ├── new_job_alert.html
+│   │   │   ├── newsletter.html
+│   │   │   ├── password_reset.html
+│   │   │   ├── promotional.html
+│   │   ├── jobs/
+│   │   │   ├── create_job_alert.html
+│   │   │   ├── edit_job_alert.html
+│   │   │   ├── job_alerts.html
+│   │   │   ├── job_categories.html
+│   │   │   ├── job_create.html
+│   │   │   ├── job_detail.html
+│   │   │   ├── job_edit.html
+│   │   │   ├── job_list.html
+│   │   │   ├── jobs_by_category.html
+│   │   │   ├── saved_jobs.html
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── decorators.py
+│   │   ├── export.py
+│   │   ├── helpers.py

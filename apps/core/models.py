@@ -235,6 +235,8 @@ class PageContent(models.Model):
         ('home', 'Accueil'),
         ('hero_section', 'Section héro'),
         ('footer_content', 'Contenu du footer'),
+        ('career_tips', 'Conseils de carrière'),  # NOUVEAU
+        ('promotional', 'Contenu promotionnel'),  # NOUVEAU
         ('custom', 'Page personnalisée'),
     )
 
@@ -313,3 +315,79 @@ class ThemeSettings(models.Model):
             # Désactiver les autres thèmes
             ThemeSettings.objects.filter(is_active=True).update(is_active=False)
         super().save(*args, **kwargs)
+
+
+
+
+class TeamMember(models.Model):
+    """Membres de l'équipe"""
+    ROLE_CHOICES = (
+        ('management', 'Direction'),
+        ('technical', 'Technique'),
+        ('hr', 'Ressources Humaines'),
+        ('marketing', 'Marketing'),
+        ('sales', 'Commercial'),
+        ('support', 'Support'),
+        ('other', 'Autre'),
+    )
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='team_member')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    bio = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='team/', blank=True, null=True)
+    linkedin_url = models.URLField(blank=True)
+    twitter_url = models.URLField(blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    show_in_team = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Membre d\'équipe'
+        verbose_name_plural = 'Membres d\'équipe'
+        ordering = ['order', 'user__first_name']
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.get_role_display()}"
+
+
+class Value(models.Model):
+    """Vales de l'entreprise"""
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    icon = models.CharField(max_length=50, help_text='Classe FontAwesome (ex: fas fa-heart)')
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Valeur'
+        verbose_name_plural = 'Valeurs'
+        ordering = ['order', 'title']
+
+    def __str__(self):
+        return self.title
+
+
+class Statistic(models.Model):
+    """Statistiques pour la page about"""
+    title = models.CharField(max_length=100)
+    value = models.PositiveIntegerField(default=0)
+    icon = models.CharField(max_length=50, help_text='Classe FontAwesome (ex: fas fa-users)')
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Statistique'
+        verbose_name_plural = 'Statistiques'
+        ordering = ['order', 'title']
+
+    def __str__(self):
+        return f"{self.title}: {self.value}"

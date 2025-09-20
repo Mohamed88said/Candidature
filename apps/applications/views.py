@@ -17,6 +17,8 @@ from .forms import (
 )
 from apps.jobs.models import Job
 from apps.accounts.models import CandidateProfile
+# Ajout des imports pour les emails
+from apps.core.tasks import send_application_received_email, send_interview_invitation_email
 
 
 @login_required
@@ -54,6 +56,9 @@ def apply_to_job(request, job_id):
             application.job = job
             application.save()
             
+            # Envoyer l'email de confirmation
+            send_application_received_email.delay(application.id)
+            
             # Incrémenter le compteur de candidatures du job
             job.increment_applications()
             
@@ -74,7 +79,7 @@ def my_applications(request):
     """Mes candidatures (pour les candidats)"""
     if request.user.user_type != 'candidate':
         messages.error(request, "Accès non autorisé.")
-        return redirect('home')
+        return redirect('core:home')
     
     try:
         candidate_profile = request.user.candidate_profile
@@ -232,6 +237,9 @@ def schedule_interview(request, pk):
             interview.created_by = request.user
             interview.save()
             form.save_m2m()  # Pour les ManyToMany fields
+            
+            # Envoyer l'email d'invitation
+            send_interview_invitation_email.delay(interview.id)
             
             # Mettre à jour le statut de la candidature
             if application.status in ['pending', 'reviewing']:

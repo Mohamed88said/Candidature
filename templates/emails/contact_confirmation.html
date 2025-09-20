@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de contact</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .highlight {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Confirmation de réception</h1>
+            <p>Merci de nous avoir contactés</p>
+        </div>
+        
+        <div class="content">
+            <h2>Bonjour {{ user_name }},</h2>
+            
+            <p>Nous avons bien reçu votre message concernant <strong>{{ message_subject }}</strong> et nous vous en remercions.</p>
+            
+            <div class="highlight">
+                <p><strong>📧 Votre message a été transmis à notre équipe</strong></p>
+                <p>Nous traitons chaque demande dans les plus brefs délais. Vous pouvez généralement espérer une réponse sous 24 à 48 heures.</p>
+            </div>
+            
+            <h3>Prochaines étapes :</h3>
+            <ul>
+                <li>Notre équipe analyse votre demande</li>
+                <li>Un conseiller spécialisé vous répondra</li>
+                <li>Vous recevrez une réponse personnalisée</li>
+            </ul>
+            
+            <p>Si votre demande est urgente, n'hésitez pas à nous contacter directement à l'adresse :</p>
+            <p style="text-align: center;">
+                <a href="mailto:{{ support_email }}" style="color: #007bff; text-decoration: none;">
+                    {{ support_email }}
+                </a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 Plateforme de Recrutement. Tous droits réservés.</p>
+            <p>
+                <a href="{{ SITE_URL }}/privacy/" style="color: #6c757d; text-decoration: none;">Politique de confidentialité</a> • 
+                <a href="{{ SITE_URL }}/terms/" style="color: #6c757d; text-decoration: none;">Conditions d'utilisation</a>
+            </p>
+            <p>Cet email a été envoyé à {{ user_email }} parce que vous nous avez contactés via notre formulaire.</p>
+        </div>
+    </div>
+</body>
+</html>

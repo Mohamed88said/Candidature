@@ -6,10 +6,14 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 
-from .models import ContactMessage, FAQ, SiteSettings, Newsletter, BlogPost, PageContent
+from .models import ContactMessage, FAQ, SiteSettings, Newsletter, BlogPost, PageContent, TeamMember, Value, Statistic
 from .forms import ContactForm, NewsletterForm, SearchForm
 from apps.jobs.models import Job, JobCategory
 from apps.accounts.models import CandidateProfile
+# Ajout des imports pour les emails
+from django.core.mail import send_mail
+from django.conf import settings
+from apps.core.tasks import send_contact_confirmation_email
 
 
 def home(request):
@@ -66,45 +70,73 @@ def about(request):
     except SiteSettings.DoesNotExist:
         site_settings = None
     
-    # Statistiques pour la page à propos
-    stats = {
-        'jobs_posted': Job.objects.count(),
-        'candidates_registered': CandidateProfile.objects.count(),
-        'successful_placements': Job.objects.filter(status='filled').count(),
-        'companies_served': Job.objects.values('company').distinct().count(),
-    }
+    # Récupérer les données dynamiques
+    team_members = TeamMember.objects.filter(
+        is_active=True, 
+        show_in_team=True
+    ).select_related('user').order_by('order')
+    
+    values = Value.objects.filter(is_active=True).order_by('order')
+    
+    statistics = Statistic.objects.filter(is_active=True).order_by('order')
+    
+    # Si pas de statistiques configurées, utiliser les valeurs par défaut
+    if not statistics.exists():
+        stats = {
+            'jobs_posted': Job.objects.count(),
+            'candidates_registered': CandidateProfile.objects.count(),
+            'successful_placements': Job.objects.filter(status='filled').count(),
+            'companies_served': Job.objects.values('company').distinct().count(),
+        }
+    else:
+        stats = {stat.title.lower().replace(' ', '_'): stat.value for stat in statistics}
     
     context = {
         'about_content': about_content,
         'site_settings': site_settings,
+        'team_members': team_members,
+        'values': values,
         'stats': stats,
     }
     
     return render(request, 'core/about.html', context)
 
 
-def contact(request):
+def contact_view(request):
     """Page de contact"""
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            contact_message = form.save()
-            messages.success(request, 'Votre message a été envoyé avec succès! Nous vous répondrons dans les plus brefs délais.')
+            # Envoyer l'email de confirmation
+            send_contact_confirmation_email.delay(
+                form.cleaned_data['email'],
+                form.cleaned_data['name'],
+                form.cleaned_data['subject']
+            )
+            
+            # Envoyer l'email à l'équipe (vous pouvez adapter cela)
+            subject = f"Nouveau message de contact: {form.cleaned_data['subject']}"
+            message = f"""
+            Nom: {form.cleaned_data['name']}
+            Email: {form.cleaned_data['email']}
+            Sujet: {form.cleaned_data['subject']}
+            Message:
+            {form.cleaned_data['message']}
+            """
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [settings.DEFAULT_FROM_EMAIL],  # Envoyer à l'équipe
+                fail_silently=False,
+            )
+            
+            messages.success(request, 'Votre message a été envoyé avec succès !')
             return redirect('core:contact')
     else:
         form = ContactForm()
     
-    try:
-        site_settings = SiteSettings.objects.first()
-    except SiteSettings.DoesNotExist:
-        site_settings = None
-    
-    context = {
-        'form': form,
-        'site_settings': site_settings,
-    }
-    
-    return render(request, 'core/contact.html', context)
+    return render(request, 'core/contact.html', {'form': form})
 
 
 def faq(request):
@@ -355,3 +387,93 @@ def handler404(request, exception):
 def handler500(request):
     """Page d'erreur 500 personnalisée"""
     return render(request, 'core/500.html', status=500)
+
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+from .forms import ComposeNewsletterForm
+from .tasks import send_newsletter_task
+from .models import Newsletter
+
+@staff_member_required
+def compose_newsletter(request):
+    """Vue pour composer une newsletter depuis l'admin"""
+    if request.method == 'POST':
+        form = ComposeNewsletterForm(request.POST)
+        if form.is_valid():
+            subject = form.cleaned_data['subject']
+            template_name = form.cleaned_data['template_name']
+            preview = form.cleaned_data['preview']
+            
+            # Récupérer les destinataires depuis la session
+            recipient_ids = request.session.get('newsletter_recipients', [])
+            if not recipient_ids:
+                # Si aucun destinataire spécifique, utiliser tous les abonnés actifs
+                recipients = Newsletter.objects.filter(is_active=True)
+                recipient_ids = list(recipients.values_list('id', flat=True))
+            
+            if preview:
+                # Mode preview : envoyer seulement à l'admin
+                from django.conf import settings
+                recipient_emails = [settings.DEFAULT_FROM_EMAIL]
+                messages.info(request, "Email de test envoyé à l'administrateur.")
+            else:
+                # Envoi réel
+                recipients = Newsletter.objects.filter(id__in=recipient_ids, is_active=True)
+                recipient_emails = list(recipients.values_list('email', flat=True))
+                messages.success(request, f"Newsletter envoyée à {len(recipient_emails)} destinataires.")
+            
+            # Préparer le contexte avec les offres réelles
+            context_list = []
+            for email in recipient_emails:
+                context = {
+                    'email': email,
+                    'subject': subject,
+                    'unsubscribe_url': f"{request.scheme}://{request.get_host()}/newsletter/unsubscribe/{email}/",
+                    'SITE_URL': f"{request.scheme}://{request.get_host()}",
+                    'current_date': timezone.now(),
+                }
+                context_list.append(context)
+            
+            # Lancer la tâche asynchrone
+            send_newsletter_task.delay(subject, template_name, context_list, recipient_emails)
+            
+            # Nettoyer la session
+            if 'newsletter_recipients' in request.session:
+                del request.session['newsletter_recipients']
+            
+            return redirect('admin:core_newsletter_changelist')
+    else:
+        form = ComposeNewsletterForm()
+    
+    return render(request, 'admin/compose_newsletter.html', {
+        'form': form,
+        'title': 'Composer une newsletter'
+    })
+
+@staff_member_required
+def send_newsletter_email(request, pk):
+    """Envoyer un email à un seul abonné"""
+    from django.conf import settings
+    from .tasks import send_newsletter_task
+    
+    newsletter = Newsletter.objects.get(pk=pk)
+    
+    subject = f"Message personnalisé pour {newsletter.email}"
+    template_name = "newsletter.html"
+    
+    context = {
+        'email': newsletter.email,
+        'subject': subject,
+        'unsubscribe_url': f"{request.scheme}://{request.get_host()}/newsletter/unsubscribe/{newsletter.email}/",
+        'SITE_URL': f"{request.scheme}://{request.get_host()}",
+        'current_date': timezone.now(),
+    }
+    
+    send_newsletter_task.delay(subject, template_name, [context], [newsletter.email])
+    
+    messages.success(request, f"Email envoyé à {newsletter.email}")
+    return redirect('admin:core_newsletter_changelist')

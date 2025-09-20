@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .promo-card {
+            border: 2px dashed #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            background-color: #fff3cd;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #ffc107;
+            color: #000;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .discount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .code-promo {
+            background: #ffc107;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎁 Offre Spéciale</h1>
+            <p>Des opportunités exclusives pour vous</p>
+        </div>
+        
+        <div class="content">
+            <h2>Bonjour cher membre,</h2>
+            
+            <p>Nous avons le plaisir de vous offrir des avantages exclusifs :</p>
+            
+            <div class="promo-card">
+                <h3>{{ promo_content.title }}</h3>
+                <p class="discount">{{ promo_content.discount }} DE RÉDUCTION</p>
+                <p>{{ promo_content.content }}</p>
+                <p><strong>Code promo :</strong> <span class="code-promo">{{ promo_content.code }}</span></p>
+                <a href="{{ SITE_URL }}/premium-services/" class="button">Profiter de l'offre</a>
+            </div>
+            
+            <h3>📊 Événements à venir</h3>
+            <ul>
+                {% for event in upcoming_events %}
+                <li><strong>{{ event.date }} :</strong> {{ event.title }}</li>
+                {% endfor %}
+            </ul>
+            
+            <h3>💡 Conseil du mois</h3>
+            <p>Saviez-vous que les candidats qui personnalisent leur lettre de motivation ont <strong>40% plus de chances</strong> d'être contactés par les recruteurs ?</p>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{{ SITE_URL }}/events/" class="button">Voir tous les événements</a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 Plateforme de Recrutement. Tous droits réservés.</p>
+            <p>
+                <a href="{{ unsubscribe_url }}" style="color: #6c757d; text-decoration: none;">
+                    📧 Se désabonner des emails promotionnels
+                </a>
+            </p>
+            <p>Vous recevez cet email parce que vous êtes inscrit sur notre plateforme.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .job-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            background-color: #f8f9fa;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .urgent-badge {
+            background-color: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .featured-badge {
+            background-color: #ffc107;
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .job-detail {
+            margin-bottom: 8px;
+        }
+        .job-detail strong {
+            display: inline-block;
+            width: 120px;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Nouvelles offres correspondant à vos critères</h1>
+            <p>Alertes pour : {{ alert_title }}</p>
+        </div>
+        
+        <div class="content">
+            <h2>Bonjour {% if user_name %}{{ user_name }}{% else %}cher candidat{% endif %},</h2>
+            
+            <p>Voici les nouvelles offres d'emploi qui correspondent à vos critères de recherche :</p>
+            
+            {% for job in matching_jobs %}
+            <div class="job-card">
+                <h3>
+                    {% if job.job_type == 'internship' %}🎓{% endif %}
+                    {% if job.job_type == 'full_time' %}🚀{% endif %}
+                    {% if job.job_type == 'part_time' %}⏱️{% endif %}
+                    {% if job.job_type == 'freelance' %}💼{% endif %}
+                    {{ job.title }}
+                    {% if job.featured %}<span class="featured-badge">⭐ Vedette</span>{% endif %}
+                    {% if job.urgent %}<span class="urgent-badge">⚡ Urgent</span>{% endif %}
+                </h3>
+                
+                <div class="job-detail">
+                    <strong>Entreprise :</strong> {{ job.company }}
+                </div>
+                
+                <div class="job-detail">
+                    <strong>Localisation :</strong> {{ job.location }}{% if job.remote_work %} (Remote possible){% endif %}
+                </div>
+                
+                <div class="job-detail">
+                    <strong>Type :</strong> {{ job.get_job_type_display }}
+                </div>
+                
+                <div class="job-detail">
+                    <strong>Expérience :</strong> {{ job.get_experience_level_display }}
+                </div>
+                
+                {% if job.salary_min or job.salary_max %}
+                <div class="job-detail">
+                    <strong>Salaire :</strong> 
+                    {% if job.salary_min and job.salary_max %}
+                        {{ job.salary_min }} - {{ job.salary_max }} {{ job.salary_currency }}
+                    {% elif job.salary_min %}
+                        À partir de {{ job.salary_min }} {{ job.salary_currency }}
+                    {% elif job.salary_max %}
+                        Jusqu'à {{ job.salary_max }} {{ job.salary_currency }}
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <p>{{ job.description|truncatewords:30 }}</p>
+                
+                <a href="{{ SITE_URL }}{{ job.get_absolute_url }}" class="button">
+                    📋 Voir l'offre complète et postuler
+                </a>
+            </div>
+            {% empty %}
+            <div class="job-card">
+                <h3>📋 Aucune nouvelle offre cette semaine</h3>
+                <p>Aucune nouvelle offre ne correspond actuellement à vos critères de recherche.</p>
+                <p>Nous vous informerons dès que de nouvelles opportunités seront disponibles.</p>
+                <a href="{{ SITE_URL }}/jobs/" class="button">Voir toutes les offres</a>
+            </div>
+            {% endfor %}
+            
+            <h3>💡 Pourquoi ces offres ?</h3>
+            <ul>
+                <li>Elles correspondent à vos critères de recherche sauvegardés</li>
+                <li>Elles ont été publiées récemment</li>
+                <li>Elles proviennent d'entreprises de qualité</li>
+            </ul>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{{ SITE_URL }}/jobs/" class="button">
+                    🔍 Voir toutes les offres
+                </a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 Plateforme de Recrutement. Tous droits réservés.</p>
+            <p>
+                <a href="{{ unsubscribe_url }}" style="color: #6c757d; text-decoration: none;">
+                    📧 Gérer mes alertes emploi
+                </a>
+            </p>
+            <p>Vous recevez cet email parce que vous êtes abonné aux alertes emploi de notre plateforme.</p>
+        </div>
+    </div>
+</body>
+</html>

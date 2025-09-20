@@ -3,7 +3,6 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, HTML
 from .models import ContactMessage, Newsletter
 
-
 class ContactForm(forms.ModelForm):
     """Formulaire de contact"""
     class Meta:
@@ -70,3 +69,36 @@ class SearchForm(forms.Form):
             'query',
             Submit('submit', 'Rechercher', css_class='btn btn-primary ml-2')
         )
+
+
+class NewsletterAdminForm(forms.ModelForm):
+    """Formulaire admin pour la newsletter"""
+    class Meta:
+        model = Newsletter
+        fields = '__all__'
+
+
+class ComposeNewsletterForm(forms.Form):
+    """Formulaire pour composer une newsletter"""
+    subject = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={'placeholder': 'Sujet de la newsletter', 'class': 'vTextField'}),
+        label="Sujet de l'email"
+    )
+    template_name = forms.ChoiceField(
+        choices=[
+            ('newsletter.html', 'Newsletter générale'),
+            ('new_job_alert.html', 'Alerte nouvelles offres'),
+            ('promotional.html', 'Email promotionnel'),
+        ],
+        initial='newsletter.html',
+        widget=forms.Select(attrs={'class': 'vSelect'}),
+        label="Template d'email"
+    )
+    preview = forms.BooleanField(
+        required=False,
+        initial=True,
+        help_text="Envoyer d'abord un email de test à l'administrateur",
+        widget=forms.CheckboxInput(attrs={'class': 'vCheckboxField'}),
+        label="Mode test"
+    )
