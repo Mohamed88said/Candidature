@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_http_methods
 from .models import Job, JobCategory, SavedJob, JobAlert
 from .forms import JobForm, JobSearchForm, JobAlertForm
@@ -81,7 +81,33 @@ def job_list(request):
 
 def job_detail(request, slug):
     """Détail d'une offre d'emploi"""
-    job = get_object_or_404(Job, slug=slug, status='published')
+    try:
+        # Essayer de trouver le job par son slug
+        job = get_object_or_404(Job, slug=slug, status='published')
+    except Http404:
+        # Si le job n'existe pas, vérifier s'il a été déplacé ou renommé
+        try:
+            # Chercher parmi tous les jobs publiés par ID potentiel dans le slug
+            published_jobs = Job.objects.filter(status='published')
+            
+            # Essayer d'extraire un UUID du slug
+            import re
+            uuid_pattern = r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
+            match = re.search(uuid_pattern, slug)
+            
+            if match:
+                uuid_part = match.group(0)
+                # Chercher un job avec cet UUID dans son slug
+                for j in published_jobs:
+                    if uuid_part in j.slug:
+                        return redirect('job_detail', slug=j.slug, permanent=True)
+            
+            # Si on arrive ici, le job n'existe vraiment pas
+            raise Http404("Cette offre d'emploi n'existe pas ou a été supprimée.")
+            
+        except Exception:
+            # En cas d'erreur, lever une 404 normale
+            raise Http404("Cette offre d'emploi n'existe pas.")
     
     # Incrémenter le nombre de vues
     job.increment_views()
@@ -118,18 +144,25 @@ def job_detail(request, slug):
 @login_required
 def create_job(request):
     """Créer une nouvelle offre d'emploi (admin/hr seulement)"""
-    if request.user.user_type not in ['admin', 'hr']:
+    if not request.user.is_authenticated or request.user.user_type not in ['admin', 'hr']:
         messages.error(request, "Vous n'avez pas l'autorisation de créer des offres d'emploi.")
-        return redirect('jobs:job_list')
+        return redirect('job_list')
     
     if request.method == 'POST':
-        form = JobForm(request.POST)
+        form = JobForm(request.POST, request.FILES)
         if form.is_valid():
             job = form.save(commit=False)
             job.created_by = request.user
+            job.status = 'published'
+            
+            # Sauvegarder pour générer le slug
             job.save()
+            form.save_m2m()
+            
             messages.success(request, 'Offre d\'emploi créée avec succès!')
             return redirect('jobs:job_detail', slug=job.slug)
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
     else:
         form = JobForm()
     
@@ -144,14 +177,14 @@ def edit_job(request, slug):
     # Vérifier les permissions
     if request.user.user_type not in ['admin', 'hr'] and job.created_by != request.user:
         messages.error(request, "Vous n'avez pas l'autorisation de modifier cette offre.")
-        return redirect('jobs:job_detail', slug=job.slug)
+        return redirect('job_detail', slug=job.slug)
     
     if request.method == 'POST':
-        form = JobForm(request.POST, instance=job)
+        form = JobForm(request.POST, request.FILES, instance=job)
         if form.is_valid():
             form.save()
             messages.success(request, 'Offre d\'emploi mise à jour avec succès!')
-            return redirect('jobs:job_detail', slug=job.slug)
+            return redirect('job_detail', slug=job.slug)
     else:
         form = JobForm(instance=job)
     
@@ -215,7 +248,7 @@ def create_job_alert(request):
             alert.user = request.user
             alert.save()
             messages.success(request, 'Alerte emploi créée avec succès!')
-            return redirect('jobs:job_alerts')
+            return redirect('job_alerts')
     else:
         form = JobAlertForm()
     
@@ -232,7 +265,7 @@ def edit_job_alert(request, alert_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Alerte emploi mise à jour avec succès!')
-            return redirect('jobs:job_alerts')
+            return redirect('job_alerts')
     else:
         form = JobAlertForm(instance=alert)
     
@@ -246,7 +279,7 @@ def delete_job_alert(request, alert_id):
     alert = get_object_or_404(JobAlert, id=alert_id, user=request.user)
     alert.delete()
     messages.success(request, 'Alerte emploi supprimée avec succès!')
-    return redirect('jobs:job_alerts')
+    return redirect('job_alerts')
 
 
 @login_required

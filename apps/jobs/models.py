@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
+import uuid
+from django.utils.text import slugify
+from unidecode import unidecode  # Ajout pour gérer les caractères spéciaux
 
 User = get_user_model()
 
@@ -168,14 +171,72 @@ class Job(models.Model):
         return f"{self.title} - {self.company}"
 
     def get_absolute_url(self):
-        return reverse('jobs:job_detail', kwargs={'slug': self.slug})
+        return reverse('job_detail', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            from django.utils.text import slugify
-            import uuid
-            self.slug = f"{slugify(self.title)}-{str(uuid.uuid4())[:8]}"
+        # Générer le slug seulement si nécessaire ou si le titre a changé
+        if not self.slug or self._has_title_changed():
+            # Nettoyer le titre pour créer un slug valide
+            base_slug = self._generate_base_slug()
+            
+            # Générer un slug unique avec UUID
+            unique_id = str(uuid.uuid4())[:8]
+            self.slug = f"{base_slug}-{unique_id}"
+            
+            # Vérifier l'unicité
+            self._ensure_unique_slug()
+        
         super().save(*args, **kwargs)
+
+    def _has_title_changed(self):
+        """Vérifie si le titre a changé depuis la dernière sauvegarde"""
+        if self.pk:
+            try:
+                original = Job.objects.get(pk=self.pk)
+                return original.title != self.title
+            except Job.DoesNotExist:
+                return True
+        return True
+
+    def _generate_base_slug(self):
+        """Génère la partie de base du slug à partir du titre"""
+        try:
+            # Utiliser unidecode pour gérer les caractères spéciaux
+            from unidecode import unidecode
+            title_ascii = unidecode(self.title)
+        except ImportError:
+            # Fallback si unidecode n'est pas installé
+            title_ascii = self.title
+        
+        # Nettoyer et créer le slug de base
+        base_slug = slugify(title_ascii)
+        
+        if not base_slug:
+            base_slug = "offre-emploi"
+        
+        # Limiter la longueur
+        if len(base_slug) > 50:
+            base_slug = base_slug[:50]
+            # S'assurer qu'on ne coupe pas au milieu d'un mot
+            if '-' in base_slug:
+                base_slug = base_slug.rsplit('-', 1)[0]
+        
+        return base_slug
+
+    def _ensure_unique_slug(self):
+        """S'assure que le slug est unique"""
+        original_slug = self.slug
+        counter = 1
+        
+        while Job.objects.filter(slug=self.slug).exclude(id=self.id).exists():
+            # Si le slug existe déjà, ajouter un compteur
+            self.slug = f"{original_slug}-{counter}"
+            counter += 1
+            if counter > 100:  # Sécurité pour éviter les boucles infinies
+                # En cas d'échec, utiliser uniquement l'UUID
+                unique_id = str(uuid.uuid4())[:12]
+                self.slug = f"job-{unique_id}"
+                break
 
     @property
     def is_active(self):
@@ -242,7 +303,7 @@ class SavedJob(models.Model):
         unique_together = ['user', 'job']
 
     def __str__(self):
-        return f"{self.user.full_name} - {self.job.title}"
+        return f"{self.user.email} - {self.job.title}"
 
 
 class JobAlert(models.Model):
@@ -271,4 +332,4 @@ class JobAlert(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Alerte: {self.title} - {self.user.full_name}"
+        return f"Alerte: {self.title} - {self.user.email}"

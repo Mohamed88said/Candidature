@@ -113,6 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'fr-fr'
 TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -194,7 +195,19 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
-
-
-# Ajoutez cette ligne dans les settings
+# Site URL
 SITE_URL = config('SITE_URL', default='http://localhost:8000')
+
+# Configuration de la langue française
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
+# Configuration des formats de date français
+DATE_FORMAT = 'd/m/Y'
+DATETIME_FORMAT = 'd/m/Y H:i'
+SHORT_DATE_FORMAT = 'd/m/Y'
+SHORT_DATETIME_FORMAT = 'd/m/Y H:i'
+
+# Formules de politesse françaises pour les emails
+EMAIL_SUBJECT_PREFIX = '[Plateforme Recrutement] '

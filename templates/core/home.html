@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Accueil - Plateforme de Recrutement{% endblock %}
+{% block title %}Accueil - Plateforme de SARL{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -10,11 +10,19 @@
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0 text-center text-lg-start">
                 <h1 class="display-4 fw-bold mb-4">
-                    Trouvez votre emploi idéal
+                    {% if site_settings.hero_title %}
+                        {{ site_settings.hero_title }}
+                    {% else %}
+                        Trouvez votre emploi idéal
+                    {% endif %}
                 </h1>
                 <p class="lead mb-4">
-                    Découvrez des milliers d'opportunités d'emploi et connectez-vous 
-                    avec les meilleures entreprises. Votre carrière commence ici.
+                    {% if site_settings.hero_subtitle %}
+                        {{ site_settings.hero_subtitle }}
+                    {% else %}
+                        Découvrez des opportunités d'emploi et connectez-vous 
+                        avec les meilleures entreprises. Votre carrière commence ici.
+                    {% endif %}
                 </p>
                 <div class="d-flex gap-3 flex-column flex-sm-row justify-content-center justify-content-lg-start">
                     <a href="{% url 'jobs:job_list' %}" class="btn btn-light btn-lg btn-mobile-full">
@@ -26,8 +34,13 @@
                 </div>
             </div>
             <div class="col-lg-6 text-center d-none d-lg-block">
-                <img src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=600" 
-                     alt="Recherche d'emploi" class="img-fluid rounded shadow">
+                {% if site_settings.hero_image %}
+                    <img src="{{ site_settings.hero_image.url }}" 
+                         alt="Recherche d'emploi" class="img-fluid rounded shadow">
+                {% else %}
+                    <img src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=600" 
+                         alt="Recherche d'emploi" class="img-fluid rounded shadow">
+                {% endif %}
             </div>
         </div>
     </div>
@@ -248,7 +261,7 @@
             <div class="col-lg-8">
                 <h2 class="fw-bold mb-3">Prêt à commencer votre recherche ?</h2>
                 <p class="lead mb-4">
-                    Rejoignez des milliers de candidats qui ont trouvé leur emploi idéal 
+                    Rejoignez des candidats qui ont trouvé leur emploi idéal 
                     grâce à notre plateforme.
                 </p>
                 <div class="d-flex justify-content-center gap-3">
@@ -308,6 +321,16 @@
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn-mobile-full {
+    width: 100%;
+}
+
+@media (min-width: 576px) {
+    .btn-mobile-full {
+        width: auto;
+    }
 }
 </style>
 {% endblock %}

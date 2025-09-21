@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}À propos - Plateforme de Recrutement{% endblock %}
+{% block title %}À propos - {% if site_settings %}{{ site_settings.site_name }}{% else %}Plateforme de Recrutement{% endif %}{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -10,23 +10,27 @@
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0 text-center text-lg-start">
                 <h1 class="display-4 fw-bold mb-4">
-                    {% if about_content.title %}{{ about_content.title }}{% else %}À propos de nous{% endif %}
+                    {% if site_settings and site_settings.about_title %}
+                        {{ site_settings.about_title }}
+                    {% else %}
+                        À propos de nous
+                    {% endif %}
                 </h1>
                 <p class="lead">
-                    {% if about_content.content %}
-                        {{ about_content.content|truncatewords:30 }}
+                    {% if site_settings and site_settings.about_content %}
+                        {{ site_settings.about_content|truncatewords:30 }}
                     {% else %}
                         Nous connectons les talents aux opportunités, en révolutionnant le processus de recrutement grâce à la technologie.
                     {% endif %}
                 </p>
             </div>
             <div class="col-lg-6 text-center d-none d-lg-block">
-                {% if site_settings.hero_image %}
+                {% if site_settings and site_settings.hero_image %}
                     <img src="{{ site_settings.hero_image.url }}" 
                          alt="Notre équipe" class="img-fluid rounded shadow">
                 {% else %}
                     <img src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=600" 
-                     alt="Notre équipe" class="img-fluid rounded shadow">
+                         alt="Notre équipe" class="img-fluid rounded shadow">
                 {% endif %}
             </div>
         </div>
@@ -40,7 +44,7 @@
             <div class="col-lg-8 mx-auto text-center">
                 <h2 class="fw-bold mb-4">Notre Mission</h2>
                 <p class="lead text-muted mb-5">
-                    {% if site_settings.about_mission %}
+                    {% if site_settings and site_settings.about_mission %}
                         {{ site_settings.about_mission }}
                     {% else %}
                         Simplifier et optimiser le processus de recrutement en offrant une plateforme 
@@ -95,6 +99,7 @@
 </section>
 
 <!-- Stats Section -->
+{% if statistics %}
 <section class="py-5 bg-light">
     <div class="container">
         <div class="row text-center">
@@ -120,8 +125,10 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 <!-- Values Section -->
+{% if values %}
 <section class="py-5">
     <div class="container">
         <div class="row">
@@ -151,8 +158,10 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 <!-- Team Section -->
+{% if team_members %}
 <section class="py-5 bg-light">
     <div class="container">
         <div class="row">
@@ -200,6 +209,73 @@
         </div>
     </div>
 </section>
+{% endif %}
+
+<!-- Company Info Section -->
+{% if site_settings %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-5">
+                        <h3 class="fw-bold text-center mb-4">Informations de l'Entreprise</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="fw-bold text-primary">Coordonnées</h5>
+                                <p class="mb-3">
+                                    <i class="fas fa-building me-2 text-muted"></i>
+                                    <strong>{{ site_settings.site_name }}</strong>
+                                </p>
+                                {% if site_settings.address %}
+                                <p class="mb-3">
+                                    <i class="fas fa-map-marker-alt me-2 text-muted"></i>
+                                    {{ site_settings.address|linebreaksbr }}
+                                </p>
+                                {% endif %}
+                                {% if site_settings.contact_phone %}
+                                <p class="mb-3">
+                                    <i class="fas fa-phone me-2 text-muted"></i>
+                                    {{ site_settings.contact_phone }}
+                                </p>
+                                {% endif %}
+                                {% if site_settings.contact_email %}
+                                <p class="mb-3">
+                                    <i class="fas fa-envelope me-2 text-muted"></i>
+                                    {{ site_settings.contact_email }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="fw-bold text-primary">Informations légales</h5>
+                                <!-- Ces champs seront disponibles après les migrations -->
+                                {% if site_settings.siret %}
+                                <p class="mb-2">
+                                    <small class="text-muted">SIRET:</small><br>
+                                    {{ site_settings.siret }}
+                                </p>
+                                {% endif %}
+                                {% if site_settings.rcs %}
+                                <p class="mb-2">
+                                    <small class="text-muted">RCS:</small><br>
+                                    {{ site_settings.rcs }}
+                                </p>
+                                {% endif %}
+                                {% if site_settings.vat_number %}
+                                <p class="mb-2">
+                                    <small class="text-muted">N° TVA:</small><br>
+                                    {{ site_settings.vat_number }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
 
 <!-- CTA Section -->
 <section class="py-5 bg-primary text-white">
