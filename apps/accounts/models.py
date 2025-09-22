@@ -260,7 +260,7 @@ class Experience(models.Model):
     end_date = models.DateField(blank=True, null=True)
     is_current = models.BooleanField(default=False)
     salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    salary_currency = models.CharField(max_length=3, default='EUR')
+    salary_currency = models.CharField(max_length=3, default='GNF')
     description = models.TextField()
     achievements = models.TextField(blank=True)
     technologies_used = models.TextField(blank=True, help_text='Technologies, outils, logiciels utilisés')

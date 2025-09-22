@@ -106,13 +106,13 @@ def job_detail(request, slug):
             raise Http404("Cette offre d'emploi n'existe pas ou a été supprimée.")
             
         except Exception:
-            # En cas d'erreur, lever une 404 normale
+            # En cas d'errGNF, lever une 404 normale
             raise Http404("Cette offre d'emploi n'existe pas.")
     
     # Incrémenter le nombre de vues
     job.increment_views()
     
-    # Vérifier si l'utilisateur a sauvegardé cette offre
+    # Vérifier si l'utilisatGNF a sauvegardé cette offre
     is_saved = False
     user_applied = False
     
@@ -219,7 +219,7 @@ def toggle_save_job(request, job_id):
 
 @login_required
 def saved_jobs(request):
-    """Liste des offres sauvegardées par l'utilisateur"""
+    """Liste des offres sauvegardées par l'utilisatGNF"""
     saved_jobs = SavedJob.objects.filter(user=request.user).select_related('job', 'job__category')
     
     # Pagination

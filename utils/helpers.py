@@ -1,4 +1,4 @@
-import os
+﻿import os
 import uuid
 from django.core.mail import send_mail
 from django.conf import settings
@@ -166,13 +166,13 @@ def calculate_age(birth_date):
     return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
 
 
-def format_currency(amount, currency='EUR'):
+def format_currency(amount, currency='GNF'):
     """Formate un montant en devise"""
     if not amount:
         return ""
     
     symbols = {
-        'EUR': '€',
+        'GNF': 'GNF ',
         'USD': '$',
         'GBP': '£',
     }
@@ -267,3 +267,4 @@ def compress_image(image_path, quality=85):
     except Exception as e:
         logger.error(f"Erreur compression image {image_path}: {str(e)}")
         return False
+

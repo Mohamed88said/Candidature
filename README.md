@@ -1,7 +1,7 @@
 # Plateforme de Recrutement Django
 
 ## Description
-Plateforme ultra-complète de gestion de recrutement avec intelligence artificielle, permettant aux candidats de postuler à des offres d'emploi et aux administrateurs de gérer tout le processus de recrutement avec des outils avancés d'analyse, de suivi, et de personnalisation complète.
+Plateforme ultra-complète de gestion de recrutement avec intelligence artificielle, permettant aux candidats de postuler à des offres d'emploi et aux administratGNFs de gérer tout le processus de recrutement avec des outils avancés d'analyse, de suivi, et de personnalisation complète.
 
 ## Fonctionnalités
 
@@ -24,17 +24,17 @@ Plateforme ultra-complète de gestion de recrutement avec intelligence artificie
 - ✅ Recommandations personnalisées
 - ✅ Alertes emploi avancées
 
-### Pour les Administrateurs
+### Pour les AdministratGNFs
 - ✅ Dashboard complet avec statistiques
 - ✅ Gestion complète du contenu du site (pages dynamiques)
-- ✅ Personnalisation des couleurs et thèmes
+- ✅ Personnalisation des coulGNFs et thèmes
 - ✅ Configuration avancée des paramètres
 - ✅ Gestion des offres d'emploi
 - ✅ Gestion des candidatures
 - ✅ Système de notation des candidats
 - ✅ Commentaires et feedback
 - ✅ Export Excel des données
-- ✅ Gestion des utilisateurs
+- ✅ Gestion des utilisatGNFs
 - ✅ Rapports détaillés
 - ✅ Analytics avancées avec graphiques
 - ✅ Système de notifications
@@ -45,7 +45,7 @@ Plateforme ultra-complète de gestion de recrutement avec intelligence artificie
 ### Pages Générales
 - ✅ Page d'accueil dynamique et personnalisable
 - ✅ Page de contact avec formulaire avancé
-- ✅ À propos entièrement configurable via admin
+- ✅ �GNF propos entièrement configurable via admin
 - ✅ Conditions d'utilisation éditables
 - ✅ Politique de confidentialité configurable
 - ✅ FAQ dynamique par catégories
@@ -80,7 +80,7 @@ Plateforme ultra-complète de gestion de recrutement avec intelligence artificie
 - **API**: Django REST Framework
 - **Graphiques**: Chart.js
 - **Formulaires**: Django Crispy Forms
-- **Conteneurisation**: Docker
+- **ContenGNFisation**: Docker
 
 ## Installation
 
@@ -124,7 +124,7 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-6. **Créer un superutilisateur**
+6. **Créer un superutilisatGNF**
 ```bash
 python manage.py createsuperuser
 ```
@@ -134,7 +134,7 @@ python manage.py createsuperuser
 python manage.py collectstatic
 ```
 
-8. **Lancer le serveur de développement**
+8. **Lancer le servGNF de développement**
 ```bash
 python manage.py runserver
 ```
@@ -145,109 +145,109 @@ Le site sera accessible sur `http://127.0.0.1:8000/`
 
 ```
 recruitment_platform/
-├── manage.py
-├── requirements.txt
-├── .env.example
-├── README.md
-├── recruitment_platform/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
-├── apps/
-│   ├── __init__.py
-│   ├── accounts/
-│   │   ├── __init__.py
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   ├── urls.py
-│   │   ├── forms.py
-│   │   ├── signals.py
-│   │   └── migrations/
-│   ├── jobs/
-│   │   ├── __init__.py
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   ├── urls.py
-│   │   ├── forms.py
-│   │   └── migrations/
-│   ├── applications/
-│   │   ├── __init__.py
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   ├── urls.py
-│   │   ├── forms.py
-│   │   └── migrations/
-│   ├── dashboard/
-│   │   ├── __init__.py
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   ├── urls.py
-│   │   ├── utils.py
-│   │   └── migrations/
-│   └── core/
-│       ├── __init__.py
-│       ├── admin.py
-│       ├── apps.py
-│       ├── models.py
-│       ├── views.py
-│       ├── urls.py
-│       ├── forms.py
-│       └── migrations/
-├── templates/
-│   ├── base.html
-│   ├── home.html
-│   ├── accounts/
-│   │   ├── login.html
-│   │   ├── register.html
-│   │   ├── profile.html
-│   │   ├── profile_edit.html
-│   │   └── dashboard.html
-│   ├── jobs/
-│   │   ├── job_list.html
-│   │   ├── job_detail.html
-│   │   ├── job_create.html
-│   │   └── job_edit.html
-│   ├── applications/
-│   │   ├── application_form.html
-│   │   ├── application_list.html
-│   │   └── application_detail.html
-│   ├── dashboard/
-│   │   ├── admin_dashboard.html
-│   │   ├── statistics.html
-│   │   ├── candidates.html
-│   │   └── reports.html
-│   └── core/
-│       ├── contact.html
-│       ├── about.html
-│       ├── terms.html
-│       └── privacy.html
-├── static/
-│   ├── css/
-│   │   ├── bootstrap.min.css
-│   │   └── custom.css
-│   ├── js/
-│   │   ├── bootstrap.min.js
-│   │   └── custom.js
-│   └── images/
-├── media/
-│   ├── cvs/
-│   ├── documents/
-│   └── profile_pictures/
-└── utils/
-    ├── __init__.py
-    ├── decorators.py
-    ├── helpers.py
-    └── export.py
+├�GNF�GNF manage.py
+├�GNF�GNF requirements.txt
+├�GNF�GNF .env.example
+├�GNF�GNF README.md
+├�GNF�GNF recruitment_platform/
+│   ├�GNF�GNF __init__.py
+│   ├�GNF�GNF settings.py
+│   ├�GNF�GNF urls.py
+│   ├�GNF�GNF wsgi.py
+│   └�GNF�GNF asgi.py
+├�GNF�GNF apps/
+│   ├�GNF�GNF __init__.py
+│   ├�GNF�GNF accounts/
+│   │   ├�GNF�GNF __init__.py
+│   │   ├�GNF�GNF admin.py
+│   │   ├�GNF�GNF apps.py
+│   │   ├�GNF�GNF models.py
+│   │   ├�GNF�GNF views.py
+│   │   ├�GNF�GNF urls.py
+│   │   ├�GNF�GNF forms.py
+│   │   ├�GNF�GNF signals.py
+│   │   └�GNF�GNF migrations/
+│   ├�GNF�GNF jobs/
+│   │   ├�GNF�GNF __init__.py
+│   │   ├�GNF�GNF admin.py
+│   │   ├�GNF�GNF apps.py
+│   │   ├�GNF�GNF models.py
+│   │   ├�GNF�GNF views.py
+│   │   ├�GNF�GNF urls.py
+│   │   ├�GNF�GNF forms.py
+│   │   └�GNF�GNF migrations/
+│   ├�GNF�GNF applications/
+│   │   ├�GNF�GNF __init__.py
+│   │   ├�GNF�GNF admin.py
+│   │   ├�GNF�GNF apps.py
+│   │   ├�GNF�GNF models.py
+│   │   ├�GNF�GNF views.py
+│   │   ├�GNF�GNF urls.py
+│   │   ├�GNF�GNF forms.py
+│   │   └�GNF�GNF migrations/
+│   ├�GNF�GNF dashboard/
+│   │   ├�GNF�GNF __init__.py
+│   │   ├�GNF�GNF admin.py
+│   │   ├�GNF�GNF apps.py
+│   │   ├�GNF�GNF models.py
+│   │   ├�GNF�GNF views.py
+│   │   ├�GNF�GNF urls.py
+│   │   ├�GNF�GNF utils.py
+│   │   └�GNF�GNF migrations/
+│   └�GNF�GNF core/
+│       ├�GNF�GNF __init__.py
+│       ├�GNF�GNF admin.py
+│       ├�GNF�GNF apps.py
+│       ├�GNF�GNF models.py
+│       ├�GNF�GNF views.py
+│       ├�GNF�GNF urls.py
+│       ├�GNF�GNF forms.py
+│       └�GNF�GNF migrations/
+├�GNF�GNF templates/
+│   ├�GNF�GNF base.html
+│   ├�GNF�GNF home.html
+│   ├�GNF�GNF accounts/
+│   │   ├�GNF�GNF login.html
+│   │   ├�GNF�GNF register.html
+│   │   ├�GNF�GNF profile.html
+│   │   ├�GNF�GNF profile_edit.html
+│   │   └�GNF�GNF dashboard.html
+│   ├�GNF�GNF jobs/
+│   │   ├�GNF�GNF job_list.html
+│   │   ├�GNF�GNF job_detail.html
+│   │   ├�GNF�GNF job_create.html
+│   │   └�GNF�GNF job_edit.html
+│   ├�GNF�GNF applications/
+│   │   ├�GNF�GNF application_form.html
+│   │   ├�GNF�GNF application_list.html
+│   │   └�GNF�GNF application_detail.html
+│   ├�GNF�GNF dashboard/
+│   │   ├�GNF�GNF admin_dashboard.html
+│   │   ├�GNF�GNF statistics.html
+│   │   ├�GNF�GNF candidates.html
+│   │   └�GNF�GNF reports.html
+│   └�GNF�GNF core/
+│       ├�GNF�GNF contact.html
+│       ├�GNF�GNF about.html
+│       ├�GNF�GNF terms.html
+│       └�GNF�GNF privacy.html
+├�GNF�GNF static/
+│   ├�GNF�GNF css/
+│   │   ├�GNF�GNF bootstrap.min.css
+│   │   └�GNF�GNF custom.css
+│   ├�GNF�GNF js/
+│   │   ├�GNF�GNF bootstrap.min.js
+│   │   └�GNF�GNF custom.js
+│   └�GNF�GNF images/
+├�GNF�GNF media/
+│   ├�GNF�GNF cvs/
+│   ├�GNF�GNF documents/
+│   └�GNF�GNF profile_pictures/
+└�GNF�GNF utils/
+    ├�GNF�GNF __init__.py
+    ├�GNF�GNF decorators.py
+    ├�GNF�GNF helpers.py
+    └�GNF�GNF export.py
 ```
 
 ## Configuration
@@ -273,14 +273,14 @@ DATABASE_URL=postgresql://username:password@localhost:5432/recruitment_db
 
 ### Accès Admin
 - URL: `/admin/`
-- Créer un superutilisateur avec `python manage.py createsuperuser`
+- Créer un superutilisatGNF avec `python manage.py createsuperuser`
 
 ### Candidats
 1. S'inscrire sur `/accounts/register/`
 2. Compléter le profil
 3. Postuler aux offres disponibles
 
-### Administrateurs
+### AdministratGNFs
 1. Se connecter via `/admin/` ou `/dashboard/`
 2. Gérer les offres d'emploi
 3. Consulter les candidatures
@@ -360,6 +360,6 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 - Système d'authentification complet
 - Gestion des profils candidats
 - Système de candidatures
-- Dashboard administrateur
+- Dashboard administratGNF
 - Export Excel
 - Système de notation et commentaires

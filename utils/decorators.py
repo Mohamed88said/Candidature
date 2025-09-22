@@ -6,7 +6,7 @@ from django.http import JsonResponse
 
 
 def admin_required(view_func):
-    """Décorateur pour restreindre l'accès aux admins et HR"""
+    """DécoratGNF pour restreindre l'accès aux admins et HR"""
     @wraps(view_func)
     @login_required
     def _wrapped_view(request, *args, **kwargs):
@@ -18,7 +18,7 @@ def admin_required(view_func):
 
 
 def candidate_required(view_func):
-    """Décorateur pour restreindre l'accès aux candidats"""
+    """DécoratGNF pour restreindre l'accès aux candidats"""
     @wraps(view_func)
     @login_required
     def _wrapped_view(request, *args, **kwargs):
@@ -30,7 +30,7 @@ def candidate_required(view_func):
 
 
 def ajax_required(view_func):
-    """Décorateur pour les vues AJAX uniquement"""
+    """DécoratGNF pour les vues AJAX uniquement"""
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -40,7 +40,7 @@ def ajax_required(view_func):
 
 
 def profile_complete_required(view_func):
-    """Décorateur pour s'assurer que le profil candidat est complet"""
+    """DécoratGNF pour s'assurer que le profil candidat est complet"""
     @wraps(view_func)
     @candidate_required
     def _wrapped_view(request, *args, **kwargs):
@@ -57,7 +57,7 @@ def profile_complete_required(view_func):
 
 
 def ratelimit(max_requests=10, period=60):
-    """Décorateur simple de limitation de taux"""
+    """DécoratGNF simple de limitation de taux"""
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):

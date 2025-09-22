@@ -3,19 +3,21 @@ Django settings for recruitment_platform project.
 """
 
 from pathlib import Path
-from decouple import config
+from decouple import config, Csv
 import os
+import dj_database_url
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.onrender.com', cast=Csv())
 
 # Application definition
 DJANGO_APPS = [
@@ -33,6 +35,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'django_filters',
     'corsheaders',
+    'django_celery_beat',
 ]
 
 LOCAL_APPS = [
@@ -79,19 +82,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'recruitment_platform.wsgi.application'
 
-# Database
+# Database - Configuration pour Neon PostgreSQL
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=not DEBUG
+    )
 }
-
-# For PostgreSQL in production
-# import dj_database_url
-# DATABASES = {
-#     'default': dj_database_url.parse(config('DATABASE_URL'))
-# }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -122,6 +120,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -139,13 +138,13 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Email Configuration
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@recruitment-platform.com')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply_mohamedsaiddiallo88@gmail.com')
 
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -163,19 +162,26 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20
 }
 
-# File Upload Settings
-MAX_UPLOAD_SIZE = config('MAX_UPLOAD_SIZE', default=5242880, cast=int)  # 5MB
-ALLOWED_FILE_TYPES = config('ALLOWED_FILE_TYPES', default='pdf,doc,docx,txt').split(',')
-
 # Security Settings (Production)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SECURE_HSTS_SECONDS = 31536000
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000, cast=int)
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = 'DENY'
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+
+# CORS Settings
+CORS_ALLOWED_ORIGINS = [
+    "https://*.onrender.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+CORS_ALLOW_CREDENTIALS = True
 
 # Messages Framework
 from django.contrib.messages import constants as messages
@@ -187,7 +193,7 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-# Celery Configuration (for background tasks)
+# Celery Configuration
 CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
@@ -211,3 +217,28 @@ SHORT_DATETIME_FORMAT = 'd/m/Y H:i'
 
 # Formules de politesse françaises pour les emails
 EMAIL_SUBJECT_PREFIX = '[Plateforme Recrutement] '
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+# Test runner sans migrations pour les tests
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]

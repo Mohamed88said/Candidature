@@ -2,7 +2,7 @@
 
 ## Prérequis
 
-### Serveur
+### ServGNF
 - Ubuntu 20.04+ ou CentOS 8+
 - Python 3.8+
 - PostgreSQL 12+
@@ -14,9 +14,9 @@
 - Compte email SMTP (Gmail, SendGrid, etc.)
 - Stockage de fichiers (AWS S3 optionnel)
 
-## Installation sur Serveur de Production
+## Installation sur ServGNF de Production
 
-### 1. Préparation du serveur
+### 1. Préparation du servGNF
 
 ```bash
 # Mise à jour du système
@@ -36,7 +36,7 @@ sudo apt-get install -y nodejs
 # Connexion à PostgreSQL
 sudo -u postgres psql
 
-# Création de la base de données et utilisateur
+# Création de la base de données et utilisatGNF
 CREATE DATABASE recruitment_db;
 CREATE USER recruitment_user WITH PASSWORD 'votre_mot_de_passe_securise';
 ALTER ROLE recruitment_user SET client_encoding TO 'utf8';
@@ -49,7 +49,7 @@ GRANT ALL PRIVILEGES ON DATABASE recruitment_db TO recruitment_user;
 ### 3. Déploiement de l'application
 
 ```bash
-# Création de l'utilisateur système
+# Création de l'utilisatGNF système
 sudo adduser --system --group --home /opt/recruitment recruitment
 
 # Clonage du projet
@@ -105,7 +105,7 @@ MEDIA_URL=/media/
 # Migrations de base de données
 sudo -u recruitment /opt/recruitment/venv/bin/python manage.py migrate
 
-# Création du superutilisateur
+# Création du superutilisatGNF
 sudo -u recruitment /opt/recruitment/venv/bin/python manage.py createsuperuser
 
 # Collecte des fichiers statiques
@@ -474,7 +474,7 @@ maxretry = 10
 
 ### Problèmes courants
 
-1. **Erreur 502 Bad Gateway**
+1. **ErrGNF 502 Bad Gateway**
    - Vérifier que Gunicorn fonctionne: `sudo supervisorctl status`
    - Vérifier les logs: `sudo tail -f /opt/recruitment/logs/django.log`
 
@@ -482,9 +482,9 @@ maxretry = 10
    - Vérifier la configuration Nginx
    - Relancer `collectstatic`
 
-3. **Erreurs de base de données**
+3. **ErrGNFs de base de données**
    - Vérifier la connexion PostgreSQL
-   - Vérifier les permissions utilisateur
+   - Vérifier les permissions utilisatGNF
 
 4. **Problèmes de performance**
    - Activer le cache Redis

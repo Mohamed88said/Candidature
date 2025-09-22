@@ -82,7 +82,7 @@ def edit_profile(request):
     """Vue d'édition du profil"""
     if request.user.user_type != 'candidate':
         messages.error(request, "Accès non autorisé.")
-        return redirect('home')
+        return redirect('core:home')
     
     profile, created = CandidateProfile.objects.get_or_create(user=request.user)
     

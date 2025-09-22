@@ -1,4 +1,4 @@
-import logging
+﻿import logging
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.conf import settings
@@ -16,7 +16,7 @@ class Command(BaseCommand):
         self.stdout.write('🚀 Début de l\'envoi des alertes quotidiennes...')
         
         try:
-            # Récupérer toutes les alertes actives
+            # RÃ©cupÃ©rer toutes les alertes actives
             active_alerts = JobAlert.objects.filter(is_active=True)
             
             total_sent = 0
@@ -24,7 +24,7 @@ class Command(BaseCommand):
             
             for alert in active_alerts:
                 try:
-                    # Trouver les offres correspondant aux critères de l'alerte
+                    # Trouver les offres correspondant aux critÃ¨res de l'alerte
                     matching_jobs = self.get_matching_jobs(alert)
                     
                     if matching_jobs.exists():
@@ -52,13 +52,13 @@ class Command(BaseCommand):
             )
 
     def get_matching_jobs(self, alert):
-        """Retourne les offres correspondant aux critères de l'alerte"""
+        """Retourne les offres correspondant aux critÃ¨res de l'alerte"""
         queryset = Job.objects.filter(
             status='published',
             application_deadline__gte=timezone.now()
         )
         
-        # Filtres basés sur les critères de l'alerte
+        # Filtres basÃ©s sur les critÃ¨res de l'alerte
         if alert.keywords:
             keywords = [k.strip() for k in alert.keywords.split(',')]
             query = Q()
@@ -89,11 +89,11 @@ class Command(BaseCommand):
         if alert.remote_work:
             queryset = queryset.filter(remote_work=True)
         
-        # Exclure les offres déjà vues/vieilles de plus de 7 jours
+        # Exclure les offres dÃ©jÃ  vues/vieilles de plus de 7 jours
         seven_days_ago = timezone.now() - timezone.timedelta(days=7)
         queryset = queryset.filter(created_at__gte=seven_days_ago)
         
-        return queryset.order_by('-created_at')[:10]  # Limiter à 10 offres
+        return queryset.order_by('-created_at')[:10]  # Limiter Ã  10 offres
 
     def send_alert_email(self, alert, matching_jobs):
         """Envoie l'email d'alerte au candidat"""
@@ -141,3 +141,4 @@ class Command(BaseCommand):
             type=int,
             help='ID utilisateur spécifique pour tester'
         )
+

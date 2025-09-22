@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+﻿from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
@@ -24,7 +24,7 @@ def home(request):
         featured=True
     ).select_related('category')[:6]
     
-    # Offres récentes
+    # Offres rÃ©centes
     recent_jobs = Job.objects.filter(
         status='published'
     ).select_related('category').order_by('-created_at')[:8]
@@ -37,7 +37,7 @@ def home(request):
         'total_categories': JobCategory.objects.filter(is_active=True).count(),
     }
     
-    # Catégories populaires
+    # CatÃ©gories populaires
     popular_categories = JobCategory.objects.filter(
         is_active=True
     ).annotate(
@@ -59,7 +59,7 @@ def home(request):
 
 
 def about(request):
-    """Page à propos"""
+    """Page Ã  propos"""
     try:
         about_content = PageContent.objects.get(page_type='about', is_active=True)
     except PageContent.DoesNotExist:
@@ -70,7 +70,7 @@ def about(request):
     except SiteSettings.DoesNotExist:
         site_settings = None
     
-    # Récupérer les données dynamiques
+    # RÃ©cupÃ©rer les donnÃ©es dynamiques
     team_members = TeamMember.objects.filter(
         is_active=True, 
         show_in_team=True
@@ -80,7 +80,7 @@ def about(request):
     
     statistics = Statistic.objects.filter(is_active=True).order_by('order')
     
-    # Si pas de statistiques configurées, utiliser les valeurs par défaut
+    # Si pas de statistiques configurÃ©es, utiliser les valGNFs par dÃ©faut
     if not statistics.exists():
         stats = {
             'jobs_posted': Job.objects.count(),
@@ -114,7 +114,7 @@ def contact_view(request):
                 form.cleaned_data['subject']
             )
             
-            # Envoyer l'email à l'équipe (vous pouvez adapter cela)
+            # Envoyer l'email Ã  l'Ã©quipe (vous pouvez adapter cela)
             subject = f"Nouveau message de contact: {form.cleaned_data['subject']}"
             message = f"""
             Nom: {form.cleaned_data['name']}
@@ -143,7 +143,7 @@ def faq(request):
     """Page FAQ"""
     faqs = FAQ.objects.filter(is_active=True).order_by('category', 'order')
     
-    # Grouper par catégorie
+    # Grouper par catÃ©gorie
     faq_by_category = {}
     for faq in faqs:
         category = faq.get_category_display()
@@ -170,7 +170,7 @@ def terms(request):
 
 
 def privacy(request):
-    """Politique de confidentialité"""
+    """Politique de confidentialitÃ©"""
     try:
         privacy_content = PageContent.objects.get(page_type='privacy', is_active=True)
     except PageContent.DoesNotExist:
@@ -186,7 +186,7 @@ def privacy(request):
 
 @require_http_methods(["POST"])
 def newsletter_subscribe(request):
-    """Abonnement à la newsletter (AJAX)"""
+    """Abonnement Ã  la newsletter (AJAX)"""
     form = NewsletterForm(request.POST)
     if form.is_valid():
         email = form.cleaned_data['email']
@@ -221,7 +221,7 @@ def newsletter_subscribe(request):
 
 
 def newsletter_unsubscribe(request, email):
-    """Désabonnement de la newsletter"""
+    """DÃ©sabonnement de la newsletter"""
     try:
         newsletter = Newsletter.objects.get(email=email, is_active=True)
         newsletter.is_active = False
@@ -308,10 +308,10 @@ def blog(request):
 
 
 def blog_detail(request, slug):
-    """Détail d'un article de blog"""
+    """DÃ©tail d'un article de blog"""
     post = get_object_or_404(BlogPost, slug=slug, status='published')
     
-    # Incrémenter le nombre de vues
+    # IncrÃ©menter le nombre de vues
     post.views_count += 1
     post.save(update_fields=['views_count'])
     
@@ -320,7 +320,7 @@ def blog_detail(request, slug):
         status='published'
     ).exclude(id=post.id).order_by('-published_at')[:3]
     
-    # Articles récents pour la sidebar
+    # Articles rÃ©cents pour la sidebar
     recent_posts = BlogPost.objects.filter(status='published').order_by('-published_at')[:5]
     
     context = {
@@ -344,6 +344,10 @@ def blog_by_tag(request, tag):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
+    # RAFRAÃŽCHIR LES VUES DEPUIS LA BASE DE DONNÃ‰ES
+    for post in page_obj:
+        post.refresh_from_db()
+    
     context = {
         'page_obj': page_obj,
         'tag': tag,
@@ -364,10 +368,10 @@ def sitemap(request):
         {'name': 'Blog', 'url': 'core:blog'},
     ]
     
-    # Catégories d'emploi
+    # CatÃ©gories d'emploi
     categories = JobCategory.objects.filter(is_active=True)
     
-    # Articles de blog récents
+    # Articles de blog rÃ©cents
     recent_posts = BlogPost.objects.filter(status='published').order_by('-published_at')[:10]
     
     context = {
@@ -380,12 +384,12 @@ def sitemap(request):
 
 
 def handler404(request, exception):
-    """Page d'erreur 404 personnalisée"""
+    """Page d'errGNF 404 personnalisÃ©e"""
     return render(request, 'core/404.html', status=404)
 
 
 def handler500(request):
-    """Page d'erreur 500 personnalisée"""
+    """Page d'errGNF 500 personnalisÃ©e"""
     return render(request, 'core/500.html', status=500)
 
 
@@ -408,25 +412,25 @@ def compose_newsletter(request):
             template_name = form.cleaned_data['template_name']
             preview = form.cleaned_data['preview']
             
-            # Récupérer les destinataires depuis la session
+            # RÃ©cupÃ©rer les destinataires depuis la session
             recipient_ids = request.session.get('newsletter_recipients', [])
             if not recipient_ids:
-                # Si aucun destinataire spécifique, utiliser tous les abonnés actifs
+                # Si aucun destinataire spÃ©cifique, utiliser tous les abonnÃ©s actifs
                 recipients = Newsletter.objects.filter(is_active=True)
                 recipient_ids = list(recipients.values_list('id', flat=True))
             
             if preview:
-                # Mode preview : envoyer seulement à l'admin
+                # Mode preview : envoyer seulement Ã  l'admin
                 from django.conf import settings
                 recipient_emails = [settings.DEFAULT_FROM_EMAIL]
                 messages.info(request, "Email de test envoyé à l'administrateur.")
             else:
-                # Envoi réel
+                # Envoi rÃ©el
                 recipients = Newsletter.objects.filter(id__in=recipient_ids, is_active=True)
                 recipient_emails = list(recipients.values_list('email', flat=True))
                 messages.success(request, f"Newsletter envoyée à {len(recipient_emails)} destinataires.")
             
-            # Préparer le contexte avec les offres réelles
+            # PrÃ©parer le contexte avec les offres rÃ©elles
             context_list = []
             for email in recipient_emails:
                 context = {
@@ -438,7 +442,7 @@ def compose_newsletter(request):
                 }
                 context_list.append(context)
             
-            # Lancer la tâche asynchrone
+            # Lancer la tÃ¢che asynchrone
             send_newsletter_task.delay(subject, template_name, context_list, recipient_emails)
             
             # Nettoyer la session
@@ -456,7 +460,7 @@ def compose_newsletter(request):
 
 @staff_member_required
 def send_newsletter_email(request, pk):
-    """Envoyer un email à un seul abonné"""
+    """Envoyer un email Ã  un seul abonnÃ©"""
     from django.conf import settings
     from .tasks import send_newsletter_task
     
@@ -477,3 +481,4 @@ def send_newsletter_email(request, pk):
     
     messages.success(request, f"Email envoyé à {newsletter.email}")
     return redirect('admin:core_newsletter_changelist')
+

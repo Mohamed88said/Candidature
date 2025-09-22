@@ -1,16 +1,16 @@
-from django.db import models
+﻿from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 import uuid
 from django.utils.text import slugify
-from unidecode import unidecode  # Ajout pour gérer les caractères spéciaux
+from unidecode import unidecode  # Ajout pour gÃ©rer les caractÃ¨res spÃ©ciaux
 
 User = get_user_model()
 
 
 class JobCategory(models.Model):
-    """Catégorie d'emploi"""
+    """CatÃ©gorie d'emploi"""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
@@ -107,7 +107,7 @@ class Job(models.Model):
     company_culture = models.TextField(blank=True)
     growth_opportunities = models.TextField(blank=True)
     
-    # Équipe et environnement
+    # Ã‰quipe et environnement
     team_size = models.PositiveIntegerField(blank=True, null=True)
     reports_to = models.CharField(max_length=200, blank=True)
     manages_team = models.BooleanField(default=False)
@@ -174,22 +174,22 @@ class Job(models.Model):
         return reverse('job_detail', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
-        # Générer le slug seulement si nécessaire ou si le titre a changé
+        # GÃ©nÃ©rer le slug seulement si nÃ©cessaire ou si le titre a changÃ©
         if not self.slug or self._has_title_changed():
-            # Nettoyer le titre pour créer un slug valide
+            # Nettoyer le titre pour crÃ©er un slug valide
             base_slug = self._generate_base_slug()
             
-            # Générer un slug unique avec UUID
+            # GÃ©nÃ©rer un slug unique avec UUID
             unique_id = str(uuid.uuid4())[:8]
             self.slug = f"{base_slug}-{unique_id}"
             
-            # Vérifier l'unicité
+            # VÃ©rifier l'unicitÃ©
             self._ensure_unique_slug()
         
         super().save(*args, **kwargs)
 
     def _has_title_changed(self):
-        """Vérifie si le titre a changé depuis la dernière sauvegarde"""
+        """VÃ©rifie si le titre a changÃ© depuis la derniÃ¨re sauvegarde"""
         if self.pk:
             try:
                 original = Job.objects.get(pk=self.pk)
@@ -199,22 +199,22 @@ class Job(models.Model):
         return True
 
     def _generate_base_slug(self):
-        """Génère la partie de base du slug à partir du titre"""
+        """GÃ©nÃ¨re la partie de base du slug Ã  partir du titre"""
         try:
-            # Utiliser unidecode pour gérer les caractères spéciaux
+            # Utiliser unidecode pour gÃ©rer les caractÃ¨res spÃ©ciaux
             from unidecode import unidecode
             title_ascii = unidecode(self.title)
         except ImportError:
-            # Fallback si unidecode n'est pas installé
+            # Fallback si unidecode n'est pas installÃ©
             title_ascii = self.title
         
-        # Nettoyer et créer le slug de base
+        # Nettoyer et crÃ©er le slug de base
         base_slug = slugify(title_ascii)
         
         if not base_slug:
             base_slug = "offre-emploi"
         
-        # Limiter la longueur
+        # Limiter la longuGNF
         if len(base_slug) > 50:
             base_slug = base_slug[:50]
             # S'assurer qu'on ne coupe pas au milieu d'un mot
@@ -229,7 +229,7 @@ class Job(models.Model):
         counter = 1
         
         while Job.objects.filter(slug=self.slug).exclude(id=self.id).exists():
-            # Si le slug existe déjà, ajouter un compteur
+            # Si le slug existe dÃ©jÃ , ajouter un comptGNF
             self.slug = f"{original_slug}-{counter}"
             counter += 1
             if counter > 100:  # Sécurité pour éviter les boucles infinies
@@ -240,7 +240,7 @@ class Job(models.Model):
 
     @property
     def is_active(self):
-        """Vérifie si l'offre est encore active"""
+        """VÃ©rifie si l'offre est encore active"""
         if self.status != 'published':
             return False
         if self.application_deadline and self.application_deadline < timezone.now():
@@ -249,7 +249,7 @@ class Job(models.Model):
 
     @property
     def salary_range(self):
-        """Retourne la fourchette de salaire formatée"""
+        """Retourne la fourchette de salaire formatÃ©e"""
         if self.salary_min and self.salary_max:
             return f"{self.salary_min} - {self.salary_max} {self.salary_currency}"
         elif self.salary_min:
@@ -270,7 +270,7 @@ class Job(models.Model):
 
 
 class JobSkill(models.Model):
-    """Compétences requises pour un emploi"""
+    """CompÃ©tences requises pour un emploi"""
     SKILL_LEVELS = (
         ('required', 'Requis'),
         ('preferred', 'Souhaité'),
@@ -292,7 +292,7 @@ class JobSkill(models.Model):
 
 
 class SavedJob(models.Model):
-    """Emplois sauvegardés par les candidats"""
+    """Emplois sauvegardÃ©s par les candidats"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_jobs')
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='saved_by')
     saved_at = models.DateTimeField(auto_now_add=True)
@@ -333,3 +333,4 @@ class JobAlert(models.Model):
 
     def __str__(self):
         return f"Alerte: {self.title} - {self.user.email}"
+

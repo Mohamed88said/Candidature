@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
 {% block title %}Mes Candidatures{% endblock %}
@@ -156,8 +156,7 @@
                 <div class="col-md-4 text-md-end">
                     {% if application.expected_salary %}
                         <p class="text-primary fw-bold mb-2">
-                            {{ application.expected_salary }} €
-                        </p>
+                            {{ application.expected_salary }} GNF </p>
                     {% endif %}
                     
                     <div class="d-flex flex-column flex-md-column flex-sm-row gap-2">
@@ -252,3 +251,4 @@
 }
 </style>
 {% endblock %}
+

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}{% if job %}{{ job.title }} - {{ job.company }}{% else %}Offre non trouvée{% endif %}{% endblock %}
@@ -34,7 +34,7 @@
                                 {% endif %}
                             </p>
                         </div>
-                        <div class="text-end text-md-end text-start mt-3 mt-md-0">
+                        <div class=" text-md-end text-start mt-3 mt-md-0">
                             {% if job.featured %}
                                 <span class="badge bg-primary mb-2 d-block">Offre en vedette</span>
                             {% endif %}
@@ -420,3 +420,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

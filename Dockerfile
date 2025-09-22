@@ -1,5 +1,3 @@
-# Dockerfile pour la plateforme de recrutement Django
-
 FROM python:3.11-slim
 
 # Variables d'environnement
@@ -13,21 +11,11 @@ WORKDIR /app
 # Dépendances système
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        postgresql-client \
         build-essential \
         libpq-dev \
         libjpeg-dev \
         libpng-dev \
-        libfreetype6-dev \
-        liblcms2-dev \
-        libwebp-dev \
-        tcl8.6-dev \
-        tk8.6-dev \
-        python3-tk \
-        libharfbuzz-dev \
-        libfribidi-dev \
-        libxcb1-dev \
-    && rm -rf /var/lib/apt/lists/*
+        && rm -rf /var/lib/apt/lists/*
 
 # Copier les requirements
 COPY requirements.txt /app/
@@ -46,8 +34,4 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Script de démarrage
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
-
-# Commande par défaut
-CMD ["/app/docker-entrypoint.sh"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "recruitment_platform.wsgi:application"]

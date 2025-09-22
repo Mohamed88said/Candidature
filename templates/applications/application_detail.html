@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Candidature - {{ application.job.title }}{% endblock %}
@@ -67,8 +67,7 @@
                             <small class="text-muted d-block">Salaire souhaité</small>
                             <strong>
                                 {% if application.expected_salary %}
-                                    {{ application.expected_salary }} €
-                                {% else %}
+                                    {{ application.expected_salary }} GNF {% else %}
                                     Non renseigné
                                 {% endif %}
                             </strong>
@@ -413,3 +412,4 @@
 }
 </style>
 {% endblock %}
+

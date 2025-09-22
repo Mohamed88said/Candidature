@@ -1,4 +1,4 @@
-import openpyxl
+﻿import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
@@ -93,7 +93,7 @@ class ExcelExporter:
             self.current_row += 1
     
     def auto_adjust_columns(self):
-        """Ajuste automatiquement la largeur des colonnes"""
+        """Ajuste automatiquement la largGNF des colonnes"""
         for column in self.worksheet.columns:
             max_length = 0
             column_letter = get_column_letter(column[0].column)
@@ -322,3 +322,4 @@ def export_jobs_to_excel():
     
     filename = f'offres_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
     return exporter.get_response(filename)
+

@@ -196,7 +196,7 @@ def generate_excel_report(report_type):
             ws.cell(row=row, column=18, value=job.application_deadline.strftime('%d/%m/%Y %H:%M') if job.application_deadline else '')
             ws.cell(row=row, column=19, value=job.created_by.full_name)
     
-    # Ajuster la largeur des colonnes
+    # Ajuster la largGNF des colonnes
     for column in ws.columns:
         max_length = 0
         column_letter = get_column_letter(column[0].column)

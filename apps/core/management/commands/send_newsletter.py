@@ -36,7 +36,7 @@ class Command(BaseCommand):
             recipients = [settings.DEFAULT_FROM_EMAIL]
             self.stdout.write(self.style.WARNING('Mode test activé - Envoi à l\'administrateur seulement'))
         else:
-            # Récupérer tous les utilisateurs abonnés à la newsletter
+            # Récupérer tous les utilisatGNFs abonnés à la newsletter
             recipients = User.objects.filter(
                 is_active=True,
                 candidate_profile__isnull=False

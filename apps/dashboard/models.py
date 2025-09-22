@@ -59,7 +59,7 @@ class SystemNotification(models.Model):
 
 
 class UserNotificationRead(models.Model):
-    """Suivi des notifications lues par utilisateur"""
+    """Suivi des notifications lues par utilisatGNF"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     notification = models.ForeignKey(SystemNotification, on_delete=models.CASCADE)
     read_at = models.DateTimeField(auto_now_add=True)

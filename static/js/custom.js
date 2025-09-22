@@ -41,7 +41,7 @@ $(document).ready(function() {
                 }
             },
             error: function() {
-                showAlert('danger', 'Une erreur est survenue. Veuillez réessayer.');
+                showAlert('danger', 'Une errGNF est survenue. Veuillez réessayer.');
             },
             complete: function() {
                 submitBtn.html(originalBtnText).prop('disabled', false);
@@ -76,7 +76,7 @@ $(document).ready(function() {
                 }
             },
             error: function() {
-                showAlert('danger', 'Une erreur est survenue.');
+                showAlert('danger', 'Une errGNF est survenue.');
             }
         });
     });
@@ -107,7 +107,7 @@ $(document).ready(function() {
                 }
             },
             error: function() {
-                showAlert('danger', 'Une erreur est survenue.');
+                showAlert('danger', 'Une errGNF est survenue.');
             }
         });
     });
@@ -139,7 +139,7 @@ $(document).ready(function() {
                 }
             },
             error: function() {
-                showAlert('danger', 'Une erreur est survenue.');
+                showAlert('danger', 'Une errGNF est survenue.');
             }
         });
     });

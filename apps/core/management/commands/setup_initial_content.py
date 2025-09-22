@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand
+﻿from django.core.management.base import BaseCommand
 from apps.core.models import PageContent, SiteSettings
 
 
@@ -6,7 +6,7 @@ class Command(BaseCommand):
     help = 'Configure le contenu initial des pages'
 
     def handle(self, *args, **options):
-        # Créer le contenu de la page À propos
+        # CrÃ©er le contenu de la page ÃGNF propos
         about_content = """
         <h2>Notre Mission</h2>
         <p>Nous connectons les talents aux opportunités depuis plus de 10 ans, en révolutionnant le processus de recrutement grâce à la technologie.</p>
@@ -35,7 +35,7 @@ class Command(BaseCommand):
             }
         )
 
-        # Créer le contenu de la politique de confidentialité
+        # CrÃ©er le contenu de la politique de confidentialitÃ©
         privacy_content = """
         <h2>1. Responsable du traitement</h2>
         <p>Le responsable du traitement de vos données personnelles est RecrutementPro SAS.</p>
@@ -82,7 +82,7 @@ class Command(BaseCommand):
             }
         )
 
-        # Créer le contenu des conditions d'utilisation
+        # CrÃ©er le contenu des conditions d'utilisation
         terms_content = """
         <h2>1. Acceptation des conditions</h2>
         <p>En utilisant cette plateforme, vous acceptez ces conditions d'utilisation.</p>
@@ -128,3 +128,4 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS('Contenu initial des pages créé avec succès!')
         )
+

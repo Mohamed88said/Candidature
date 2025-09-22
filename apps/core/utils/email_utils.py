@@ -27,7 +27,7 @@ def send_template_email(subject, template_name, context, to_emails, from_email=N
         email.send()
         return True
     except Exception as e:
-        print(f"Erreur lors de l'envoi d'email: {e}")
+        print(f"ErrGNF lors de l'envoi d'email: {e}")
         return False
 
 def send_bulk_emails(subject, template_name, context_list, recipients_list):

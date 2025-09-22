@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
@@ -148,7 +148,7 @@ class SiteSettings(models.Model):
     # Paramètres d'email
     email_notifications_enabled = models.BooleanField(default=True, verbose_name=_('notifications email'))
     admin_notification_email = models.EmailField(blank=True, verbose_name=_('email admin'))
-    email_signature = models.TextField(default='L\'équipe Recruitment Expert\ncontact@recruitment-expert.com\n+33 1 23 45 67 89', 
+    email_signature = models.TextField(default='L\'équipe Recruitment Expert\nmohamedsaiddiallo88@gmail.com\n+33 6 28 53 09 45', 
                                      verbose_name=_('signature email'))
     
     # Maintenance
@@ -413,3 +413,4 @@ class Statistic(models.Model):
 
     def __str__(self):
         return f"{self.title}: {self.value}"
+

@@ -1,4 +1,4 @@
-from .models import SiteSettings, ThemeSettings
+﻿from .models import SiteSettings, ThemeSettings
 from django.utils.translation import gettext_lazy as _
 
 
@@ -38,3 +38,4 @@ def site_settings(request):
         'site_settings': settings,
         'active_theme': theme,
     }
+
