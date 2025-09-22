@@ -1,0 +1,1 @@
+web: gunicorn recruitment_platform.wsgi --bind 0.0.0.0:$PORT
