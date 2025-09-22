@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import CustomPasswordResetView  # AJOUTE CET IMPORT
 
 app_name = 'accounts'
 
@@ -54,15 +55,20 @@ urlpatterns = [
     path('award/add/', views.add_award, name='add_award'),
     path('award/<int:award_id>/delete/', views.delete_award, name='delete_award'),
     
-    # Réinitialisation de mot de passe
-    path('password_reset/', auth_views.PasswordResetView.as_view(
-        template_name='accounts/password_reset.html'
+    # Réinitialisation de mot de passe - VERSION CORRIGÉE POUR HTML
+    path('password_reset/', CustomPasswordResetView.as_view(
+        template_name='accounts/password_reset.html',
+        email_template_name='emails/password_reset.html',  # Template HTML
+        subject_template_name='emails/password_reset_subject.txt',
+        success_url='/accounts/password_reset/done/',
+        html_email_template_name='emails/password_reset.html',  # SPÉCIFIQUE HTML
     ), name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
         template_name='accounts/password_reset_done.html'
     ), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
-        template_name='accounts/password_reset_confirm.html'
+        template_name='accounts/password_reset_confirm.html',
+        success_url='/accounts/reset/done/'
     ), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
         template_name='accounts/password_reset_complete.html'

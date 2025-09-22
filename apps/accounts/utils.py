@@ -1,7 +1,10 @@
 from datetime import date, timedelta
 from django.db.models import Q
 from .models import CandidateProfile, Experience
-
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
 
 def calculate_candidate_experience(candidate, target_position=None):
     """Calcule l'expérience d'un candidat de manière intelligente"""
@@ -242,3 +245,42 @@ def get_matching_jobs(candidate, limit=10):
     matching_jobs.sort(key=lambda x: x['score'], reverse=True)
     
     return matching_jobs[:limit]
+
+# NOUVELLES FONCTIONS POUR LES EMAILS HTML
+def send_html_email(subject, template_name, context, to_emails):
+    """
+    Envoie un email HTML avec fallback en texte brut
+    """
+    try:
+        # Rendre le template HTML
+        html_content = render_to_string(template_name, context)
+        
+        # Créer la version texte brut
+        text_content = strip_tags(html_content)
+        
+        # Créer l'email
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,  # Version texte brut
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=to_emails,
+        )
+        
+        # Attacher la version HTML
+        email.attach_alternative(html_content, "text/html")
+        
+        # Envoyer
+        email.send(fail_silently=False)
+        return True
+        
+    except Exception as e:
+        print(f"Erreur envoi email HTML: {e}")
+        return False
+
+def get_email_context():
+    """Retourne le contexte commun pour tous les emails"""
+    return {
+        'support_email': getattr(settings, 'SUPPORT_EMAIL', 'support@recruitment-platform.com'),
+        'site_name': getattr(settings, 'SITE_NAME', 'Plateforme de Recrutement'),
+        'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000')
+    }

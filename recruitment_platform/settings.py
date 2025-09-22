@@ -12,7 +12,7 @@ import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -83,26 +83,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'recruitment_platform.wsgi.application'
 
 # Database - Configuration pour Neon PostgreSQL
-import os
-from urllib.parse import urlparse, parse_qsl
-from dotenv import load_dotenv
-
-load_dotenv()  # Charge le .env en local
-
-tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': tmpPostgres.path[1:],  # supprime le /
-        'USER': tmpPostgres.username,
-        'PASSWORD': tmpPostgres.password,
-        'HOST': tmpPostgres.hostname,
-        'PORT': tmpPostgres.port or 5432,
-        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default='sqlite:///db.sqlite3'),
+        conn_max_age=600,
+        ssl_require=not DEBUG
+    )
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -127,12 +114,22 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files (CSS, JavaScript, Images) - CORRECTION ICI
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# CORRECTION : Chemin correct pour les fichiers statiques
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / 'static',  # Ceci pointe vers le dossier static à la racine
 ]
+
+# Vérifier que le dossier static existe
+if not os.path.exists(BASE_DIR / 'static'):
+    os.makedirs(BASE_DIR / 'static')
+    os.makedirs(BASE_DIR / 'static/css')
+    os.makedirs(BASE_DIR / 'static/js')
+    os.makedirs(BASE_DIR / 'static/images')
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
@@ -151,13 +148,19 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Email Configuration
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply_mohamedsaiddiallo88@gmail.com')
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='mohamedsaiddiallo88@gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='gmqylnuvrqgmqmsl')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='mohamedsaiddiallo88@gmail.com')
+
+# Support Email et Site Name pour les templates
+SUPPORT_EMAIL = config('SUPPORT_EMAIL', default='mohamedsaiddiallo88@gmail.com')
+SITE_NAME = config('SITE_NAME', default='Plateforme de Recrutement')
+SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -213,9 +216,6 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
-
-# Site URL
-SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
 # Configuration de la langue française
 LOCALE_PATHS = [

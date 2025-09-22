@@ -17,6 +17,10 @@ from .forms import (
 from django.core.mail import send_mail
 from django.conf import settings
 from apps.core.tasks import send_welcome_email, send_password_reset_email
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from .utils import send_html_email, get_email_context 
+from django.contrib.auth.views import PasswordResetView
 
 
 def register(request):
@@ -574,3 +578,61 @@ def delete_social_profile(request, profile_id):
         'object': social_profile,
         'object_type': 'profil social'
     })
+# Ajoute ces imports en haut du fichier si pas déjà présents
+
+
+def get_email_context():
+    """Retourne le contexte commun pour tous les emails"""
+    return {
+        'support_email': getattr(settings, 'SUPPORT_EMAIL', 'support@recruitment-platform.com'),
+        'site_name': getattr(settings, 'SITE_NAME', 'Plateforme de Recrutement')
+    }
+
+def send_custom_password_reset_email(user, reset_url):
+    """Envoie un email de réinitialisation personnalisé"""
+    context = get_email_context()
+    context.update({
+        'user': user,
+        'user_name': user.get_full_name() or user.username,
+        'reset_url': reset_url,
+        'protocol': 'https' if not settings.DEBUG else 'http',
+        'domain': settings.SITE_URL.split('://')[-1] if hasattr(settings, 'SITE_URL') else 'localhost:8000'
+    })
+    
+    subject = "Réinitialisation de votre mot de passe"
+    html_message = render_to_string('emails/password_reset.html', context)
+    plain_message = strip_tags(html_message)
+    
+    try:
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Erreur envoi email: {e}")
+        return False
+    
+
+
+
+
+class CustomPasswordResetView(PasswordResetView):
+    """Vue personnalisée pour l'envoi d'emails HTML"""
+    
+    def form_valid(self, form):
+        # Préparer le contexte pour l'email
+        context = {
+            'email': form.cleaned_data["email"],
+            'domain': self.request.get_host(),
+            'site_name': getattr(settings, 'SITE_NAME', 'Plateforme de Recrutement'),
+            'protocol': 'https' if self.request.is_secure() else 'http',
+            'support_email': getattr(settings, 'SUPPORT_EMAIL', 'mohamedsaiddiallo88@gmail.com'),
+        }
+        
+        # Appeler la méthode parente
+        return super().form_valid(form)
