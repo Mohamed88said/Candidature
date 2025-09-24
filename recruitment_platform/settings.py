@@ -114,13 +114,12 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images) - CORRECTION ICI
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# CORRECTION : Chemin correct pour les fichiers statiques
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',  # Ceci pointe vers le dossier static à la racine
+    BASE_DIR / 'static',
 ]
 
 # Vérifier que le dossier static existe
@@ -209,13 +208,36 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-# Celery Configuration
-CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://localhost:6379/0')
+# =============================================================================
+# CELERY CONFIGURATION - SOLUTION GRATUITE ET FONCTIONNELLE
+# =============================================================================
+
+# Solution intelligente : Mode asynchrone si Redis disponible, sinon synchrone
+REDIS_URL = config('REDIS_URL', default='')
+
+if REDIS_URL and not REDIS_URL.startswith(('redis://localhost', 'redis://127.0.0.1')):
+    # MODE PRODUCTION - Redis externe disponible
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
+    CELERY_TASK_ALWAYS_EAGER = False  # Mode asynchrone
+    print("✅ Mode Celery: ASYNCHRONE avec Redis")
+else:
+    # MODE DÉVELOPPEMENT/GRATUIT - Pas de Redis
+    CELERY_TASK_ALWAYS_EAGER = True   # Mode synchrone
+    CELERY_TASK_EAGER_PROPAGATES = True
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
+    print("✅ Mode Celery: SYNCHRONE (gratuit)")
+
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+# =============================================================================
+# FIN CONFIGURATION CELERY
+# =============================================================================
 
 # Configuration de la langue française
 LOCALE_PATHS = [
