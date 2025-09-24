@@ -1,55 +1,30 @@
 import os
 from celery import Celery
-
-# Définir le module de paramètres Django par défaut pour le programme 'celery'.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'recruitment_platform.settings')
-
-app = Celery('recruitment_platform')
-
-# Utiliser une chaîne ici signifie que le worker n'a pas besoin de sérialiser
-# l'objet de configuration vers les processus enfants.
-app.config_from_object('django.conf:settings', namespace='CELERY')
-
-# Charger les modules de tâches de toutes les applications Django enregistrées.
-app.autodiscover_tasks()
-
-
-@app.task(bind=True)
-def debug_task(self):
-    print(f'Request: {self.request!r}')
-
-
-
-
-# Dans celery.py
 from celery.schedules import crontab
 
-app.conf.beat_schedule = {
-    'send-daily-alerts': {
-        'task': 'apps.core.tasks.task_send_daily_alerts',
-        'schedule': crontab(hour=8, minute=0),  # Tous les jours à 8h
-    },
-}
-
-
-
-
-
-
+# Définir le module de paramètres Django par défaut
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'recruitment_platform.settings')
 
 app = Celery('recruitment_platform')
+
+# Utiliser la configuration depuis les settings Django
 app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Charger automatiquement les tâches depuis toutes les applications enregistrées
 app.autodiscover_tasks()
 
-# Ajoutez cette configuration
+# Configuration des tâches planifiées (CORRIGÉ)
 app.conf.beat_schedule = {
     'send-daily-job-alerts': {
-        'task': 'apps.core.management.commands.send_daily_alerts',
-        'schedule': crontab(hour=8, minute=0),  # Tous les jours à 8h00
+        'task': 'apps.core.tasks.send_daily_alerts',  # Chemin corrigé
+        'schedule': crontab(hour=8, minute=0),
     },
     'send-weekly-newsletter': {
-        'task': 'apps.core.tasks.send_weekly_newsletter',
-        'schedule': crontab(day_of_week=1, hour=9, minute=0),  # Tous les lundis à 9h00
+        'task': 'apps.core.tasks.send_weekly_newsletter',  # Chemin corrigé
+        'schedule': crontab(day_of_week=1, hour=9, minute=0),
     },
 }
+
+@app.task(bind=True, ignore_result=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')

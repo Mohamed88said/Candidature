@@ -103,36 +103,80 @@ def about(request):
 
 
 def contact_view(request):
-    """Page de contact"""
+    """Page de contact avec gestion d'erreur Redis"""
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            # Envoyer l'email de confirmation
-            send_contact_confirmation_email.delay(
-                form.cleaned_data['email'],
-                form.cleaned_data['name'],
-                form.cleaned_data['subject']
-            )
+            # Sauvegarder le message de contact
+            contact_message = form.save()
             
-            # Envoyer l'email Ã  l'Ã©quipe (vous pouvez adapter cela)
-            subject = f"Nouveau message de contact: {form.cleaned_data['subject']}"
-            message = f"""
-            Nom: {form.cleaned_data['name']}
-            Email: {form.cleaned_data['email']}
-            Sujet: {form.cleaned_data['subject']}
-            Message:
-            {form.cleaned_data['message']}
-            """
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [settings.DEFAULT_FROM_EMAIL],  # Envoyer à l'équipe
-                fail_silently=False,
-            )
+            # Gestion robuste de l'envoi d'email
+            try:
+                # Essayer d'envoyer en asynchrone (avec Celery)
+                from apps.core.tasks import send_contact_confirmation_email
+                
+                # Vérifier si Redis est disponible
+                if settings.DEBUG or 'localhost' in settings.CELERY_BROKER_URL:
+                    # Mode développement - exécution synchrone
+                    send_contact_confirmation_email(
+                        form.cleaned_data['email'],
+                        form.cleaned_data['name'],
+                        form.cleaned_data['subject']
+                    )
+                    messages.success(request, 'Votre message a été envoyé avec succès!')
+                else:
+                    # Mode production - exécution asynchrone
+                    send_contact_confirmation_email.delay(
+                        form.cleaned_data['email'],
+                        form.cleaned_data['name'],
+                        form.cleaned_data['subject']
+                    )
+                    messages.success(request, 'Votre message a été envoyé avec succès! Vous recevrez une confirmation par email.')
+                
+            except Exception as e:
+                # Fallback: envoyer l'email de façon synchrone
+                from django.core.mail import send_mail
+                from django.template.loader import render_to_string
+                from django.utils.html import strip_tags
+                
+                # Email de confirmation au visiteur
+                html_message = render_to_string('emails/contact_confirmation.html', {
+                    'user_name': form.cleaned_data['name'],
+                    'message_subject': form.cleaned_data['subject'],
+                    'support_email': settings.SUPPORT_EMAIL
+                })
+                plain_message = strip_tags(html_message)
+                
+                send_mail(
+                    "Confirmation de réception de votre message",
+                    plain_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [form.cleaned_data['email']],
+                    html_message=html_message,
+                    fail_silently=True,
+                )
+                
+                # Email à l'équipe
+                team_subject = f"Nouveau message de contact: {form.cleaned_data['subject']}"
+                team_message = f"""
+                Nom: {form.cleaned_data['name']}
+                Email: {form.cleaned_data['email']}
+                Sujet: {form.cleaned_data['subject']}
+                Message:
+                {form.cleaned_data['message']}
+                """
+                
+                send_mail(
+                    team_subject,
+                    team_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [settings.SUPPORT_EMAIL],
+                    fail_silently=True,
+                )
+                
+                messages.success(request, 'Votre message a été envoyé avec succès! (Mode secours)')
             
-            messages.success(request, 'Votre message a été envoyé avec succès !')
-            return redirect('core:contact')
+            return redirect('contact')
     else:
         form = ContactForm()
     

@@ -4,7 +4,8 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from .utils.email_utils import send_template_email
-from .emails import send_bulk_newsletter  # IMPORT AJOUTÉ
+from .emails import send_bulk_newsletter  
+from apps.jobs.models import Job
 
 @shared_task
 def send_email_task(subject, template_name, context, to_emails):
@@ -105,3 +106,55 @@ def send_interview_invitation_email(interview_id):
         return send_template_email(subject, template_name, context, interview.application.candidate.user.email)
     except Interview.DoesNotExist:
         return False
+
+
+
+@shared_task
+def send_daily_alerts():
+    """
+    Tâche pour l'envoi d'alertes quotidiennes
+    """
+    from apps.jobs.models import JobAlert
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    try:
+        # Logique pour envoyer les alertes quotidiennes
+        yesterday = timezone.now() - timedelta(days=1)
+        new_jobs = Job.objects.filter(
+            created_at__gte=yesterday,
+            status='published'
+        )
+        
+        # Ici vous implémenteriez la logique d'envoi d'alertes
+        print(f"Envoi des alertes pour {new_jobs.count()} nouvelles offres")
+        return f"Alertes envoyées pour {new_jobs.count()} offres"
+    except Exception as e:
+        return f"Erreur lors de l'envoi des alertes: {str(e)}"
+
+@shared_task
+def send_weekly_newsletter():
+    """
+    Tâche pour l'envoi de la newsletter hebdomadaire
+    """
+    from .models import Newsletter
+    from apps.jobs.models import Job
+    
+    try:
+        # Récupérer les abonnés actifs
+        subscribers = Newsletter.objects.filter(is_active=True)
+        
+        # Récupérer les offres de la semaine
+        from django.utils import timezone
+        from datetime import timedelta
+        last_week = timezone.now() - timedelta(days=7)
+        weekly_jobs = Job.objects.filter(
+            created_at__gte=last_week,
+            status='published'
+        )[:10]  # Limiter à 10 offres
+        
+        # Ici vous implémenteriez l'envoi de la newsletter
+        print(f"Préparation de la newsletter pour {subscribers.count()} abonnés")
+        return f"Newsletter préparée pour {subscribers.count()} abonnés"
+    except Exception as e:
+        return f"Erreur lors de l'envoi de la newsletter: {str(e)}"

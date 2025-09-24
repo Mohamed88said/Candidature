@@ -687,7 +687,6 @@
 
 /* Touch and Gesture Improvements */
 .touch-scroll {
-    -webkit-overflow-scrolling: touch;
     overflow-x: auto;
 }
 
