@@ -176,7 +176,7 @@ def contact_view(request):
                 
                 messages.success(request, 'Votre message a été envoyé avec succès! (Mode secours)')
             
-            return redirect('contact')
+            return redirect('core:contact')
     else:
         form = ContactForm()
     
