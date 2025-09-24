@@ -82,7 +82,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'recruitment_platform.wsgi.application'
 
-# Database - Configuration pour Neon PostgreSQL
+# Database - Configuration optimisée pour Render.com
 DATABASES = {
     'default': dj_database_url.config(
         default=config('DATABASE_URL', default='sqlite:///db.sqlite3'),
@@ -90,6 +90,14 @@ DATABASES = {
         ssl_require=not DEBUG
     )
 }
+
+# Configuration optimisée pour PostgreSQL sur Render
+if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require',
+        'connect_timeout': 10,
+    }
+    DATABASES['default']['CONN_MAX_AGE'] = 300  # 5 minutes
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -122,18 +130,17 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# Vérifier que le dossier static existe
-if not os.path.exists(BASE_DIR / 'static'):
-    os.makedirs(BASE_DIR / 'static')
-    os.makedirs(BASE_DIR / 'static/css')
-    os.makedirs(BASE_DIR / 'static/js')
-    os.makedirs(BASE_DIR / 'static/images')
+# Créer les dossiers statics s'ils n'existent pas
+os.makedirs(BASE_DIR / 'static' / 'css', exist_ok=True)
+os.makedirs(BASE_DIR / 'static' / 'js', exist_ok=True)
+os.makedirs(BASE_DIR / 'static' / 'images', exist_ok=True)
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -151,7 +158,6 @@ EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='mohamedsaiddiallo88@gmail.com')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='gmqylnuvrqgmqmsl')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='mohamedsaiddiallo88@gmail.com')
@@ -209,25 +215,23 @@ MESSAGE_TAGS = {
 }
 
 # =============================================================================
-# CELERY CONFIGURATION - SOLUTION GRATUITE ET FONCTIONNELLE
+# CELERY CONFIGURATION - SOLUTION OPTIMISÉE
 # =============================================================================
 
-# Solution intelligente : Mode asynchrone si Redis disponible, sinon synchrone
+# Configuration Celery intelligente
 REDIS_URL = config('REDIS_URL', default='')
 
 if REDIS_URL and not REDIS_URL.startswith(('redis://localhost', 'redis://127.0.0.1')):
-    # MODE PRODUCTION - Redis externe disponible
+    # Mode production avec Redis externe
     CELERY_BROKER_URL = REDIS_URL
     CELERY_RESULT_BACKEND = REDIS_URL
-    CELERY_TASK_ALWAYS_EAGER = False  # Mode asynchrone
-    print("✅ Mode Celery: ASYNCHRONE avec Redis")
+    CELERY_TASK_ALWAYS_EAGER = False
 else:
-    # MODE DÉVELOPPEMENT/GRATUIT - Pas de Redis
-    CELERY_TASK_ALWAYS_EAGER = True   # Mode synchrone
+    # Mode développement/synchrone
+    CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
     CELERY_BROKER_URL = 'memory://'
     CELERY_RESULT_BACKEND = 'cache+memory://'
-    print("✅ Mode Celery: SYNCHRONE (gratuit)")
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -257,18 +261,32 @@ EMAIL_SUBJECT_PREFIX = '[Plateforme Recrutement] '
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+        'level': 'INFO' if DEBUG else 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
 
-# Test runner sans migrations pour les tests
+# Test configuration
 if 'test' in sys.argv:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -277,3 +295,12 @@ if 'test' in sys.argv:
     PASSWORD_HASHERS = [
         'django.contrib.auth.hashers.MD5PasswordHasher',
     ]
+
+# Debug information
+if DEBUG:
+    print("=" * 50)
+    print("DEBUG MODE ACTIVATED")
+    print(f"Database: {DATABASES['default']['ENGINE']}")
+    print(f"Redis URL: {REDIS_URL}")
+    print(f"Celery Mode: {'SYNCHRONE' if CELERY_TASK_ALWAYS_EAGER else 'ASYNCHRONE'}")
+    print("=" * 50)
