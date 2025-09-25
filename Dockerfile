@@ -13,8 +13,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         libpq-dev \
-        libjpeg-dev \
-        libpng-dev \
         && rm -rf /var/lib/apt/lists/*
 
 # Copier les requirements
@@ -31,7 +29,7 @@ RUN mkdir -p /app/staticfiles /app/media
 RUN python manage.py collectstatic --noinput
 
 # Exposer le port
-EXPOSE 8000
+EXPOSE 10000
 
-# Script de démarrage
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "recruitment_platform.wsgi:application"]
+# Script de démarrage optimisé
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "--bind", "0.0.0.0:10000", "recruitment_platform.wsgi:application"]
