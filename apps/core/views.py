@@ -14,6 +14,11 @@ from apps.accounts.models import CandidateProfile
 from django.core.mail import send_mail
 from django.conf import settings
 from apps.core.tasks import send_contact_confirmation_email
+import requests
+import threading
+import time
+from datetime import datetime
+from django.views import View
 
 
 def home(request):
@@ -526,3 +531,44 @@ def send_newsletter_email(request, pk):
     messages.success(request, f"Email envoyé à {newsletter.email}")
     return redirect('admin:core_newsletter_changelist')
 
+
+
+
+class HealthCheckView(View):
+    def get(self, request):
+        return JsonResponse({
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'framework': 'Django'
+        })
+
+class SelfPingView(View):
+    def get(self, request):
+        try:
+            # Remplace par ton URL Render
+            site_url = "https://ton-site-django.onrender.com"
+            response = requests.get(f"{site_url}/health/", timeout=5)
+            return JsonResponse({
+                'self_ping': 'success',
+                'status_code': response.status_code
+            })
+        except Exception as e:
+            return JsonResponse({'self_ping': 'failed', 'error': str(e)}, status=500)
+
+# Fonction pour garder le site actif
+def start_keep_alive():
+    def keep_alive_loop():
+        while True:
+            try:
+                requests.get('https://ton-site-django.onrender.com/health/', timeout=10)
+                print(f"🔄 Keep-alive ping à {datetime.now()}")
+            except Exception as e:
+                print(f"❌ Erreur keep-alive: {e}")
+            time.sleep(600)  # 10 minutes
+    
+    thread = threading.Thread(target=keep_alive_loop)
+    thread.daemon = True
+    thread.start()
+
+# Démarrer au chargement du module
+start_keep_alive()
