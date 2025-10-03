@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils import timezone
 from apps.accounts.models import CandidateProfile
 from apps.jobs.models import Job
+from cloudinary.models import CloudinaryField
 
 User = get_user_model()
 
@@ -38,8 +39,23 @@ class Application(models.Model):
     
     # Lettre de motivation et documents
     cover_letter = models.TextField()
-    resume_file = models.FileField(upload_to='applications/resumes/', blank=True, null=True)
-    additional_documents = models.FileField(upload_to='applications/documents/', blank=True, null=True)
+    
+    # Fichiers avec Cloudinary
+    resume_file = CloudinaryField(
+        'raw',
+        folder='recruitment/applications/resumes/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
+    
+    additional_documents = CloudinaryField(
+        'raw',
+        folder='recruitment/applications/documents/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
     
     # Informations supplémentaires
     expected_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
@@ -237,7 +253,14 @@ class ApplicationDocument(models.Model):
     application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='documents')
     document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES)
     title = models.CharField(max_length=200)
-    file = models.FileField(upload_to='applications/documents/')
+    
+    # Fichier avec Cloudinary
+    file = CloudinaryField(
+        'raw',
+        folder='recruitment/applications/additional_docs/',
+        resource_type='raw'
+    )
+    
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_documents')
     uploaded_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)

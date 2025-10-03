@@ -25,8 +25,12 @@ urlpatterns = [
     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
     path('blog/tag/<str:tag>/', views.blog_by_tag, name='blog_by_tag'),
 
-
-
+    # =========================================================================
+    # ENDPOINTS DE SANTÉ POUR ÉVITER L'HIBERNATION
+    # =========================================================================
     path('health/', views.HealthCheckView.as_view(), name='health_check'),
-    path('self-ping/', views.SelfPingView.as_view(), name='self_ping'),
+    path('ping/', views.PingView.as_view(), name='ping'),
+    path('status/', views.StatusView.as_view(), name='status'),
+    path('api/health/', views.DeepHealthView.as_view(), name='api_health'),
+    # =========================================================================
 ]

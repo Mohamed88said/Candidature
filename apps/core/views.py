@@ -5,6 +5,11 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+from django.views import View
+from datetime import datetime
+import requests
+import psutil
+import os
 
 from .models import ContactMessage, FAQ, SiteSettings, Newsletter, BlogPost, PageContent, TeamMember, Value, Statistic
 from .forms import ContactForm, NewsletterForm, SearchForm
@@ -14,12 +19,115 @@ from apps.accounts.models import CandidateProfile
 from django.core.mail import send_mail
 from django.conf import settings
 from apps.core.tasks import send_contact_confirmation_email
-import requests
-import threading
-import time
-from datetime import datetime
-from django.views import View
 
+# =============================================================================
+# VUES DE SANTÉ ET KEEP-ALIVE
+# =============================================================================
+
+class HealthCheckView(View):
+    """Vue complète de santé de l'application"""
+    def get(self, request):
+        # Vérifications système
+        system_status = {
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'framework': 'Django',
+            'debug_mode': settings.DEBUG,
+        }
+        
+        # Vérification de la base de données
+        try:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+            system_status['database'] = 'connected'
+        except Exception as e:
+            system_status['database'] = f'error: {str(e)}'
+            system_status['status'] = 'degraded'
+        
+        # Informations système
+        try:
+            system_status['memory_usage'] = f"{psutil.virtual_memory().percent}%"
+            system_status['cpu_usage'] = f"{psutil.cpu_percent()}%"
+        except:
+            system_status['memory_usage'] = 'unavailable'
+            system_status['cpu_usage'] = 'unavailable'
+        
+        return JsonResponse(system_status)
+
+class PingView(View):
+    """Endpoint ping simple pour les services externes"""
+    def get(self, request):
+        return JsonResponse({
+            'status': 'pong', 
+            'timestamp': datetime.now().isoformat()
+        })
+
+class StatusView(View):
+    """Endpoint de statut étendu"""
+    def get(self, request):
+        # Statistiques de l'application
+        stats = {
+            'total_jobs': Job.objects.filter(status='published').count(),
+            'total_users': CandidateProfile.objects.filter(is_active=True).count(),
+            'total_applications': getattr(__import__('apps.applications.models', fromlist=['Application']), 'Application', None).objects.count() if hasattr(__import__('apps.applications.models', fromlist=['Application']), 'Application') else 0,
+            'uptime': 'active'
+        }
+        
+        return JsonResponse({
+            'status': 'operational',
+            'timestamp': datetime.now().isoformat(),
+            'application_stats': stats
+        })
+
+class DeepHealthView(View):
+    """Vérification de santé approfondie"""
+    def get(self, request):
+        checks = {}
+        
+        # Vérification DB
+        try:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+            checks['database'] = {'status': 'ok', 'message': 'Database connection successful'}
+        except Exception as e:
+            checks['database'] = {'status': 'error', 'message': str(e)}
+        
+        # Vérification Redis/Celery
+        try:
+            if hasattr(settings, 'CELERY_BROKER_URL') and 'redis' in settings.CELERY_BROKER_URL:
+                checks['celery'] = {'status': 'ok', 'message': 'Celery broker configured'}
+            else:
+                checks['celery'] = {'status': 'warning', 'message': 'Celery using memory broker'}
+        except Exception as e:
+            checks['celery'] = {'status': 'error', 'message': str(e)}
+        
+        # Vérification stockage fichiers
+        try:
+            static_root = settings.STATIC_ROOT
+            checks['storage'] = {'status': 'ok', 'message': f'Static files: {static_root}'}
+        except Exception as e:
+            checks['storage'] = {'status': 'error', 'message': str(e)}
+        
+        # Déterminer le statut global
+        overall_status = 'healthy'
+        for check_name, check_result in checks.items():
+            if check_result['status'] == 'error':
+                overall_status = 'unhealthy'
+                break
+            elif check_result['status'] == 'warning':
+                overall_status = 'degraded'
+        
+        return JsonResponse({
+            'status': overall_status,
+            'timestamp': datetime.now().isoformat(),
+            'checks': checks
+        })
+
+# =============================================================================
+# VUES EXISTANTES (CONSERVEZ TOUT LE RESTE)
+# =============================================================================
 
 def home(request):
     """Page d'accueil"""
@@ -29,7 +137,7 @@ def home(request):
         featured=True
     ).select_related('category')[:6]
     
-    # Offres rÃ©centes
+    # Offres récentes
     recent_jobs = Job.objects.filter(
         status='published'
     ).select_related('category').order_by('-created_at')[:8]
@@ -42,7 +150,7 @@ def home(request):
         'total_categories': JobCategory.objects.filter(is_active=True).count(),
     }
     
-    # CatÃ©gories populaires
+    # Catégories populaires
     popular_categories = JobCategory.objects.filter(
         is_active=True
     ).annotate(
@@ -62,9 +170,8 @@ def home(request):
     
     return render(request, 'core/home.html', context)
 
-
 def about(request):
-    """Page Ã  propos"""
+    """Page à propos"""
     try:
         about_content = PageContent.objects.get(page_type='about', is_active=True)
     except PageContent.DoesNotExist:
@@ -75,7 +182,7 @@ def about(request):
     except SiteSettings.DoesNotExist:
         site_settings = None
     
-    # RÃ©cupÃ©rer les donnÃ©es dynamiques
+    # Récupérer les données dynamiques
     team_members = TeamMember.objects.filter(
         is_active=True, 
         show_in_team=True
@@ -85,7 +192,7 @@ def about(request):
     
     statistics = Statistic.objects.filter(is_active=True).order_by('order')
     
-    # Si pas de statistiques configurÃ©es, utiliser les valGNFs par dÃ©faut
+    # Si pas de statistiques configurées, utiliser les valeurs par défaut
     if not statistics.exists():
         stats = {
             'jobs_posted': Job.objects.count(),
@@ -105,7 +212,6 @@ def about(request):
     }
     
     return render(request, 'core/about.html', context)
-
 
 def contact_view(request):
     """Page de contact avec gestion d'erreur Redis"""
@@ -187,12 +293,11 @@ def contact_view(request):
     
     return render(request, 'core/contact.html', {'form': form})
 
-
 def faq(request):
     """Page FAQ"""
     faqs = FAQ.objects.filter(is_active=True).order_by('category', 'order')
     
-    # Grouper par catÃ©gorie
+    # Grouper par catégorie
     faq_by_category = {}
     for faq in faqs:
         category = faq.get_category_display()
@@ -201,7 +306,6 @@ def faq(request):
         faq_by_category[category].append(faq)
     
     return render(request, 'core/faq.html', {'faq_by_category': faq_by_category})
-
 
 def terms(request):
     """Conditions d'utilisation"""
@@ -217,9 +321,8 @@ def terms(request):
     
     return render(request, 'core/terms.html', context)
 
-
 def privacy(request):
-    """Politique de confidentialitÃ©"""
+    """Politique de confidentialité"""
     try:
         privacy_content = PageContent.objects.get(page_type='privacy', is_active=True)
     except PageContent.DoesNotExist:
@@ -232,10 +335,9 @@ def privacy(request):
     
     return render(request, 'core/privacy.html', context)
 
-
 @require_http_methods(["POST"])
 def newsletter_subscribe(request):
-    """Abonnement Ã  la newsletter (AJAX)"""
+    """Abonnement à la newsletter (AJAX)"""
     form = NewsletterForm(request.POST)
     if form.is_valid():
         email = form.cleaned_data['email']
@@ -268,9 +370,8 @@ def newsletter_subscribe(request):
             'message': 'Adresse email invalide.'
         })
 
-
 def newsletter_unsubscribe(request, email):
-    """DÃ©sabonnement de la newsletter"""
+    """Désabonnement de la newsletter"""
     try:
         newsletter = Newsletter.objects.get(email=email, is_active=True)
         newsletter.is_active = False
@@ -281,7 +382,6 @@ def newsletter_unsubscribe(request, email):
         messages.error(request, 'Adresse email non trouvée.')
     
     return redirect('core:home')
-
 
 def search(request):
     """Recherche globale"""
@@ -324,7 +424,6 @@ def search(request):
     
     return render(request, 'core/search.html', context)
 
-
 def blog(request):
     """Liste des articles de blog"""
     posts = BlogPost.objects.filter(status='published').order_by('-published_at')
@@ -355,12 +454,11 @@ def blog(request):
     
     return render(request, 'core/blog.html', context)
 
-
 def blog_detail(request, slug):
-    """DÃ©tail d'un article de blog"""
+    """Détail d'un article de blog"""
     post = get_object_or_404(BlogPost, slug=slug, status='published')
     
-    # IncrÃ©menter le nombre de vues
+    # Incrémenter le nombre de vues
     post.views_count += 1
     post.save(update_fields=['views_count'])
     
@@ -369,7 +467,7 @@ def blog_detail(request, slug):
         status='published'
     ).exclude(id=post.id).order_by('-published_at')[:3]
     
-    # Articles rÃ©cents pour la sidebar
+    # Articles récents pour la sidebar
     recent_posts = BlogPost.objects.filter(status='published').order_by('-published_at')[:5]
     
     context = {
@@ -379,7 +477,6 @@ def blog_detail(request, slug):
     }
     
     return render(request, 'core/blog_detail.html', context)
-
 
 def blog_by_tag(request, tag):
     """Articles par tag"""
@@ -393,7 +490,7 @@ def blog_by_tag(request, tag):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # RAFRAÃŽCHIR LES VUES DEPUIS LA BASE DE DONNÃ‰ES
+    # RAFRAÎCHIR LES VUES DEPUIS LA BASE DE DONNÉES
     for post in page_obj:
         post.refresh_from_db()
     
@@ -403,7 +500,6 @@ def blog_by_tag(request, tag):
     }
     
     return render(request, 'core/blog_by_tag.html', context)
-
 
 def sitemap(request):
     """Plan du site"""
@@ -417,10 +513,10 @@ def sitemap(request):
         {'name': 'Blog', 'url': 'core:blog'},
     ]
     
-    # CatÃ©gories d'emploi
+    # Catégories d'emploi
     categories = JobCategory.objects.filter(is_active=True)
     
-    # Articles de blog rÃ©cents
+    # Articles de blog récents
     recent_posts = BlogPost.objects.filter(status='published').order_by('-published_at')[:10]
     
     context = {
@@ -431,16 +527,13 @@ def sitemap(request):
     
     return render(request, 'core/sitemap.html', context)
 
-
 def handler404(request, exception):
-    """Page d'errGNF 404 personnalisÃ©e"""
+    """Page d'erreur 404 personnalisée"""
     return render(request, 'core/404.html', status=404)
 
-
 def handler500(request):
-    """Page d'errGNF 500 personnalisÃ©e"""
+    """Page d'erreur 500 personnalisée"""
     return render(request, 'core/500.html', status=500)
-
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -461,25 +554,25 @@ def compose_newsletter(request):
             template_name = form.cleaned_data['template_name']
             preview = form.cleaned_data['preview']
             
-            # RÃ©cupÃ©rer les destinataires depuis la session
+            # Récupérer les destinataires depuis la session
             recipient_ids = request.session.get('newsletter_recipients', [])
             if not recipient_ids:
-                # Si aucun destinataire spÃ©cifique, utiliser tous les abonnÃ©s actifs
+                # Si aucun destinataire spécifique, utiliser tous les abonnés actifs
                 recipients = Newsletter.objects.filter(is_active=True)
                 recipient_ids = list(recipients.values_list('id', flat=True))
             
             if preview:
-                # Mode preview : envoyer seulement Ã  l'admin
+                # Mode preview : envoyer seulement à l'admin
                 from django.conf import settings
                 recipient_emails = [settings.DEFAULT_FROM_EMAIL]
                 messages.info(request, "Email de test envoyé à l'administrateur.")
             else:
-                # Envoi rÃ©el
+                # Envoi réel
                 recipients = Newsletter.objects.filter(id__in=recipient_ids, is_active=True)
                 recipient_emails = list(recipients.values_list('email', flat=True))
                 messages.success(request, f"Newsletter envoyée à {len(recipient_emails)} destinataires.")
             
-            # PrÃ©parer le contexte avec les offres rÃ©elles
+            # Préparer le contexte avec les offres réelles
             context_list = []
             for email in recipient_emails:
                 context = {
@@ -491,7 +584,7 @@ def compose_newsletter(request):
                 }
                 context_list.append(context)
             
-            # Lancer la tÃ¢che asynchrone
+            # Lancer la tâche asynchrone
             send_newsletter_task.delay(subject, template_name, context_list, recipient_emails)
             
             # Nettoyer la session
@@ -509,7 +602,7 @@ def compose_newsletter(request):
 
 @staff_member_required
 def send_newsletter_email(request, pk):
-    """Envoyer un email Ã  un seul abonnÃ©"""
+    """Envoyer un email à un seul abonné"""
     from django.conf import settings
     from .tasks import send_newsletter_task
     
@@ -530,45 +623,3 @@ def send_newsletter_email(request, pk):
     
     messages.success(request, f"Email envoyé à {newsletter.email}")
     return redirect('admin:core_newsletter_changelist')
-
-
-
-
-class HealthCheckView(View):
-    def get(self, request):
-        return JsonResponse({
-            'status': 'healthy',
-            'timestamp': datetime.now().isoformat(),
-            'framework': 'Django'
-        })
-
-class SelfPingView(View):
-    def get(self, request):
-        try:
-            # Remplace par ton URL Render
-            site_url = "https://ton-site-django.onrender.com"
-            response = requests.get(f"{site_url}/health/", timeout=5)
-            return JsonResponse({
-                'self_ping': 'success',
-                'status_code': response.status_code
-            })
-        except Exception as e:
-            return JsonResponse({'self_ping': 'failed', 'error': str(e)}, status=500)
-
-# Fonction pour garder le site actif
-def start_keep_alive():
-    def keep_alive_loop():
-        while True:
-            try:
-                requests.get('https://ton-site-django.onrender.com/health/', timeout=10)
-                print(f"🔄 Keep-alive ping à {datetime.now()}")
-            except Exception as e:
-                print(f"❌ Erreur keep-alive: {e}")
-            time.sleep(600)  # 10 minutes
-    
-    thread = threading.Thread(target=keep_alive_loop)
-    thread.daemon = True
-    thread.start()
-
-# Démarrer au chargement du module
-start_keep_alive()

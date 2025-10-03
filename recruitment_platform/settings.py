@@ -19,6 +19,23 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.onrender.com', cast=Csv())
 
+# =============================================================================
+# CONFIGURATION KEEP-ALIVE ANTI-HIBERNATION
+# =============================================================================
+
+# URL de l'application pour le keep-alive interne
+RENDER_EXTERNAL_URL = config('RENDER_EXTERNAL_URL', default='https://recruitment-platform-vnjb.onrender.com')
+
+# Activation du keep-alive interne (désactiver en développement si besoin)
+ENABLE_KEEP_ALIVE = config('ENABLE_KEEP_ALIVE', default=not DEBUG, cast=bool)
+
+# Intervalle des pings en secondes (5 minutes = 300 secondes)
+KEEP_ALIVE_INTERVAL = config('KEEP_ALIVE_INTERVAL', default=240, cast=int)  # 4 minutes
+
+# =============================================================================
+# FIN CONFIGURATION KEEP-ALIVE
+# =============================================================================
+
 # Application definition
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -36,6 +53,8 @@ THIRD_PARTY_APPS = [
     'django_filters',
     'corsheaders',
     'django_celery_beat',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 LOCAL_APPS = [
@@ -137,7 +156,17 @@ os.makedirs(BASE_DIR / 'static' / 'images', exist_ok=True)
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files
+# Cloudinary Configuration for Media Files
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+}
+
+# Media files configuration with Cloudinary
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Media URL (Cloudinary)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 os.makedirs(MEDIA_ROOT, exist_ok=True)
@@ -158,12 +187,12 @@ EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='mohamedsaiddiallo88@gmail.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='gmqylnuvrqgmqmsl')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='mohamedsaiddiallo88@gmail.com')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='')
 
 # Support Email et Site Name pour les templates
-SUPPORT_EMAIL = config('SUPPORT_EMAIL', default='mohamedsaiddiallo88@gmail.com')
+SUPPORT_EMAIL = config('SUPPORT_EMAIL', default='')
 SITE_NAME = config('SITE_NAME', default='Plateforme de Recrutement')
 SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
@@ -296,6 +325,19 @@ if 'test' in sys.argv:
         'django.contrib.auth.hashers.MD5PasswordHasher',
     ]
 
+# =============================================================================
+# DÉMARRAGE AUTOMATIQUE DU KEEP-ALIVE
+# =============================================================================
+
+# Démarrer le keep-alive automatiquement
+if ENABLE_KEEP_ALIVE and not any('test' in arg for arg in sys.argv):
+    try:
+        from apps.core.keep_alive import start_keep_alive
+        start_keep_alive()
+        print("🔄 Système keep-alive activé")
+    except Exception as e:
+        print(f"⚠️ Impossible de démarrer le keep-alive: {e}")
+
 # Debug information
 if DEBUG:
     print("=" * 50)
@@ -303,4 +345,6 @@ if DEBUG:
     print(f"Database: {DATABASES['default']['ENGINE']}")
     print(f"Redis URL: {REDIS_URL}")
     print(f"Celery Mode: {'SYNCHRONE' if CELERY_TASK_ALWAYS_EAGER else 'ASYNCHRONE'}")
+    print(f"Cloudinary: {'ACTIVE' if CLOUDINARY_STORAGE['CLOUD_NAME'] else 'INACTIVE'}")
+    print(f"Keep-alive: {'ACTIVE' if ENABLE_KEEP_ALIVE else 'INACTIVE'}")
     print("=" * 50)

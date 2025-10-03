@@ -1,8 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import RegexValidator
-from PIL import Image
-
+from cloudinary.models import CloudinaryField
+from cloudinary_storage.storage import MediaCloudinaryStorage
+import uuid
+from django.utils import timezone
 
 class User(AbstractUser):
     """Modèle utilisateur personnalisé"""
@@ -52,7 +54,17 @@ class CandidateProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='candidate_profile')
     
     # Informations personnelles
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    profile_picture = CloudinaryField(
+        'image',
+        folder='recruitment/profiles/',
+        null=True,
+        blank=True,
+        transformation=[
+            {'width': 300, 'height': 300, 'crop': 'fill'},
+            {'quality': 'auto'},
+            {'format': 'webp'}
+        ]
+    )
     date_of_birth = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES, blank=True)
@@ -78,9 +90,21 @@ class CandidateProfile(models.Model):
     expected_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     availability_date = models.DateField(blank=True, null=True)
     
-    # Documents
-    cv_file = models.FileField(upload_to='cvs/', blank=True, null=True)
-    cover_letter = models.FileField(upload_to='cover_letters/', blank=True, null=True)
+    # Documents avec Cloudinary
+    cv_file = CloudinaryField(
+        'raw',
+        folder='recruitment/cvs/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
+    cover_letter = CloudinaryField(
+        'raw',
+        folder='recruitment/cover_letters/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
     
     # Préférences
     willing_to_relocate = models.BooleanField(default=False)
@@ -106,15 +130,8 @@ class CandidateProfile(models.Model):
         return f"Profil de {self.user.full_name}"
 
     def save(self, *args, **kwargs):
+        # Plus besoin de redimensionner l'image manuellement, Cloudinary s'en charge
         super().save(*args, **kwargs)
-        
-        # Redimensionner l'image de profil
-        if self.profile_picture:
-            img = Image.open(self.profile_picture.path)
-            if img.height > 300 or img.width > 300:
-                output_size = (300, 300)
-                img.thumbnail(output_size)
-                img.save(self.profile_picture.path)
 
     def calculate_profile_completion(self):
         """Calcule le pourcentage de completion du profil"""
@@ -218,6 +235,15 @@ class Education(models.Model):
     grade = models.CharField(max_length=50, blank=True)
     description = models.TextField(blank=True)
     
+    # Diplôme avec Cloudinary
+    diploma_file = CloudinaryField(
+        'raw',
+        folder='recruitment/diplomas/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
+    
     class Meta:
         verbose_name = 'Formation'
         verbose_name_plural = 'Formations'
@@ -266,6 +292,15 @@ class Experience(models.Model):
     technologies_used = models.TextField(blank=True, help_text='Technologies, outils, logiciels utilisés')
     team_size = models.PositiveIntegerField(blank=True, null=True, help_text='Taille de l\'équipe managée')
     budget_managed = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    
+    # Preuve d'expérience avec Cloudinary
+    proof_file = CloudinaryField(
+        'raw',
+        folder='recruitment/experience_proofs/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
     
     # Métadonnées
     created_at = models.DateTimeField(auto_now_add=True)
@@ -390,6 +425,15 @@ class Certification(models.Model):
     credential_id = models.CharField(max_length=100, blank=True)
     credential_url = models.URLField(blank=True)
     
+    # Certificat avec Cloudinary
+    certificate_file = CloudinaryField(
+        'raw',
+        folder='recruitment/certifications/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
+    
     class Meta:
         verbose_name = 'Certification'
         verbose_name_plural = 'Certifications'
@@ -457,6 +501,26 @@ class Project(models.Model):
     achievements = models.TextField(blank=True)
     impact = models.TextField(blank=True, help_text='Impact business ou technique')
     
+    # Fichiers projet avec Cloudinary
+    project_files = CloudinaryField(
+        'raw',
+        folder='recruitment/projects/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
+    screenshot = CloudinaryField(
+        'image',
+        folder='recruitment/project_screenshots/',
+        null=True,
+        blank=True,
+        transformation=[
+            {'width': 800, 'height': 600, 'crop': 'fill'},
+            {'quality': 'auto'},
+            {'format': 'webp'}
+        ]
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -519,6 +583,15 @@ class Award(models.Model):
     date_received = models.DateField()
     description = models.TextField(blank=True)
     certificate_url = models.URLField(blank=True)
+    
+    # Certificat de prix avec Cloudinary
+    award_certificate = CloudinaryField(
+        'raw',
+        folder='recruitment/awards/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
     
     class Meta:
         verbose_name = 'Prix/Reconnaissance'

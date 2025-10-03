@@ -4,13 +4,14 @@ from django.urls import reverse
 from django.utils import timezone
 import uuid
 from django.utils.text import slugify
-from unidecode import unidecode  # Ajout pour gÃ©rer les caractÃ¨res spÃ©ciaux
+from unidecode import unidecode
+from cloudinary.models import CloudinaryField
 
 User = get_user_model()
 
 
 class JobCategory(models.Model):
-    """CatÃ©gorie d'emploi"""
+    """Catégorie d'emploi"""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
@@ -84,7 +85,20 @@ class Job(models.Model):
     company_size = models.CharField(max_length=20, choices=COMPANY_SIZES, blank=True)
     company_description = models.TextField(blank=True)
     company_website = models.URLField(blank=True)
-    company_logo = models.ImageField(upload_to='company_logos/', blank=True, null=True)
+    
+    # Logo d'entreprise avec Cloudinary
+    company_logo = CloudinaryField(
+        'image',
+        folder='recruitment/company_logos/',
+        null=True,
+        blank=True,
+        transformation=[
+            {'width': 200, 'height': 200, 'crop': 'fill'},
+            {'quality': 'auto'},
+            {'format': 'webp'}
+        ]
+    )
+    
     category = models.ForeignKey(JobCategory, on_delete=models.CASCADE, related_name='jobs')
     job_type = models.CharField(max_length=20, choices=JOB_TYPES)
     experience_level = models.CharField(max_length=20, choices=EXPERIENCE_LEVELS)
@@ -107,7 +121,7 @@ class Job(models.Model):
     company_culture = models.TextField(blank=True)
     growth_opportunities = models.TextField(blank=True)
     
-    # Ã‰quipe et environnement
+    # Équipe et environnement
     team_size = models.PositiveIntegerField(blank=True, null=True)
     reports_to = models.CharField(max_length=200, blank=True)
     manages_team = models.BooleanField(default=False)
@@ -138,6 +152,15 @@ class Job(models.Model):
     interview_process = models.TextField(blank=True, help_text='Description du processus d\'entretien')
     number_of_positions = models.PositiveIntegerField(default=1)
     application_questions = models.JSONField(default=list, blank=True, help_text='Questions personnalisées')
+    
+    # Documents additionnels avec Cloudinary
+    job_description_file = CloudinaryField(
+        'raw',
+        folder='recruitment/job_descriptions/',
+        null=True,
+        blank=True,
+        resource_type='raw'
+    )
     
     # Dates
     application_deadline = models.DateTimeField(blank=True, null=True)
@@ -174,22 +197,22 @@ class Job(models.Model):
         return reverse('job_detail', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
-        # GÃ©nÃ©rer le slug seulement si nÃ©cessaire ou si le titre a changÃ©
+        # Générer le slug seulement si nécessaire ou si le titre a changé
         if not self.slug or self._has_title_changed():
-            # Nettoyer le titre pour crÃ©er un slug valide
+            # Nettoyer le titre pour créer un slug valide
             base_slug = self._generate_base_slug()
             
-            # GÃ©nÃ©rer un slug unique avec UUID
+            # Générer un slug unique avec UUID
             unique_id = str(uuid.uuid4())[:8]
             self.slug = f"{base_slug}-{unique_id}"
             
-            # VÃ©rifier l'unicitÃ©
+            # Vérifier l'unicité
             self._ensure_unique_slug()
         
         super().save(*args, **kwargs)
 
     def _has_title_changed(self):
-        """VÃ©rifie si le titre a changÃ© depuis la derniÃ¨re sauvegarde"""
+        """Vérifie si le titre a changé depuis la dernière sauvegarde"""
         if self.pk:
             try:
                 original = Job.objects.get(pk=self.pk)
@@ -199,22 +222,22 @@ class Job(models.Model):
         return True
 
     def _generate_base_slug(self):
-        """GÃ©nÃ¨re la partie de base du slug Ã  partir du titre"""
+        """Génère la partie de base du slug à partir du titre"""
         try:
-            # Utiliser unidecode pour gÃ©rer les caractÃ¨res spÃ©ciaux
+            # Utiliser unidecode pour gérer les caractères spéciaux
             from unidecode import unidecode
             title_ascii = unidecode(self.title)
         except ImportError:
-            # Fallback si unidecode n'est pas installÃ©
+            # Fallback si unidecode n'est pas installé
             title_ascii = self.title
         
-        # Nettoyer et crÃ©er le slug de base
+        # Nettoyer et créer le slug de base
         base_slug = slugify(title_ascii)
         
         if not base_slug:
             base_slug = "offre-emploi"
         
-        # Limiter la longuGNF
+        # Limiter la longueur
         if len(base_slug) > 50:
             base_slug = base_slug[:50]
             # S'assurer qu'on ne coupe pas au milieu d'un mot
@@ -229,7 +252,7 @@ class Job(models.Model):
         counter = 1
         
         while Job.objects.filter(slug=self.slug).exclude(id=self.id).exists():
-            # Si le slug existe dÃ©jÃ , ajouter un comptGNF
+            # Si le slug existe déjà, ajouter un compteur
             self.slug = f"{original_slug}-{counter}"
             counter += 1
             if counter > 100:  # Sécurité pour éviter les boucles infinies
@@ -240,7 +263,7 @@ class Job(models.Model):
 
     @property
     def is_active(self):
-        """VÃ©rifie si l'offre est encore active"""
+        """Vérifie si l'offre est encore active"""
         if self.status != 'published':
             return False
         if self.application_deadline and self.application_deadline < timezone.now():
@@ -249,7 +272,7 @@ class Job(models.Model):
 
     @property
     def salary_range(self):
-        """Retourne la fourchette de salaire formatÃ©e"""
+        """Retourne la fourchette de salaire formatée"""
         if self.salary_min and self.salary_max:
             return f"{self.salary_min} - {self.salary_max} {self.salary_currency}"
         elif self.salary_min:
@@ -270,7 +293,7 @@ class Job(models.Model):
 
 
 class JobSkill(models.Model):
-    """CompÃ©tences requises pour un emploi"""
+    """Compétences requises pour un emploi"""
     SKILL_LEVELS = (
         ('required', 'Requis'),
         ('preferred', 'Souhaité'),
@@ -292,7 +315,7 @@ class JobSkill(models.Model):
 
 
 class SavedJob(models.Model):
-    """Emplois sauvegardÃ©s par les candidats"""
+    """Emplois sauvegardés par les candidats"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_jobs')
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='saved_by')
     saved_at = models.DateTimeField(auto_now_add=True)
@@ -333,4 +356,3 @@ class JobAlert(models.Model):
 
     def __str__(self):
         return f"Alerte: {self.title} - {self.user.email}"
-
