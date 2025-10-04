@@ -1,82 +1,112 @@
 ﻿{% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}Mes Candidatures{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Header -->
+<div class="container-fluid py-4">
+    <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-md-8">
-            <h1 class="fw-bold mb-2">Mes Candidatures</h1>
-            <p class="text-muted">Suivez l'évolution de vos candidatures</p>
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary text-white rounded p-3 me-3">
+                    <i class="fas fa-file-alt fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h2 fw-bold text-primary mb-1">Mes Candidatures</h1>
+                    <p class="text-muted mb-0">Suivez l'évolution de vos candidatures en temps réel</p>
+                </div>
+            </div>
         </div>
         <div class="col-md-4 text-md-end">
-            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
+            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center">
                 <i class="fas fa-search me-2"></i>Chercher des offres
             </a>
         </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.total }}</h4>
-                    <small>Total</small>
+    <div class="row mb-5">
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-primary text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.total }}</h3>
+                    <small class="opacity-8">Total</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.pending }}</h4>
-                    <small>En attente</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-warning text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.pending }}</h3>
+                    <small class="opacity-8">En attente</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.reviewing }}</h4>
-                    <small>En examen</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-info text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-search fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.reviewing }}</h3>
+                    <small class="opacity-8">En examen</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.shortlisted }}</h4>
-                    <small>Présélectionné</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-success text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.shortlisted }}</h3>
+                    <small class="opacity-8">Présélectionné</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.rejected }}</h4>
-                    <small>Rejetées</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-danger text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-times fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.rejected }}</h3>
+                    <small class="opacity-8">Rejetées</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-dark text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.interviews|default:0 }}</h4>
-                    <small>Entretiens</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-dark text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-handshake fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.interviews|default:0 }}</h3>
+                    <small class="opacity-8">Entretiens</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card mb-4">
+    <!-- Filters Section -->
+    <div class="card shadow-lg border-0 mb-4">
+        <div class="card-header bg-transparent border-bottom-0 py-4">
+            <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                <i class="fas fa-filter text-primary me-2"></i>Filtres et Recherche
+            </h4>
+        </div>
         <div class="card-body">
             <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Filtrer par statut</label>
-                    <select name="status" class="form-select">
+                <div class="col-md-6 col-lg-4">
+                    <label class="form-label fw-semibold">Filtrer par statut</label>
+                    <select name="status" class="form-select form-select-lg">
                         <option value="">Tous les statuts</option>
                         {% for value, label in status_choices %}
                             <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
@@ -85,11 +115,11 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter me-2"></i>Filtrer
+                <div class="col-md-6 col-lg-8 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg d-flex align-items-center">
+                        <i class="fas fa-filter me-2"></i>Appliquer les filtres
                     </button>
-                    <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-secondary btn-lg d-flex align-items-center">
                         <i class="fas fa-times me-2"></i>Effacer
                     </a>
                 </div>
@@ -98,143 +128,249 @@
     </div>
 
     <!-- Applications List -->
-    {% for application in page_obj %}
-    <div class="card application-card mb-3 border-start border-4 
-         {% if application.status == 'pending' %}border-warning
-         {% elif application.status == 'reviewing' %}border-info
-         {% elif application.status == 'shortlisted' %}border-success
-         {% elif application.status == 'rejected' %}border-danger
-         {% else %}border-secondary{% endif %}">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h5 class="card-title mb-2">
-                        <a href="{% url 'jobs:job_detail' application.job.slug %}" class="text-decoration-none">
-                            {{ application.job.title }}
-                        </a>
-                    </h5>
-                    <p class="text-muted mb-2">
-                        <i class="fas fa-building me-2"></i>{{ application.job.company }}
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-map-marker-alt me-2"></i>{{ application.job.location }}
-                    </p>
-                    <p class="card-text mb-2 d-none d-md-block">
-                        <small class="text-muted">
-                            Candidature envoyée le {{ application.applied_at|date:"d F Y à H:i" }}
-                            <span class="mx-2">•</span>
-                            Il y a {{ application.days_since_applied }} jour{{ application.days_since_applied|pluralize }}
-                        </small>
-                    </p>
-                    <p class="card-text mb-2 d-md-none">
-                        <small class="text-muted">
-                            {{ application.applied_at|date:"d/m/Y" }} • {{ application.days_since_applied }}j
-                        </small>
-                    </p>
-                    
-                    <!-- Status Badge -->
-                    <span class="badge 
-                        {% if application.status == 'pending' %}bg-warning
-                        {% elif application.status == 'reviewing' %}bg-info
-                        {% elif application.status == 'shortlisted' %}bg-success
-                        {% elif application.status == 'interview_scheduled' %}bg-primary
-                        {% elif application.status == 'accepted' %}bg-success
-                        {% elif application.status == 'rejected' %}bg-danger
-                        {% else %}bg-secondary{% endif %}">
-                        {{ application.get_status_display }}
-                    </span>
-                    
-                    {% if application.priority != 'medium' %}
-                        <span class="badge 
-                            {% if application.priority == 'high' %}bg-danger
-                            {% elif application.priority == 'urgent' %}bg-danger
-                            {% else %}bg-secondary{% endif %} ms-2">
-                            {{ application.get_priority_display }}
-                        </span>
-                    {% endif %}
-                </div>
-                
-                <div class="col-md-4 text-md-end">
-                    {% if application.expected_salary %}
-                        <p class="text-primary fw-bold mb-2">
-                            {{ application.expected_salary }} GNF </p>
-                    {% endif %}
-                    
-                    <div class="d-flex flex-column flex-md-column flex-sm-row gap-2">
-                        <a href="{% url 'applications:application_detail' application.pk %}" 
-                           class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-eye me-2 d-none d-md-inline"></i>
-                            <i class="fas fa-eye d-md-none"></i>
-                            <span class="d-none d-md-inline">Voir détails</span>
-                        </a>
+    <div class="row">
+        {% for application in page_obj %}
+        <div class="col-12 mb-4">
+            <div class="card application-card shadow-sm border-0 hover-lift">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <!-- Job Title & Company -->
+                            <h3 class="h4 fw-bold mb-2">
+                                <a href="{% url 'jobs:job_detail' application.job.slug %}" 
+                                   class="text-decoration-none text-dark hover-text-primary">
+                                    {{ application.job.title }}
+                                </a>
+                            </h3>
+                            
+                            <!-- Company & Location -->
+                            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+                                <span class="d-flex align-items-center text-muted">
+                                    <i class="fas fa-building me-2"></i>{{ application.job.company }}
+                                </span>
+                                <span class="d-flex align-items-center text-muted">
+                                    <i class="fas fa-map-marker-alt me-2"></i>{{ application.job.location }}
+                                </span>
+                                {% if application.job.remote_work %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-wifi me-1"></i>Télétravail
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Application Details -->
+                            <div class="application-meta d-flex flex-wrap gap-4 mb-3">
+                                <div class="meta-item">
+                                    <small class="text-muted d-block">Date de candidature</small>
+                                    <strong>{{ application.applied_at|date:"d F Y" }}</strong>
+                                </div>
+                                <div class="meta-item">
+                                    <small class="text-muted d-block">Durée</small>
+                                    <strong>{{ application.days_since_applied }} jour{{ application.days_since_applied|pluralize }}</strong>
+                                </div>
+                                {% if application.expected_salary %}
+                                <div class="meta-item">
+                                    <small class="text-muted d-block">Salaire souhaité</small>
+                                    <strong class="text-success">{{ application.expected_salary }} GNF</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Status & Priority Badges -->
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <span class="badge status-badge fs-6 px-3 py-2 
+                                    {% if application.status == 'pending' %}bg-warning
+                                    {% elif application.status == 'reviewing' %}bg-info
+                                    {% elif application.status == 'shortlisted' %}bg-success
+                                    {% elif application.status == 'interview_scheduled' %}bg-primary
+                                    {% elif application.status == 'accepted' %}bg-success
+                                    {% elif application.status == 'rejected' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    <i class="fas 
+                                        {% if application.status == 'pending' %}fa-clock
+                                        {% elif application.status == 'reviewing' %}fa-search
+                                        {% elif application.status == 'shortlisted' %}fa-star
+                                        {% elif application.status == 'interview_scheduled' %}fa-calendar
+                                        {% elif application.status == 'accepted' %}fa-check
+                                        {% elif application.status == 'rejected' %}fa-times
+                                        {% else %}fa-question{% endif %} me-2"></i>
+                                    {{ application.get_status_display }}
+                                </span>
+                                
+                                {% if application.priority != 'medium' %}
+                                    <span class="badge priority-badge fs-6 px-3 py-2
+                                        {% if application.priority == 'high' %}bg-danger
+                                        {% elif application.priority == 'urgent' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        <i class="fas 
+                                            {% if application.priority == 'high' %}fa-exclamation-triangle
+                                            {% elif application.priority == 'urgent' %}fa-fire
+                                            {% else %}fa-arrow-down{% endif %} me-2"></i>
+                                        {{ application.get_priority_display }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
                         
-                        {% if application.status not in 'accepted,rejected' %}
-                            <a href="{% url 'applications:withdraw_application' application.pk %}" 
-                               class="btn btn-outline-danger btn-sm"
-                               onclick="return confirm('Êtes-vous sûr de vouloir retirer cette candidature ?')">
-                                <i class="fas fa-times me-2 d-none d-md-inline"></i>
-                                <i class="fas fa-times d-md-none"></i>
-                                <span class="d-none d-md-inline">Retirer</span>
-                            </a>
-                        {% endif %}
+                        <!-- Actions -->
+                        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                            <div class="d-flex flex-column gap-3">
+                                <!-- Quick Actions -->
+                                <div class="d-flex flex-column flex-sm-row flex-lg-column gap-2">
+                                    <a href="{% url 'applications:application_detail' application.pk %}" 
+                                       class="btn btn-primary d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-eye me-2"></i>
+                                        <span>Voir détails</span>
+                                    </a>
+                                    
+                                    {% if application.status not in 'accepted,rejected' %}
+                                        <a href="{% url 'applications:withdraw_application' application.pk %}" 
+                                           class="btn btn-outline-danger d-flex align-items-center justify-content-center"
+                                           onclick="return confirm('Êtes-vous sûr de vouloir retirer cette candidature ? Cette action est irréversible.')">
+                                            <i class="fas fa-times me-2"></i>
+                                            <span>Retirer</span>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Status Progress -->
+                                <div class="progress-container">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Progression</small>
+                                        <small class="text-muted">
+                                            {% if application.status == 'pending' %}0%
+                                            {% elif application.status == 'reviewing' %}25%
+                                            {% elif application.status == 'shortlisted' %}50%
+                                            {% elif application.status == 'interview_scheduled' %}75%
+                                            {% elif application.status == 'accepted' %}100%
+                                            {% elif application.status == 'rejected' %}100%
+                                            {% else %}0%{% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar 
+                                            {% if application.status == 'pending' %}bg-warning
+                                            {% elif application.status == 'reviewing' %}bg-info
+                                            {% elif application.status == 'shortlisted' %}bg-success
+                                            {% elif application.status == 'interview_scheduled' %}bg-primary
+                                            {% elif application.status == 'accepted' %}bg-success
+                                            {% elif application.status == 'rejected' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}" 
+                                            style="width: 
+                                                {% if application.status == 'pending' %}0%
+                                                {% elif application.status == 'reviewing' %}25%
+                                                {% elif application.status == 'shortlisted' %}50%
+                                                {% elif application.status == 'interview_scheduled' %}75%
+                                                {% elif application.status == 'accepted' %}100%
+                                                {% elif application.status == 'rejected' %}100%
+                                                {% else %}0%{% endif %}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        {% empty %}
+        <!-- Empty State -->
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center py-5">
+                    <div class="empty-state-icon mb-4">
+                        <i class="fas fa-file-alt fa-4x text-muted"></i>
+                    </div>
+                    <h3 class="h4 text-muted mb-3">Aucune candidature trouvée</h3>
+                    <p class="text-muted mb-4">Vous n'avez pas encore postulé à des offres d'emploi ou vos filtres ne correspondent à aucune candidature.</p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-lg d-flex align-items-center">
+                            <i class="fas fa-search me-2"></i>Parcourir les offres
+                        </a>
+                        <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-secondary btn-lg d-flex align-items-center">
+                            <i class="fas fa-times me-2"></i>Effacer les filtres
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-    <div class="text-center py-5">
-        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-        <h4 class="text-muted">Aucune candidature</h4>
-        <p class="text-muted">Vous n'avez pas encore postulé à des offres d'emploi</p>
-        <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
-            <i class="fas fa-search me-2"></i>Parcourir les offres
-        </a>
-    </div>
-    {% endfor %}
 
     <!-- Pagination -->
     {% if page_obj.has_other_pages %}
-    <nav aria-label="Navigation des pages">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1{% if current_status %}&status={{ current_status }}{% endif %}">
-                        <i class="fas fa-angle-double-left"></i>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
-                        <i class="fas fa-angle-left"></i>
-                    </a>
-                </li>
-            {% endif %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <nav aria-label="Navigation des pages" class="d-flex justify-content-center">
+                <ul class="pagination shadow-sm">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link d-flex align-items-center" 
+                               href="?page=1{% if current_status %}&status={{ current_status }}{% endif %}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link d-flex align-items-center" 
+                               href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link d-flex align-items-center">
+                                <i class="fas fa-angle-double-left"></i>
+                            </span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link d-flex align-items-center">
+                                <i class="fas fa-angle-left"></i>
+                            </span>
+                        </li>
+                    {% endif %}
 
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
-                    </li>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if current_status %}&status={{ current_status }}{% endif %}">{{ num }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" 
+                                   href="?page={{ num }}{% if current_status %}&status={{ current_status }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
 
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
-                        <i class="fas fa-angle-right"></i>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_status %}&status={{ current_status }}{% endif %}">
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
-                </li>
-            {% endif %}
-        </ul>
-    </nav>
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link d-flex align-items-center" 
+                               href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link d-flex align-items-center" 
+                               href="?page={{ page_obj.paginator.num_pages }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link d-flex align-items-center">
+                                <i class="fas fa-angle-right"></i>
+                            </span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link d-flex align-items-center">
+                                <i class="fas fa-angle-double-right"></i>
+                            </span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
     {% endif %}
 </div>
 {% endblock %}
@@ -242,13 +378,164 @@
 {% block extra_css %}
 <style>
 .application-card {
+    border-left: 4px solid;
+    border-left-color: 
+        {% if application.status == 'pending' %}#ffc107
+        {% elif application.status == 'reviewing' %}#17a2b8
+        {% elif application.status == 'shortlisted' %}#28a745
+        {% elif application.status == 'interview_scheduled' %}#007bff
+        {% elif application.status == 'accepted' %}#28a745
+        {% elif application.status == 'rejected' %}#dc3545
+        {% else %}#6c757d{% endif %};
     transition: all 0.3s ease;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
 }
 
 .application-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.stat-card {
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    opacity: 0.9;
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.hover-text-primary:hover {
+    color: #007bff !important;
+}
+
+.status-badge, .priority-badge {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.progress-container {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.empty-state-icon {
+    opacity: 0.7;
+}
+
+.pagination .page-link {
+    border: none;
+    margin: 0 2px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.application-meta .meta-item {
+    min-width: 120px;
+}
+
+@media (max-width: 768px) {
+    .application-meta {
+        flex-direction: column;
+        gap: 1rem !important;
+    }
+    
+    .application-meta .meta-item {
+        min-width: auto;
+    }
+    
+    .stat-card .display-6 {
+        font-size: 1.75rem;
+    }
 }
 </style>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate stats cards
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+
+    // Animate application cards
+    const appCards = document.querySelectorAll('.application-card');
+    appCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateX(0)';
+        }, index * 100);
+    });
+
+    // Add loading states to buttons
+    document.querySelectorAll('a[href*="withdraw"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!confirm('Êtes-vous sûr de vouloir retirer cette candidature ? Cette action est irréversible.')) {
+                e.preventDefault();
+                return;
+            }
+            
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Traitement...';
+            this.classList.add('disabled');
+            
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.classList.remove('disabled');
+            }, 3000);
+        });
+    });
+
+    // Auto-update progress bars based on status
+    function updateProgressBars() {
+        document.querySelectorAll('.application-card').forEach(card => {
+            const status = card.querySelector('.status-badge').textContent.trim();
+            const progressBar = card.querySelector('.progress-bar');
+            
+            if (progressBar) {
+                // Animate progress bar
+                const currentWidth = progressBar.style.width;
+                progressBar.style.width = '0%';
+                
+                setTimeout(() => {
+                    progressBar.style.transition = 'width 1s ease-in-out';
+                    progressBar.style.width = currentWidth;
+                }, 500);
+            }
+        });
+    }
+
+    updateProgressBars();
+});
+</script>
+{% endblock %}

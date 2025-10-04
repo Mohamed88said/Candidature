@@ -1,86 +1,252 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags static %}
 
 {% block title %}Postuler - {{ job.title }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <!-- Job Summary -->
-            <div class="card mb-4 border-primary">
-                <div class="card-body">
-                    <h4 class="fw-bold text-primary mb-2">{{ job.title }}</h4>
-                    <p class="text-muted mb-2">
-                        <i class="fas fa-building me-2"></i>{{ job.company }}
-                    </p>
-                    <p class="text-muted mb-0">
-                        <i class="fas fa-map-marker-alt me-2"></i>{{ job.location }}
-                        {% if job.remote_work %}
-                            <span class="badge bg-success ms-2">Télétravail</span>
-                        {% endif %}
-                    </p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Job Summary Card -->
+            <div class="card shadow-lg border-primary mb-4">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h2 fw-bold text-primary mb-2">{{ job.title }}</h1>
+                            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+                                <span class="d-flex align-items-center text-muted">
+                                    <i class="fas fa-building me-2"></i>{{ job.company }}
+                                </span>
+                                <span class="d-flex align-items-center text-muted">
+                                    <i class="fas fa-map-marker-alt me-2"></i>{{ job.location }}
+                                </span>
+                                {% if job.remote_work %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-wifi me-1"></i>Télétravail
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="job-meta d-flex flex-wrap gap-4">
+                                <div class="meta-item">
+                                    <small class="text-muted d-block">Type</small>
+                                    <strong>{{ job.get_job_type_display }}</strong>
+                                </div>
+                                <div class="meta-item">
+                                    <small class="text-muted d-block">Salaire</small>
+                                    <strong class="text-success">{{ job.salary_range }}</strong>
+                                </div>
+                                <div class="meta-item">
+                                    <small class="text-muted d-block">Expérience</small>
+                                    <strong>{{ job.get_experience_level_display }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="application-count bg-light rounded p-3 text-center">
+                                <div class="count-number h3 fw-bold text-primary mb-1">{{ job.application_count }}</div>
+                                <div class="count-label text-muted small">Candidatures</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Application Form -->
+            <!-- Application Form Card -->
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-paper-plane me-2"></i>Postuler à cette offre
-                    </h3>
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="application-icon me-3">
+                            <i class="fas fa-paper-plane fa-2x"></i>
+                        </div>
+                        <div>
+                            <h2 class="h3 fw-bold mb-1">Postuler à cette offre</h2>
+                            <p class="mb-0 opacity-8">Remplissez le formulaire ci-dessous pour soumettre votre candidature</p>
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="card-body p-4">
-                    <!-- Profile Completion Warning -->
+                    <!-- Profile Completion Alert -->
                     {% if candidate_profile.profile_completion < 80 %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Profil incomplet ({{ candidate_profile.profile_completion }}%)</strong>
-                        <p class="mb-2">Un profil complet augmente vos chances d'être sélectionné.</p>
-                        <a href="{% url 'accounts:edit_profile' %}" class="btn btn-sm btn-warning">
-                            Compléter mon profil
-                        </a>
+                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center" role="alert">
+                        <div class="alert-icon me-3">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="alert-heading mb-2">Profil incomplet ({{ candidate_profile.profile_completion }}%)</h5>
+                            <p class="mb-2">Un profil complet augmente considérablement vos chances d'être sélectionné par les recruteurs.</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{% url 'accounts:edit_profile' %}" class="btn btn-warning btn-sm d-flex align-items-center">
+                                    <i class="fas fa-user-edit me-2"></i>Compléter mon profil
+                                </a>
+                                <button type="button" class="btn btn-outline-warning btn-sm d-flex align-items-center" data-bs-dismiss="alert">
+                                    <i class="fas fa-times me-2"></i>Ignorer
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     {% endif %}
 
-                    <form method="post" enctype="multipart/form-data" data-autosave="application-{{ job.id }}">
+                    <form method="post" enctype="multipart/form-data" data-autosave="application-{{ job.id }}" id="applicationForm">
                         {% csrf_token %}
-                        {{ form|crispy }}
                         
-                        <!-- Profile Summary -->
-                        <div class="card bg-light mt-4">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-user me-2"></i>Résumé de votre profil
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p class="mb-1"><strong>Nom:</strong> {{ candidate_profile.user.full_name }}</p>
-                                        <p class="mb-1"><strong>Email:</strong> {{ candidate_profile.user.email }}</p>
-                                        <p class="mb-1"><strong>Téléphone:</strong> {{ candidate_profile.mobile_phone|default:"Non renseigné" }}</p>
+                        <!-- Cover Letter Section -->
+                        <div class="form-section mb-5">
+                            <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                <i class="fas fa-file-alt me-2"></i>Lettre de motivation
+                            </h4>
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    {{ form.cover_letter|as_crispy_field }}
+                                    <div class="form-text">
+                                        <small class="text-muted">
+                                            <i class="fas fa-lightbulb me-1 text-warning"></i>
+                                            Conseils : Personnalisez votre lettre pour cette offre spécifique, 
+                                            mettez en avant vos compétences pertinentes et expliquez pourquoi 
+                                            vous êtes le candidat idéal.
+                                        </small>
                                     </div>
-                                    <div class="col-md-6">
-                                        <p class="mb-1"><strong>Poste actuel:</strong> {{ candidate_profile.current_position|default:"Non renseigné" }}</p>
-                                        <p class="mb-1"><strong>Expérience:</strong> {{ candidate_profile.years_of_experience }} ans</p>
-                                        <p class="mb-1"><strong>CV:</strong> 
-                                            {% if candidate_profile.cv_file %}
-                                                <span class="text-success">✓ Disponible</span>
-                                            {% else %}
-                                                <span class="text-danger">✗ Manquant</span>
-                                            {% endif %}
-                                        </p>
+                                    <div class="character-counter mt-2 text-end">
+                                        <small class="text-muted">
+                                            <span id="charCount">0</span> / 5000 caractères
+                                        </small>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'jobs:job_detail' job.slug %}" class="btn btn-outline-secondary">
+                        <!-- Documents Section -->
+                        <div class="form-section mb-5">
+                            <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                <i class="fas fa-folder me-2"></i>Documents
+                            </h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 bg-light">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                                <i class="fas fa-file-pdf me-2 text-danger"></i>CV
+                                            </h6>
+                                            {{ form.resume_file|as_crispy_field }}
+                                            <div class="form-text">
+                                                <small class="text-muted">
+                                                    Formats acceptés : PDF, DOC, DOCX (max. 5MB)
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 bg-light">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                                <i class="fas fa-file-alt me-2 text-primary"></i>Documents supplémentaires
+                                            </h6>
+                                            {{ form.additional_documents|as_crispy_field }}
+                                            <div class="form-text">
+                                                <small class="text-muted">
+                                                    Portfolio, lettres de recommandation, certifications, etc.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="form-section mb-5">
+                            <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                <i class="fas fa-info-circle me-2"></i>Informations supplémentaires
+                            </h4>
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            {{ form.expected_salary|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ form.availability_date|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                {{ form.willing_to_relocate|as_crispy_field }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Summary -->
+                        <div class="form-section mb-5">
+                            <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                <i class="fas fa-user me-2"></i>Résumé de votre profil
+                            </h4>
+                            <div class="card border-primary">
+                                <div class="card-header bg-transparent border-primary">
+                                    <h5 class="fw-bold mb-0">Informations qui seront transmises au recruteur</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="profile-info-item mb-3">
+                                                <small class="text-muted d-block">Nom complet</small>
+                                                <strong>{{ candidate_profile.user.full_name }}</strong>
+                                            </div>
+                                            <div class="profile-info-item mb-3">
+                                                <small class="text-muted d-block">Email</small>
+                                                <strong>{{ candidate_profile.user.email }}</strong>
+                                            </div>
+                                            <div class="profile-info-item mb-3">
+                                                <small class="text-muted d-block">Téléphone</small>
+                                                <strong>{{ candidate_profile.mobile_phone|default:"Non renseigné" }}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="profile-info-item mb-3">
+                                                <small class="text-muted d-block">Poste actuel</small>
+                                                <strong>{{ candidate_profile.current_position|default:"Non renseigné" }}</strong>
+                                            </div>
+                                            <div class="profile-info-item mb-3">
+                                                <small class="text-muted d-block">Expérience</small>
+                                                <strong>{{ candidate_profile.years_of_experience }} ans</strong>
+                                            </div>
+                                            <div class="profile-info-item mb-3">
+                                                <small class="text-muted d-block">CV principal</small>
+                                                <strong class="{% if candidate_profile.cv_file %}text-success{% else %}text-danger{% endif %}">
+                                                    {% if candidate_profile.cv_file %}
+                                                        <i class="fas fa-check me-1"></i>Disponible
+                                                    {% else %}
+                                                        <i class="fas fa-times me-1"></i>Manquant
+                                                    {% endif %}
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="profile-completion mt-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <small class="text-muted">Complétude du profil</small>
+                                            <small class="text-muted">{{ candidate_profile.profile_completion }}%</small>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: {{ candidate_profile.profile_completion }}%"
+                                                 role="progressbar">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <a href="{% url 'jobs:job_detail' job.slug %}" 
+                               class="btn btn-outline-secondary btn-lg d-flex align-items-center">
                                 <i class="fas fa-arrow-left me-2"></i>Retour à l'offre
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-primary btn-lg d-flex align-items-center shadow" id="submitBtn">
                                 <i class="fas fa-paper-plane me-2"></i>Envoyer ma candidature
                             </button>
                         </div>
@@ -88,30 +254,84 @@
                 </div>
             </div>
 
-            <!-- Tips -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-lightbulb me-2"></i>Conseils pour une candidature réussie
-                    </h5>
+            <!-- Tips Card -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Conseils pour une candidature réussie
+                    </h4>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6><i class="fas fa-check-circle text-success me-2"></i>Lettre de motivation</h6>
-                            <ul class="small text-muted">
-                                <li>Personnalisez pour chaque offre</li>
-                                <li>Montrez votre motivation</li>
-                                <li>Mettez en avant vos atouts</li>
-                            </ul>
+                            <div class="tip-item mb-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="tip-icon bg-success text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-success mb-2">Lettre de motivation personnalisée</h6>
+                                        <ul class="text-muted small mb-0 ps-3">
+                                            <li>Adaptez votre lettre à chaque entreprise</li>
+                                            <li>Mentionnez des éléments spécifiques à l'offre</li>
+                                            <li>Montrez votre motivation et votre intérêt</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tip-item">
+                                <div class="d-flex align-items-start">
+                                    <div class="tip-icon bg-info text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-info mb-2">CV à jour et professionnel</h6>
+                                        <ul class="text-muted small mb-0 ps-3">
+                                            <li>Format PDF recommandé</li>
+                                            <li>Mettez à jour vos expériences récentes</li>
+                                            <li>Vérifiez l'orthographe et la grammaire</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <h6><i class="fas fa-check-circle text-success me-2"></i>Documents</h6>
-                            <ul class="small text-muted">
-                                <li>CV à jour et professionnel</li>
-                                <li>Portfolio si pertinent</li>
-                                <li>Formats PDF recommandés</li>
-                            </ul>
+                            <div class="tip-item mb-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="tip-icon bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-bullseye"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-primary mb-2">Précision des informations</h6>
+                                        <ul class="text-muted small mb-0 ps-3">
+                                            <li>Salaire cohérent avec le marché</li>
+                                            <li>Disponibilité réaliste</li>
+                                            <li>Informations de contact à jour</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tip-item">
+                                <div class="d-flex align-items-start">
+                                    <div class="tip-icon bg-warning text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-warning mb-2">Suivi de candidature</h6>
+                                        <ul class="text-muted small mb-0 ps-3">
+                                            <li>Consultez régulièrement vos candidatures</li>
+                                            <li>Préparez-vous aux entretiens</li>
+                                            <li>Restez professionnel dans vos échanges</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -123,11 +343,284 @@
 
 {% block extra_css %}
 <style>
-.card {
-    border-radius: 15px;
+.application-icon {
+    animation: bounce 2s infinite;
 }
-.card-header {
-    border-radius: 15px 15px 0 0 !important;
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+}
+
+.form-section {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 2rem;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.job-meta .meta-item {
+    background: #f8f9fa;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    min-width: 120px;
+}
+
+.application-count {
+    border: 2px dashed #dee2e6;
+}
+
+.tip-item {
+    transition: all 0.3s ease;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.tip-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: translateX(5px);
+}
+
+.profile-info-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.profile-info-item:last-child {
+    border-bottom: none;
+}
+
+.character-counter {
+    font-size: 0.875rem;
+}
+
+#charCount {
+    font-weight: 600;
+}
+
+/* File upload styling */
+.custom-file-upload {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.custom-file-upload:hover {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.custom-file-upload.dragover {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+@media (max-width: 768px) {
+    .job-meta {
+        flex-direction: column;
+        gap: 1rem !important;
+    }
+    
+    .job-meta .meta-item {
+        min-width: auto;
+        text-align: center;
+    }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const applicationForm = document.getElementById('applicationForm');
+    const coverLetterTextarea = document.querySelector('#id_cover_letter');
+    const charCount = document.getElementById('charCount');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Character counter for cover letter
+    if (coverLetterTextarea && charCount) {
+        coverLetterTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = count;
+            
+            if (count < 100) {
+                charCount.className = 'text-danger fw-bold';
+            } else if (count < 200) {
+                charCount.className = 'text-warning fw-bold';
+            } else {
+                charCount.className = 'text-success fw-bold';
+            }
+        });
+        
+        // Initialize count
+        coverLetterTextarea.dispatchEvent(new Event('input'));
+    }
+
+    // Form submission handling
+    applicationForm.addEventListener('submit', function(e) {
+        const coverLetter = coverLetterTextarea ? coverLetterTextarea.value : '';
+        
+        if (coverLetter.length < 100) {
+            e.preventDefault();
+            showAlert('warning', 'La lettre de motivation doit contenir au moins 100 caractères.');
+            return;
+        }
+        
+        // Show loading state
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...';
+        submitBtn.disabled = true;
+        
+        // Re-enable after 10 seconds (safety)
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 10000);
+    });
+
+    // File upload drag and drop
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+        const container = input.closest('.form-group');
+        if (container) {
+            const customUpload = document.createElement('div');
+            customUpload.className = 'custom-file-upload mt-2';
+            customUpload.innerHTML = `
+                <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                <p class="text-muted mb-1">Glissez-déposez votre fichier ici</p>
+                <p class="text-muted small">ou cliquez pour parcourir</p>
+            `;
+            
+            container.appendChild(customUpload);
+            
+            // Drag and drop events
+            ['dragover', 'dragenter'].forEach(event => {
+                customUpload.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    customUpload.classList.add('dragover');
+                });
+            });
+
+            ['dragleave', 'dragend'].forEach(event => {
+                customUpload.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    customUpload.classList.remove('dragover');
+                });
+            });
+
+            customUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                customUpload.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    input.files = files;
+                    updateFileDisplay(input, files[0].name);
+                }
+            });
+
+            customUpload.addEventListener('click', () => {
+                input.click();
+            });
+
+            input.addEventListener('change', () => {
+                if (input.files.length > 0) {
+                    updateFileDisplay(input, input.files[0].name);
+                }
+            });
+        }
+    });
+
+    function updateFileDisplay(input, fileName) {
+        const container = input.closest('.form-group');
+        const customUpload = container.querySelector('.custom-file-upload');
+        if (customUpload) {
+            customUpload.innerHTML = `
+                <i class="fas fa-file text-success fa-2x mb-2"></i>
+                <p class="text-success fw-bold mb-1">${fileName}</p>
+                <p class="text-muted small">Cliquez pour changer de fichier</p>
+            `;
+        }
+    }
+
+    function showAlert(type, message) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        applicationForm.insertAdjacentHTML('beforebegin', alertHtml);
+    }
+
+    // Auto-save functionality
+    let autoSaveTimeout;
+    applicationForm.addEventListener('input', function() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            const formData = new FormData(applicationForm);
+            // Remove files from auto-save for security
+            for (let [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    formData.delete(key);
+                }
+            }
+            
+            const data = Object.fromEntries(formData);
+            localStorage.setItem(applicationForm.dataset.autosave, JSON.stringify(data));
+            
+            // Show auto-save indicator
+            showAutoSaveIndicator();
+        }, 1000);
+    });
+
+    function showAutoSaveIndicator() {
+        let indicator = document.getElementById('autoSaveIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'autoSaveIndicator';
+            indicator.className = 'position-fixed bottom-0 end-0 m-3';
+            indicator.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show shadow" role="alert">
+                    <i class="fas fa-save me-2"></i>
+                    <small>Candidature sauvegardée automatiquement</small>
+                </div>
+            `;
+            document.body.appendChild(indicator);
+            
+            setTimeout(() => {
+                indicator.remove();
+            }, 3000);
+        }
+    }
+
+    // Load auto-saved data
+    const savedData = localStorage.getItem(applicationForm.dataset.autosave);
+    if (savedData) {
+        try {
+            const data = JSON.parse(savedData);
+            Object.keys(data).forEach(key => {
+                const field = applicationForm.querySelector(`[name="${key}"]`);
+                if (field && field.type !== 'file') {
+                    field.value = data[key];
+                }
+            });
+            
+            // Trigger character count update
+            if (coverLetterTextarea) {
+                coverLetterTextarea.dispatchEvent(new Event('input'));
+            }
+        } catch (e) {
+            console.log('Error loading saved data:', e);
+        }
+    }
+});
+</script>
 {% endblock %}

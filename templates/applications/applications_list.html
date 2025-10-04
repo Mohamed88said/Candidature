@@ -1,117 +1,215 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load static crispy_forms_tags %}
 
 {% block title %}Gestion des Candidatures - Dashboard{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <!-- Header -->
+    <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-md-8">
-            <h1 class="fw-bold mb-2">Gestion des Candidatures</h1>
-            <p class="text-muted">Suivi et gestion de toutes les candidatures</p>
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary text-white rounded p-3 me-3">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+                <div>
+                    <h1 class="h2 fw-bold text-primary mb-1">Gestion des Candidatures</h1>
+                    <p class="text-muted mb-0">Suivi et gestion de toutes les candidatures</p>
+                </div>
+            </div>
         </div>
         <div class="col-md-4 text-md-end">
-            <a href="{% url 'dashboard:export_data' %}?type=applications" class="btn btn-success">
-                <i class="fas fa-download me-2"></i>Export Excel
-            </a>
+            <div class="d-flex gap-2 justify-content-md-end">
+                <a href="{% url 'dashboard:export_data' %}?type=applications" 
+                   class="btn btn-success btn-lg d-flex align-items-center">
+                    <i class="fas fa-download me-2"></i>Export Excel
+                </a>
+                <a href="{% url 'jobs:create_job' %}" 
+                   class="btn btn-primary btn-lg d-flex align-items-center">
+                    <i class="fas fa-plus me-2"></i>Nouvelle Offre
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-2 col-md-4 col-6 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.total }}</h4>
-                    <small>Total</small>
+    <!-- Stats Dashboard -->
+    <div class="row mb-5">
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-primary text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.total }}</h3>
+                    <small class="opacity-8">Total</small>
                 </div>
             </div>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 mb-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.pending }}</h4>
-                    <small>En attente</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-warning text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.pending }}</h3>
+                    <small class="opacity-8">En attente</small>
                 </div>
             </div>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.reviewing }}</h4>
-                    <small>En examen</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-info text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-search fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.reviewing }}</h3>
+                    <small class="opacity-8">En examen</small>
                 </div>
             </div>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.shortlisted }}</h4>
-                    <small>Présélectionnés</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-success text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.shortlisted }}</h3>
+                    <small class="opacity-8">Présélectionnés</small>
                 </div>
             </div>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 mb-3">
-            <div class="card bg-secondary text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.interviews }}</h4>
-                    <small>Entretiens</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-secondary text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-handshake fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.interviews }}</h3>
+                    <small class="opacity-8">Entretiens</small>
                 </div>
             </div>
         </div>
-        <div class="col-lg-2 col-md-4 col-6 mb-3">
-            <div class="card bg-dark text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.hired|default:0 }}</h4>
-                    <small>Embauchés</small>
+        <div class="col-xl-2 col-md-4 col-6 mb-3">
+            <div class="card stat-card bg-dark text-white shadow-lg hover-lift">
+                <div class="card-body text-center p-4">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-user-check fa-2x"></i>
+                    </div>
+                    <h3 class="fw-bold display-6 mb-1">{{ stats.hired|default:0 }}</h3>
+                    <small class="opacity-8">Embauchés</small>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Search and Filters -->
-    <div class="card mb-4">
+    <div class="card shadow-lg border-0 mb-4">
+        <div class="card-header bg-transparent border-bottom-0 py-4">
+            <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                <i class="fas fa-search text-primary me-2"></i>Recherche Avancée
+            </h4>
+        </div>
         <div class="card-body">
-            <form method="get" class="row g-3">
-                {{ form|crispy }}
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary me-2">
-                        <i class="fas fa-search me-2"></i>Rechercher
-                    </button>
-                    <a href="{% url 'applications:applications_list' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-2"></i>Effacer
-                    </a>
+            <form method="get" class="advanced-search-form">
+                <div class="row g-3">
+                    {{ form|crispy }}
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-primary btn-lg d-flex align-items-center">
+                                <i class="fas fa-search me-2"></i>Rechercher
+                            </button>
+                            <a href="{% url 'applications:applications_list' %}" 
+                               class="btn btn-outline-secondary btn-lg d-flex align-items-center">
+                                <i class="fas fa-times me-2"></i>Effacer
+                            </a>
+                            <button type="button" class="btn btn-outline-info btn-lg d-flex align-items-center" 
+                                    id="saveSearchBtn">
+                                <i class="fas fa-save me-2"></i>Sauvegarder
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Applications Table -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">
-                <i class="fas fa-file-alt me-2"></i>Liste des candidatures
-                <span class="badge bg-primary ms-2">{{ page_obj.paginator.count }}</span>
-            </h5>
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-sort me-2"></i>Trier par
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="?sort=-applied_at">Plus récentes</a></li>
-                    <li><a class="dropdown-item" href="?sort=candidate__user__last_name">Nom A-Z</a></li>
-                    <li><a class="dropdown-item" href="?sort=job__title">Poste A-Z</a></li>
-                    <li><a class="dropdown-item" href="?sort=status">Statut</a></li>
-                </ul>
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-transparent border-bottom-0 py-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h4 class="h5 fw-bold mb-2 mb-md-0 d-flex align-items-center">
+                    <i class="fas fa-list-alt text-primary me-2"></i>Liste des Candidatures
+                    <span class="badge bg-primary ms-2 fs-6">{{ page_obj.paginator.count }}</span>
+                </h4>
+                <div class="d-flex gap-2 flex-wrap">
+                    <!-- Sort Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle d-flex align-items-center" 
+                                type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-sort me-2"></i>Trier par
+                        </button>
+                        <ul class="dropdown-menu shadow-lg">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center {% if current_sort == '-applied_at' %}active{% endif %}" 
+                                   href="?sort=-applied_at{% for key, value in request.GET.items %}{% if key != 'sort' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-calendar-alt me-2"></i>Plus récentes
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center {% if current_sort == 'candidate__user__last_name' %}active{% endif %}" 
+                                   href="?sort=candidate__user__last_name{% for key, value in request.GET.items %}{% if key != 'sort' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-user me-2"></i>Nom A-Z
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center {% if current_sort == 'job__title' %}active{% endif %}" 
+                                   href="?sort=job__title{% for key, value in request.GET.items %}{% if key != 'sort' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-briefcase me-2"></i>Poste A-Z
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center {% if current_sort == 'status' %}active{% endif %}" 
+                                   href="?sort=status{% for key, value in request.GET.items %}{% if key != 'sort' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-flag me-2"></i>Statut
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Bulk Actions -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" 
+                                type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tasks me-2"></i>Actions groupées
+                        </button>
+                        <ul class="dropdown-menu shadow-lg">
+                            <li><a class="dropdown-item d-flex align-items-center" href="#" data-bulk-action="mark-reviewed">
+                                <i class="fas fa-check me-2 text-success"></i>Marquer comme examiné
+                            </a></li>
+                            <li><a class="dropdown-item d-flex align-items-center" href="#" data-bulk-action="schedule-interview">
+                                <i class="fas fa-calendar me-2 text-info"></i>Programmer entretien
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item d-flex align-items-center" href="#" data-bulk-action="export-selected">
+                                <i class="fas fa-download me-2 text-primary"></i>Exporter sélection
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
+
         <div class="card-body">
             {% if page_obj %}
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover align-middle" id="applicationsTable">
+                    <thead class="table-light">
                         <tr>
+                            <th width="40">
+                                <input type="checkbox" id="selectAll" class="form-check-input">
+                            </th>
                             <th>Candidat</th>
                             <th>Poste</th>
                             <th>Statut</th>
@@ -122,33 +220,37 @@
                     </thead>
                     <tbody>
                         {% for application in page_obj %}
-                        <tr class="{% if application.priority == 'urgent' %}table-danger{% elif application.priority == 'high' %}table-warning{% endif %}">
+                        <tr class="application-row 
+                            {% if application.priority == 'urgent' %}table-danger
+                            {% elif application.priority == 'high' %}table-warning
+                            {% endif %} hover-lift">
+                            <td>
+                                <input type="checkbox" class="form-check-input application-checkbox" 
+                                       value="{{ application.pk }}">
+                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     {% if application.candidate.profile_picture %}
                                         <img src="{{ application.candidate.profile_picture.url }}" 
-                                             class="rounded-circle me-3" 
-                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                             class="rounded-circle me-3 shadow-sm" 
+                                             style="width: 45px; height: 45px; object-fit: cover;">
                                     {% else %}
-                                        <div class="bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
-                                             style="width: 40px; height: 40px;">
+                                        <div class="avatar-sm bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center shadow-sm">
                                             {{ application.candidate.user.first_name|first }}{{ application.candidate.user.last_name|first }}
                                         </div>
                                     {% endif %}
                                     <div>
-                                        <strong>{{ application.candidate.user.full_name }}</strong>
-                                        <br>
+                                        <strong class="d-block">{{ application.candidate.user.full_name }}</strong>
                                         <small class="text-muted">{{ application.candidate.user.email }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <strong>{{ application.job.title }}</strong>
-                                <br>
+                                <strong class="d-block">{{ application.job.title }}</strong>
                                 <small class="text-muted">{{ application.job.company }}</small>
                             </td>
                             <td>
-                                <span class="badge 
+                                <span class="badge status-badge fs-7 px-3 py-2 
                                     {% if application.status == 'pending' %}bg-warning
                                     {% elif application.status == 'reviewing' %}bg-info
                                     {% elif application.status == 'shortlisted' %}bg-success
@@ -156,36 +258,58 @@
                                     {% elif application.status == 'accepted' %}bg-success
                                     {% elif application.status == 'rejected' %}bg-danger
                                     {% else %}bg-secondary{% endif %}">
+                                    <i class="fas 
+                                        {% if application.status == 'pending' %}fa-clock
+                                        {% elif application.status == 'reviewing' %}fa-search
+                                        {% elif application.status == 'shortlisted' %}fa-star
+                                        {% elif application.status == 'interview_scheduled' %}fa-calendar
+                                        {% elif application.status == 'accepted' %}fa-check
+                                        {% elif application.status == 'rejected' %}fa-times
+                                        {% else %}fa-question{% endif %} me-1"></i>
                                     {{ application.get_status_display }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge 
+                                <span class="badge priority-badge fs-7 px-3 py-2
                                     {% if application.priority == 'urgent' %}bg-danger
                                     {% elif application.priority == 'high' %}bg-warning
                                     {% elif application.priority == 'low' %}bg-secondary
                                     {% else %}bg-primary{% endif %}">
+                                    <i class="fas 
+                                        {% if application.priority == 'urgent' %}fa-fire
+                                        {% elif application.priority == 'high' %}fa-exclamation-triangle
+                                        {% elif application.priority == 'low' %}fa-arrow-down
+                                        {% else %}fa-minus{% endif %} me-1"></i>
                                     {{ application.get_priority_display }}
                                 </span>
                             </td>
                             <td>
-                                {{ application.applied_at|date:"d/m/Y" }}
-                                <br>
-                                <small class="text-muted">{{ application.applied_at|timesince }}</small>
+                                <div class="d-flex flex-column">
+                                    <strong>{{ application.applied_at|date:"d/m/Y" }}</strong>
+                                    <small class="text-muted">{{ application.applied_at|timesince }}</small>
+                                </div>
                             </td>
                             <td>
-                                <div class="btn-group" role="group">
+                                <div class="btn-group btn-group-sm" role="group">
                                     <a href="{% url 'applications:application_detail' application.pk %}" 
-                                       class="btn btn-sm btn-outline-primary">
+                                       class="btn btn-outline-primary d-flex align-items-center"
+                                       data-bs-toggle="tooltip" title="Voir détails">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="{% url 'applications:update_status' application.pk %}" 
-                                       class="btn btn-sm btn-outline-success">
+                                       class="btn btn-outline-success d-flex align-items-center"
+                                       data-bs-toggle="tooltip" title="Modifier statut">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <a href="{% url 'applications:schedule_interview' application.pk %}" 
-                                       class="btn btn-sm btn-outline-info">
+                                       class="btn btn-outline-info d-flex align-items-center"
+                                       data-bs-toggle="tooltip" title="Programmer entretien">
                                         <i class="fas fa-calendar"></i>
+                                    </a>
+                                    <a href="{% url 'applications:add_comment' application.pk %}" 
+                                       class="btn btn-outline-secondary d-flex align-items-center"
+                                       data-bs-toggle="tooltip" title="Ajouter commentaire">
+                                        <i class="fas fa-comment"></i>
                                     </a>
                                 </div>
                             </td>
@@ -198,10 +322,17 @@
             <!-- Pagination -->
             {% if page_obj.has_other_pages %}
             <nav aria-label="Navigation des pages" class="mt-4">
-                <ul class="pagination justify-content-center">
+                <ul class="pagination justify-content-center shadow-sm">
                     {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.keywords %}&keywords={{ request.GET.keywords }}{% endif %}">
+                            <a class="page-link d-flex align-items-center" 
+                               href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link d-flex align-items-center" 
+                               href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                                 <i class="fas fa-angle-left"></i>
                             </a>
                         </li>
@@ -214,15 +345,23 @@
                             </li>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}{% if request.GET.keywords %}&keywords={{ request.GET.keywords }}{% endif %}">{{ num }}</a>
+                                <a class="page-link" 
+                                   href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
                             </li>
                         {% endif %}
                     {% endfor %}
 
                     {% if page_obj.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.keywords %}&keywords={{ request.GET.keywords }}{% endif %}">
+                            <a class="page-link d-flex align-items-center" 
+                               href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                                 <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link d-flex align-items-center" 
+                               href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="fas fa-angle-double-right"></i>
                             </a>
                         </li>
                     {% endif %}
@@ -231,13 +370,238 @@
             {% endif %}
             
             {% else %}
+            <!-- Empty State -->
             <div class="text-center py-5">
-                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">Aucune candidature trouvée</h5>
-                <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+                <div class="empty-state-icon mb-4">
+                    <i class="fas fa-search fa-4x text-muted"></i>
+                </div>
+                <h4 class="text-muted mb-3">Aucune candidature trouvée</h4>
+                <p class="text-muted mb-4">Essayez de modifier vos critères de recherche ou créez de nouvelles offres.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{% url 'applications:applications_list' %}" class="btn btn-primary btn-lg d-flex align-items-center">
+                        <i class="fas fa-times me-2"></i>Effacer les filtres
+                    </a>
+                    <a href="{% url 'jobs:create_job' %}" class="btn btn-success btn-lg d-flex align-items-center">
+                        <i class="fas fa-plus me-2"></i>Créer une offre
+                    </a>
+                </div>
             </div>
             {% endif %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-card {
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.advanced-search-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.application-row {
+    transition: all 0.3s ease;
+}
+
+.application-row:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: translateX(5px);
+}
+
+.status-badge, .priority-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 20px;
+}
+
+.avatar-sm {
+    width: 45px;
+    height: 45px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pagination .page-link {
+    border: none;
+    margin: 0 2px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+}
+
+.empty-state-icon {
+    opacity: 0.6;
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+.btn-group .btn {
+    border-radius: 6px !important;
+    margin: 0 2px;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .avatar-sm {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Select all functionality
+    const selectAll = document.getElementById('selectAll');
+    const applicationCheckboxes = document.querySelectorAll('.application-checkbox');
+    
+    selectAll.addEventListener('change', function() {
+        applicationCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    // Bulk actions
+    document.querySelectorAll('[data-bulk-action]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const action = this.dataset.bulkAction;
+            const selectedApplications = Array.from(applicationCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+            
+            if (selectedApplications.length === 0) {
+                showAlert('warning', 'Veuillez sélectionner au moins une candidature.');
+                return;
+            }
+            
+            switch(action) {
+                case 'mark-reviewed':
+                    markAsReviewed(selectedApplications);
+                    break;
+                case 'schedule-interview':
+                    scheduleBulkInterview(selectedApplications);
+                    break;
+                case 'export-selected':
+                    exportSelected(selectedApplications);
+                    break;
+            }
+        });
+    });
+
+    // Save search functionality
+    document.getElementById('saveSearchBtn').addEventListener('click', function() {
+        const searchParams = new URLSearchParams(window.location.search);
+        const searchName = prompt('Nommez cette recherche :');
+        
+        if (searchName) {
+            localStorage.setItem(`saved_search_${searchName}`, searchParams.toString());
+            showAlert('success', `Recherche "${searchName}" sauvegardée !`);
+        }
+    });
+
+    // Row click functionality (except checkboxes and buttons)
+    document.querySelectorAll('.application-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            if (!e.target.matches('input, a, button, .btn, .dropdown, .dropdown *')) {
+                const applicationId = this.querySelector('.application-checkbox').value;
+                window.location.href = `{% url 'applications:application_detail' 0 %}`.replace('0', applicationId);
+            }
+        });
+    });
+
+    // Animate table rows
+    const tableRows = document.querySelectorAll('.application-row');
+    tableRows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            row.style.transition = 'all 0.5s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateX(0)';
+        }, index * 50);
+    });
+
+    // Utility functions
+    function markAsReviewed(applicationIds) {
+        if (confirm(`Marquer ${applicationIds.length} candidature(s) comme examinée(s) ?`)) {
+            // Simulate API call
+            showAlert('info', `Traitement de ${applicationIds.length} candidature(s)...`);
+            
+            setTimeout(() => {
+                showAlert('success', `${applicationIds.length} candidature(s) marquée(s) comme examinée(s) !`);
+                // In a real implementation, you would make an AJAX call here
+            }, 1500);
+        }
+    }
+
+    function scheduleBulkInterview(applicationIds) {
+        showAlert('info', `Redirection vers la planification d'entretien pour ${applicationIds.length} candidature(s)...`);
+        // In a real implementation, you would redirect to a bulk scheduling page
+    }
+
+    function exportSelected(applicationIds) {
+        const params = new URLSearchParams();
+        applicationIds.forEach(id => params.append('ids', id));
+        
+        window.open(`{% url 'dashboard:export_data' %}?type=applications&${params.toString()}`, '_blank');
+    }
+
+    function showAlert(type, message) {
+        // Use your existing alert system or create a simple one
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.querySelector('.container-fluid').insertAdjacentHTML('afterbegin', alertHtml);
+    }
+});
+</script>
 {% endblock %}

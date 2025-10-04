@@ -1,0 +1,153 @@
+<!-- Enhanced Navigation Component -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-lg sticky-top">
+    <div class="container">
+        <!-- Brand -->
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'core:home' %}">
+            {% if site_settings.site_logo %}
+                <img src="{{ site_settings.site_logo.url }}" alt="Logo" 
+                     class="me-2 rounded" style="height: 35px;">
+            {% else %}
+                <div class="bg-white text-primary rounded p-2 me-2">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+            {% endif %}
+            <span class="d-none d-sm-inline">{{ site_settings.site_name|default:"RecrutementPro" }}</span>
+        </a>
+
+        <!-- Mobile Toggle -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#mainNavbar" aria-controls="mainNavbar" 
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navigation Links -->
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
+                       href="{% url 'core:home' %}">
+                        <i class="fas fa-home d-lg-none me-2"></i>Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'jobs' in request.resolver_match.namespaces %}active{% endif %}" 
+                       href="{% url 'jobs:job_list' %}">
+                        <i class="fas fa-briefcase d-lg-none me-2"></i>Offres d'emploi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'jobs:job_categories' %}">
+                        <i class="fas fa-tags d-lg-none me-2"></i>Catégories
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'core:about' %}">
+                        <i class="fas fa-info-circle d-lg-none me-2"></i>À propos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'core:contact' %}">
+                        <i class="fas fa-envelope d-lg-none me-2"></i>Contact
+                    </a>
+                </li>
+            </ul>
+
+            <!-- User Actions -->
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <!-- Quick Actions -->
+                    {% if user.user_type == 'candidate' %}
+                        <li class="nav-item me-2">
+                            <a class="nav-link btn btn-outline-light btn-sm" href="{% url 'applications:my_applications' %}">
+                                <i class="fas fa-file-alt me-1"></i>
+                                <span class="d-none d-lg-inline">Mes Candidatures</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item me-2">
+                            <a class="nav-link btn btn-outline-light btn-sm" href="{% url 'applications:applications_list' %}">
+                                <i class="fas fa-users me-1"></i>
+                                <span class="d-none d-lg-inline">Candidatures</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <!-- User Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userMenu" 
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="Profile" 
+                                     class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light text-dark rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                     style="width: 32px; height: 32px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            {% endif %}
+                            <span class="d-none d-md-inline">{{ user.first_name|default:user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="userMenu">
+                            <li><h6 class="dropdown-header">Mon Compte</h6></li>
+                            {% if user.user_type == 'candidate' %}
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:profile' %}">
+                                        <i class="fas fa-user me-2 text-primary"></i>Mon Profil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'jobs:saved_jobs' %}">
+                                        <i class="fas fa-heart me-2 text-danger"></i>Favoris
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'jobs:job_alerts' %}">
+                                        <i class="fas fa-bell me-2 text-warning"></i>Alertes
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'dashboard:admin_dashboard' %}">
+                                        <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'jobs:create_job' %}">
+                                        <i class="fas fa-plus me-2 text-success"></i>Nouvelle Offre
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:settings' %}">
+                                    <i class="fas fa-cog me-2 text-muted"></i>Paramètres
+                                </a>
+                            </li>
+                            <li>
+                                <form method="post" action="{% url 'accounts:logout' %}" class="d-inline w-100">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item d-flex align-items-center border-0 bg-transparent w-100">
+                                        <i class="fas fa-sign-out-alt me-2 text-muted"></i>Déconnexion
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'accounts:login' %}">
+                            <i class="fas fa-sign-in-alt me-1 d-lg-none"></i>
+                            <span class="d-none d-lg-inline">Connexion</span>
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="nav-link btn btn-outline-light px-3 mt-2 mt-lg-0" href="{% url 'accounts:register' %}">
+                            <i class="fas fa-user-plus me-1"></i>Inscription
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

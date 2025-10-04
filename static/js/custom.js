@@ -1,392 +1,577 @@
-// Custom JavaScript for Recruitment Platform
+// Enhanced JavaScript for Recruitment Platform
 
-$(document).ready(function() {
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+class RecruitmentPlatform {
+    constructor() {
+        this.init();
+    }
 
-    // Initialize popovers
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
-    });
+    init() {
+        this.initComponents();
+        this.initEventListeners();
+        this.initAnimations();
+        this.initIntersectionObserver();
+    }
 
-    // Newsletter subscription
-    $('#newsletter-form').on('submit', function(e) {
-        e.preventDefault();
+    initComponents() {
+        // Initialize Bootstrap components
+        this.initTooltips();
+        this.initPopovers();
         
-        var form = $(this);
-        var email = form.find('input[name="email"]').val();
-        var submitBtn = form.find('button[type="submit"]');
-        var originalBtnText = submitBtn.html();
+        // Initialize custom components
+        this.initBackToTop();
+        this.initSmoothScrolling();
+        this.initFormEnhancements();
+        this.initNotificationSystem();
+    }
+
+    initEventListeners() {
+        // Newsletter subscription
+        this.handleNewsletterSubscription();
         
-        // Show loading state
-        submitBtn.html('<i class="fas fa-spinner fa-spin"></i>').prop('disabled', true);
+        // Job interactions
+        this.handleJobInteractions();
         
-        $.ajax({
-            url: '/newsletter/subscribe/',
-            type: 'POST',
-            data: {
-                'email': email,
-                'csrfmiddlewaretoken': form.find('input[name="csrfmiddlewaretoken"]').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    showAlert('success', response.message);
-                    form[0].reset();
-                } else {
-                    showAlert('warning', response.message);
-                }
-            },
-            error: function() {
-                showAlert('danger', 'Une errGNF est survenue. Veuillez réessayer.');
-            },
-            complete: function() {
-                submitBtn.html(originalBtnText).prop('disabled', false);
-            }
+        // Form submissions
+        this.handleFormSubmissions();
+        
+        // File upload enhancements
+        this.handleFileUploads();
+        
+        // Search enhancements
+        this.handleSearchInteractions();
+    }
+
+    initTooltips() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(tooltipTriggerEl => {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                trigger: 'hover focus'
+            });
         });
-    });
+    }
 
-    // Job save/unsave functionality
-    $('.save-job-btn').on('click', function(e) {
-        e.preventDefault();
-        
-        var btn = $(this);
-        var jobId = btn.data('job-id');
-        var icon = btn.find('i');
-        
-        $.ajax({
-            url: '/jobs/save/' + jobId + '/',
-            type: 'POST',
-            data: {
-                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    if (response.is_saved) {
-                        icon.removeClass('far').addClass('fas');
-                        btn.removeClass('btn-outline-primary').addClass('btn-primary');
-                    } else {
-                        icon.removeClass('fas').addClass('far');
-                        btn.removeClass('btn-primary').addClass('btn-outline-primary');
-                    }
-                    showAlert('success', response.message);
-                }
-            },
-            error: function() {
-                showAlert('danger', 'Une errGNF est survenue.');
-            }
+    initPopovers() {
+        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        popoverTriggerList.map(popoverTriggerEl => {
+            return new bootstrap.Popover(popoverTriggerEl);
         });
-    });
+    }
 
-    // Job alert toggle
-    $('.toggle-alert-btn').on('click', function(e) {
-        e.preventDefault();
-        
-        var btn = $(this);
-        var alertId = btn.data('alert-id');
-        
-        $.ajax({
-            url: '/jobs/alerts/' + alertId + '/toggle/',
-            type: 'POST',
-            data: {
-                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    if (response.is_active) {
-                        btn.removeClass('btn-outline-success').addClass('btn-success')
-                           .html('<i class="fas fa-bell"></i> Actif');
-                    } else {
-                        btn.removeClass('btn-success').addClass('btn-outline-success')
-                           .html('<i class="fas fa-bell-slash"></i> Inactif');
-                    }
-                    showAlert('success', response.message);
-                }
-            },
-            error: function() {
-                showAlert('danger', 'Une errGNF est survenue.');
-            }
-        });
-    });
+    initBackToTop() {
+        const backToTopBtn = this.createBackToTopButton();
+        document.body.appendChild(backToTopBtn);
 
-    // Skill and language management (AJAX)
-    $('.delete-skill-btn, .delete-language-btn').on('click', function(e) {
-        e.preventDefault();
-        
-        if (!confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) {
-            return;
-        }
-        
-        var btn = $(this);
-        var url = btn.attr('href');
-        var row = btn.closest('.list-group-item, tr');
-        
-        $.ajax({
-            url: url,
-            type: 'DELETE',
-            data: {
-                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    row.fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                    showAlert('success', 'Élément supprimé avec succès.');
-                }
-            },
-            error: function() {
-                showAlert('danger', 'Une errGNF est survenue.');
-            }
-        });
-    });
-
-    // File upload drag and drop
-    $('.file-upload-area').on('dragover', function(e) {
-        e.preventDefault();
-        $(this).addClass('dragover');
-    });
-
-    $('.file-upload-area').on('dragleave', function(e) {
-        e.preventDefault();
-        $(this).removeClass('dragover');
-    });
-
-    $('.file-upload-area').on('drop', function(e) {
-        e.preventDefault();
-        $(this).removeClass('dragover');
-        
-        var files = e.originalEvent.dataTransfer.files;
-        var input = $(this).find('input[type="file"]')[0];
-        input.files = files;
-        
-        // Update file name display
-        if (files.length > 0) {
-            $(this).find('.file-name').text(files[0].name);
-        }
-    });
-
-    // Auto-hide alerts after 5 seconds
-    $('.alert').each(function() {
-        var alert = $(this);
-        setTimeout(function() {
-            alert.fadeOut();
-        }, 5000);
-    });
-
-    // Search form enhancements
-    $('.search-form input').on('focus', function() {
-        $(this).closest('.search-form').addClass('focused');
-    });
-
-    $('.search-form input').on('blur', function() {
-        $(this).closest('.search-form').removeClass('focused');
-    });
-
-    // Smooth scrolling for anchor links
-    $('a[href^="#"]').on('click', function(e) {
-        e.preventDefault();
-        
-        var target = $(this.getAttribute('href'));
-        if (target.length) {
-            $('html, body').animate({
-                scrollTop: target.offset().top - 100
-            }, 500);
-        }
-    });
-
-    // Back to top button
-    var backToTopBtn = $('<button class="btn btn-primary btn-floating back-to-top" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: none;"><i class="fas fa-arrow-up"></i></button>');
-    $('body').append(backToTopBtn);
-
-    $(window).scroll(function() {
-        if ($(this).scrollTop() > 300) {
-            backToTopBtn.fadeIn();
-        } else {
-            backToTopBtn.fadeOut();
-        }
-    });
-
-    backToTopBtn.on('click', function() {
-        $('html, body').animate({scrollTop: 0}, 500);
-    });
-
-    // Form validation enhancements
-    $('form').on('submit', function() {
-        var form = $(this);
-        var submitBtn = form.find('button[type="submit"], input[type="submit"]');
-        
-        if (submitBtn.length) {
-            var originalText = submitBtn.html() || submitBtn.val();
-            submitBtn.prop('disabled', true);
-            
-            if (submitBtn.is('button')) {
-                submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Traitement...');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
             } else {
-                submitBtn.val('Traitement...');
-            }
-            
-            // Re-enable after 10 seconds to prevent permanent disable
-            setTimeout(function() {
-                submitBtn.prop('disabled', false);
-                if (submitBtn.is('button')) {
-                    submitBtn.html(originalText);
-                } else {
-                    submitBtn.val(originalText);
-                }
-            }, 10000);
-        }
-    });
-
-    // Character counter for textareas
-    $('textarea[maxlength]').each(function() {
-        var textarea = $(this);
-        var maxLength = textarea.attr('maxlength');
-        var counter = $('<small class="text-muted character-counter">0/' + maxLength + '</small>');
-        textarea.after(counter);
-        
-        textarea.on('input', function() {
-            var currentLength = $(this).val().length;
-            counter.text(currentLength + '/' + maxLength);
-            
-            if (currentLength > maxLength * 0.9) {
-                counter.removeClass('text-muted').addClass('text-warning');
-            } else {
-                counter.removeClass('text-warning').addClass('text-muted');
+                backToTopBtn.classList.remove('show');
             }
         });
-    });
 
-    // Auto-save for forms (draft functionality)
-    $('form[data-autosave]').each(function() {
-        var form = $(this);
-        var formId = form.data('autosave');
+        backToTopBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.smoothScrollToTop();
+        });
+    }
+
+    createBackToTopButton() {
+        const btn = document.createElement('button');
+        btn.className = 'back-to-top';
+        btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+        btn.style.display = 'none';
         
-        // Load saved data
-        var savedData = localStorage.getItem('form_' + formId);
-        if (savedData) {
-            try {
-                var data = JSON.parse(savedData);
-                $.each(data, function(name, value) {
-                    form.find('[name="' + name + '"]').val(value);
-                });
-            } catch (e) {
-                console.log('Error loading saved form data:', e);
+        setTimeout(() => {
+            btn.classList.add('show');
+            btn.style.display = 'flex';
+        }, 100);
+        
+        return btn;
+    }
+
+    smoothScrollToTop() {
+        const scrollToTop = () => {
+            const currentPosition = window.scrollY;
+            if (currentPosition > 0) {
+                window.requestAnimationFrame(scrollToTop);
+                window.scrollTo(0, currentPosition - currentPosition / 8);
             }
-        }
-        
-        // Save data on change
-        form.find('input, textarea, select').on('change input', function() {
-            var formData = {};
-            form.find('input, textarea, select').each(function() {
-                var field = $(this);
-                if (field.attr('name') && field.attr('type') !== 'password') {
-                    formData[field.attr('name')] = field.val();
+        };
+        scrollToTop();
+    }
+
+    initSmoothScrolling() {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(anchor.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.getBoundingClientRect().top + window.scrollY - 100;
+                    this.smoothScrollTo(offsetTop);
                 }
             });
-            localStorage.setItem('form_' + formId, JSON.stringify(formData));
         });
-        
-        // Clear saved data on successful submit
-        form.on('submit', function() {
-            setTimeout(function() {
-                localStorage.removeItem('form_' + formId);
-            }, 1000);
-        });
-    });
+    }
 
-    // Dashboard stats animation
-    $('.dashboard-stat h3').each(function() {
-        var $this = $(this);
-        var countTo = parseInt($this.text());
-        
-        $({ countNum: 0 }).animate({
-            countNum: countTo
-        }, {
-            duration: 2000,
-            easing: 'swing',
-            step: function() {
-                $this.text(Math.floor(this.countNum));
-            },
-            complete: function() {
-                $this.text(countTo);
-            }
+    smoothScrollTo(position) {
+        window.scrollTo({
+            top: position,
+            behavior: 'smooth'
         });
-    });
+    }
 
-    // Notification management
-    $('.mark-notification-read').on('click', function(e) {
-        e.preventDefault();
-        
-        var btn = $(this);
-        var notificationId = btn.data('notification-id');
-        
-        $.ajax({
-            url: '/dashboard/api/notification/' + notificationId + '/read/',
-            type: 'POST',
-            data: {
-                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    btn.closest('.notification-item').fadeOut();
+    handleNewsletterSubscription() {
+        const newsletterForm = document.getElementById('newsletter-form');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.submitNewsletterForm(newsletterForm);
+            });
+        }
+    }
+
+    async submitNewsletterForm(form) {
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+
+        try {
+            this.showLoadingState(submitBtn);
+            
+            const response = await fetch('/newsletter/subscribe/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showAlert('success', data.message);
+                form.reset();
+            } else {
+                this.showAlert('warning', data.message);
+            }
+        } catch (error) {
+            this.showAlert('danger', 'Une erreur est survenue. Veuillez réessayer.');
+        } finally {
+            this.hideLoadingState(submitBtn, originalBtnText);
+        }
+    }
+
+    handleJobInteractions() {
+        // Job save/unsave functionality
+        document.querySelectorAll('.save-job-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await this.toggleJobSave(btn);
+            });
+        });
+
+        // Job alert toggle
+        document.querySelectorAll('.toggle-alert-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await this.toggleJobAlert(btn);
+            });
+        });
+    }
+
+    async toggleJobSave(btn) {
+        const jobId = btn.dataset.jobId;
+        const icon = btn.querySelector('i');
+
+        try {
+            const response = await fetch(`/jobs/save/${jobId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.getCSRFToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.updateSaveButton(btn, icon, data.is_saved);
+                this.showAlert('success', data.message);
+            }
+        } catch (error) {
+            this.showAlert('danger', 'Une erreur est survenue.');
+        }
+    }
+
+    updateSaveButton(btn, icon, isSaved) {
+        if (isSaved) {
+            icon.classList.replace('far', 'fas');
+            btn.classList.replace('btn-outline-primary', 'btn-primary');
+            btn.classList.add('animate__animated', 'animate__pulse');
+        } else {
+            icon.classList.replace('fas', 'far');
+            btn.classList.replace('btn-primary', 'btn-outline-primary');
+        }
+        
+        setTimeout(() => {
+            btn.classList.remove('animate__animated', 'animate__pulse');
+        }, 1000);
+    }
+
+    initFormEnhancements() {
+        // Character counters
+        this.initCharacterCounters();
+        
+        // Auto-save functionality
+        this.initAutoSave();
+        
+        // Form validation enhancements
+        this.initFormValidation();
+    }
+
+    initCharacterCounters() {
+        document.querySelectorAll('textarea[maxlength]').forEach(textarea => {
+            const maxLength = textarea.getAttribute('maxlength');
+            const counter = document.createElement('small');
+            counter.className = 'text-muted character-counter';
+            counter.textContent = `0/${maxLength}`;
+            textarea.parentNode.appendChild(counter);
+
+            textarea.addEventListener('input', () => {
+                const currentLength = textarea.value.length;
+                counter.textContent = `${currentLength}/${maxLength}`;
+                
+                if (currentLength > maxLength * 0.9) {
+                    counter.classList.replace('text-muted', 'text-warning');
+                } else {
+                    counter.classList.replace('text-warning', 'text-muted');
+                }
+            });
+        });
+    }
+
+    initAutoSave() {
+        document.querySelectorAll('form[data-autosave]').forEach(form => {
+            const formId = form.dataset.autosave;
+            this.loadSavedFormData(form, formId);
+            
+            form.querySelectorAll('input, textarea, select').forEach(field => {
+                field.addEventListener('change', () => {
+                    this.saveFormData(form, formId);
+                });
+                
+                field.addEventListener('input', this.debounce(() => {
+                    this.saveFormData(form, formId);
+                }, 500));
+            });
+
+            form.addEventListener('submit', () => {
+                localStorage.removeItem(`form_${formId}`);
+            });
+        });
+    }
+
+    loadSavedFormData(form, formId) {
+        const savedData = localStorage.getItem(`form_${formId}`);
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                Object.keys(data).forEach(name => {
+                    const field = form.querySelector(`[name="${name}"]`);
+                    if (field && field.type !== 'password') {
+                        field.value = data[name];
+                    }
+                });
+            } catch (error) {
+                console.warn('Error loading saved form data:', error);
+            }
+        }
+    }
+
+    saveFormData(form, formId) {
+        const formData = {};
+        form.querySelectorAll('input, textarea, select').forEach(field => {
+            if (field.name && field.type !== 'password') {
+                formData[field.name] = field.value;
             }
         });
-    });
+        localStorage.setItem(`form_${formId}`, JSON.stringify(formData));
+    }
+
+    initFormValidation() {
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+                if (submitBtn) {
+                    this.showFormLoadingState(submitBtn);
+                }
+            });
+        });
+    }
+
+    showFormLoadingState(submitBtn) {
+        const originalText = submitBtn.innerHTML || submitBtn.value;
+        submitBtn.disabled = true;
+
+        if (submitBtn.tagName === 'BUTTON') {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+        } else {
+            submitBtn.value = 'Traitement...';
+        }
+
+        // Safety timeout to re-enable button
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            if (submitBtn.tagName === 'BUTTON') {
+                submitBtn.innerHTML = originalText;
+            } else {
+                submitBtn.value = originalText;
+            }
+        }, 10000);
+    }
+
+    handleFileUploads() {
+        document.querySelectorAll('.file-upload-area').forEach(area => {
+            const input = area.querySelector('input[type="file"]');
+            const fileName = area.querySelector('.file-name');
+
+            ['dragover', 'dragenter'].forEach(event => {
+                area.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    area.classList.add('dragover');
+                });
+            });
+
+            ['dragleave', 'dragend'].forEach(event => {
+                area.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                });
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    input.files = files;
+                    if (fileName) {
+                        fileName.textContent = files[0].name;
+                    }
+                    this.showAlert('success', 'Fichier sélectionné avec succès');
+                }
+            });
+
+            input.addEventListener('change', () => {
+                if (input.files.length > 0 && fileName) {
+                    fileName.textContent = input.files[0].name;
+                }
+            });
+        });
+    }
+
+    handleSearchInteractions() {
+        document.querySelectorAll('.search-form input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.closest('.search-form').classList.add('focused');
+            });
+
+            input.addEventListener('blur', () => {
+                input.closest('.search-form').classList.remove('focused');
+            });
+        });
+    }
+
+    initAnimations() {
+        // Animate numbers in dashboard stats
+        this.animateNumbers();
+        
+        // Initialize AOS (Animate On Scroll) if available
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 100
+            });
+        }
+    }
+
+    animateNumbers() {
+        document.querySelectorAll('.dashboard-stat h3').forEach(element => {
+            const target = parseInt(element.textContent);
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        });
+    }
+
+    initIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        // Observe elements for animation
+        document.querySelectorAll('.card, .stat-card, .job-card').forEach(el => {
+            observer.observe(el);
+        });
+    }
+
+    initNotificationSystem() {
+        // Auto-hide alerts
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                this.hideAlert(alert);
+            }, 5000);
+        });
+
+        // Mark notifications as read
+        document.querySelectorAll('.mark-notification-read').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await this.markNotificationAsRead(btn);
+            });
+        });
+    }
+
+    async markNotificationAsRead(btn) {
+        const notificationId = btn.dataset.notificationId;
+
+        try {
+            const response = await fetch(`/dashboard/api/notification/${notificationId}/read/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.getCSRFToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                btn.closest('.notification-item').style.opacity = '0';
+                setTimeout(() => {
+                    btn.closest('.notification-item').remove();
+                }, 300);
+            }
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    }
+
+    // Utility methods
+    showLoadingState(button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+
+    hideLoadingState(button, originalText) {
+        button.disabled = false;
+        button.innerHTML = originalText;
+    }
+
+    showAlert(type, message) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+
+        const container = document.querySelector('.container') || document.body;
+        if (container.querySelector('.alert') || container.classList.contains('container')) {
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+        } else {
+            document.body.insertAdjacentHTML('afterbegin', 
+                `<div class="container mt-3">${alertHtml}</div>`
+            );
+        }
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            this.hideAlert(document.querySelector('.alert'));
+        }, 5000);
+    }
+
+    hideAlert(alert) {
+        if (alert) {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }
+    }
+
+    getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Public utility methods
+    static formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    static formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    static formatDateTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+}
+
+// Initialize the platform when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.RecruitmentApp = new RecruitmentPlatform();
 });
 
-// Utility functions
-function showAlert(type, message) {
-    var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
-                    message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                    '</div>';
-    
-    var container = $('.container').first();
-    if (container.length) {
-        container.prepend(alertHtml);
-    } else {
-        $('body').prepend('<div class="container mt-3">' + alertHtml + '</div>');
-    }
-    
-    // Auto-hide after 5 seconds
-    setTimeout(function() {
-        $('.alert').first().fadeOut();
-    }, 5000);
-}
-
-function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
-
-function formatDate(dateString) {
-    var date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-}
-
-function formatDateTime(dateString) {
-    var date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// Export functions for global use
+// Export for global use
 window.RecruitmentPlatform = {
-    showAlert: showAlert,
-    formatNumber: formatNumber,
-    formatDate: formatDate,
-    formatDateTime: formatDateTime
+    showAlert: (type, message) => {
+        const app = window.RecruitmentApp;
+        if (app) app.showAlert(type, message);
+    },
+    formatNumber: RecruitmentPlatform.formatNumber,
+    formatDate: RecruitmentPlatform.formatDate,
+    formatDateTime: RecruitmentPlatform.formatDateTime
 };

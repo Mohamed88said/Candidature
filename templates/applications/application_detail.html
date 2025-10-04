@@ -4,109 +4,136 @@
 {% block title %}Candidature - {{ application.job.title }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container-fluid py-4">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-decoration-none">Accueil</a></li>
             {% if user.user_type == 'candidate' %}
-                <li class="breadcrumb-item"><a href="{% url 'applications:my_applications' %}">Mes candidatures</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'applications:my_applications' %}" class="text-decoration-none">Mes candidatures</a></li>
             {% else %}
-                <li class="breadcrumb-item"><a href="{% url 'applications:applications_list' %}">Candidatures</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'applications:applications_list' %}" class="text-decoration-none">Candidatures</a></li>
             {% endif %}
-            <li class="breadcrumb-item active">{{ application.job.title }}</li>
+            <li class="breadcrumb-item active">{{ application.job.title|truncatewords:4 }}</li>
         </ol>
     </nav>
 
     <div class="row">
         <!-- Main Content -->
         <div class="col-lg-8 mb-4">
-            <!-- Application Header -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <h2 class="fw-bold mb-2">{{ application.job.title }}</h2>
-                            <h5 class="text-muted mb-2">
-                                <i class="fas fa-building me-2"></i>{{ application.job.company }}
-                            </h5>
-                            <p class="text-muted mb-0">
-                                <i class="fas fa-map-marker-alt me-2"></i>{{ application.job.location }}
-                            </p>
+            <!-- Application Header Card -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="flex-grow-1">
+                            <h1 class="h2 fw-bold text-primary mb-2">{{ application.job.title }}</h1>
+                            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+                                <span class="d-flex align-items-center text-muted">
+                                    <i class="fas fa-building me-2"></i>{{ application.job.company }}
+                                </span>
+                                <span class="d-flex align-items-center text-muted">
+                                    <i class="fas fa-map-marker-alt me-2"></i>{{ application.job.location }}
+                                </span>
+                                {% if application.job.remote_work %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-wifi me-1"></i>Télétravail
+                                </span>
+                                {% endif %}
+                            </div>
                         </div>
                         <div class="text-end">
-                            <span class="badge 
-                                {% if application.status == 'pending' %}bg-warning
-                                {% elif application.status == 'reviewing' %}bg-info
-                                {% elif application.status == 'shortlisted' %}bg-success
-                                {% elif application.status == 'interview_scheduled' %}bg-primary
-                                {% elif application.status == 'accepted' %}bg-success
-                                {% elif application.status == 'rejected' %}bg-danger
-                                {% else %}bg-secondary{% endif %} fs-6 mb-2 d-block">
-                                {{ application.get_status_display }}
-                            </span>
-                            <small class="text-muted">
-                                Candidature du {{ application.applied_at|date:"d F Y" }}
+                            <div class="status-badge mb-3">
+                                <span class="badge fs-6 px-3 py-2 
+                                    {% if application.status == 'pending' %}bg-warning
+                                    {% elif application.status == 'reviewing' %}bg-info
+                                    {% elif application.status == 'shortlisted' %}bg-success
+                                    {% elif application.status == 'interview_scheduled' %}bg-primary
+                                    {% elif application.status == 'accepted' %}bg-success
+                                    {% elif application.status == 'rejected' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    <i class="fas 
+                                        {% if application.status == 'pending' %}fa-clock
+                                        {% elif application.status == 'reviewing' %}fa-search
+                                        {% elif application.status == 'shortlisted' %}fa-star
+                                        {% elif application.status == 'interview_scheduled' %}fa-calendar
+                                        {% elif application.status == 'accepted' %}fa-check
+                                        {% elif application.status == 'rejected' %}fa-times
+                                        {% else %}fa-question{% endif %} me-2"></i>
+                                    {{ application.get_status_display }}
+                                </span>
+                            </div>
+                            <small class="text-muted d-block">
+                                <i class="fas fa-clock me-1"></i>{{ application.applied_at|date:"d F Y" }}
                             </small>
                         </div>
                     </div>
 
-                    <!-- Application Meta -->
-                    <div class="row mb-3">
+                    <!-- Application Metrics -->
+                    <div class="row g-3 mb-4">
                         <div class="col-md-3">
-                            <small class="text-muted d-block">Priorité</small>
-                            <strong class="
-                                {% if application.priority == 'high' %}text-danger
-                                {% elif application.priority == 'urgent' %}text-danger
-                                {% elif application.priority == 'low' %}text-secondary
-                                {% else %}text-primary{% endif %}">
-                                {{ application.get_priority_display }}
-                            </strong>
+                            <div class="metric-card text-center p-3 rounded">
+                                <div class="metric-value fw-bold 
+                                    {% if application.priority == 'high' %}text-danger
+                                    {% elif application.priority == 'urgent' %}text-danger
+                                    {% elif application.priority == 'low' %}text-secondary
+                                    {% else %}text-primary{% endif %}">
+                                    {{ application.get_priority_display }}
+                                </div>
+                                <div class="metric-label text-muted small">Priorité</div>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <small class="text-muted d-block">Salaire souhaité</small>
-                            <strong>
-                                {% if application.expected_salary %}
-                                    {{ application.expected_salary }} GNF {% else %}
-                                    Non renseigné
-                                {% endif %}
-                            </strong>
+                            <div class="metric-card text-center p-3 rounded">
+                                <div class="metric-value fw-bold text-success">
+                                    {% if application.expected_salary %}
+                                        {{ application.expected_salary }} GNF
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                                <div class="metric-label text-muted small">Salaire souhaité</div>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <small class="text-muted d-block">Disponibilité</small>
-                            <strong>
-                                {% if application.availability_date %}
-                                    {{ application.availability_date|date:"d F Y" }}
-                                {% else %}
-                                    Immédiate
-                                {% endif %}
-                            </strong>
+                            <div class="metric-card text-center p-3 rounded">
+                                <div class="metric-value fw-bold text-info">
+                                    {% if application.availability_date %}
+                                        {{ application.availability_date|date:"d/m/Y" }}
+                                    {% else %}
+                                        Immédiate
+                                    {% endif %}
+                                </div>
+                                <div class="metric-label text-muted small">Disponibilité</div>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <small class="text-muted d-block">Mobilité</small>
-                            <strong>
-                                {% if application.willing_to_relocate %}
-                                    <span class="text-success">Oui</span>
-                                {% else %}
-                                    <span class="text-muted">Non</span>
-                                {% endif %}
-                            </strong>
+                            <div class="metric-card text-center p-3 rounded">
+                                <div class="metric-value fw-bold 
+                                    {% if application.willing_to_relocate %}text-success{% else %}text-muted{% endif %}">
+                                    {% if application.willing_to_relocate %}Oui{% else %}Non{% endif %}
+                                </div>
+                                <div class="metric-label text-muted small">Mobilité</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Admin Actions -->
                     {% if can_edit %}
                     <div class="d-flex gap-2 flex-wrap">
-                        <a href="{% url 'applications:update_status' application.pk %}" class="btn btn-primary">
+                        <a href="{% url 'applications:update_status' application.pk %}" 
+                           class="btn btn-primary btn-lg d-flex align-items-center">
                             <i class="fas fa-edit me-2"></i>Modifier le statut
                         </a>
-                        <a href="{% url 'applications:add_comment' application.pk %}" class="btn btn-outline-primary">
+                        <a href="{% url 'applications:add_comment' application.pk %}" 
+                           class="btn btn-outline-primary btn-lg d-flex align-items-center">
                             <i class="fas fa-comment me-2"></i>Ajouter un commentaire
                         </a>
-                        <a href="{% url 'applications:rate_application' application.pk %}" class="btn btn-outline-success">
+                        <a href="{% url 'applications:rate_application' application.pk %}" 
+                           class="btn btn-outline-success btn-lg d-flex align-items-center">
                             <i class="fas fa-star me-2"></i>Évaluer
                         </a>
-                        <a href="{% url 'applications:schedule_interview' application.pk %}" class="btn btn-outline-info">
+                        <a href="{% url 'applications:schedule_interview' application.pk %}" 
+                           class="btn btn-outline-info btn-lg d-flex align-items-center">
                             <i class="fas fa-calendar me-2"></i>Programmer un entretien
                         </a>
                     </div>
@@ -114,44 +141,53 @@
                 </div>
             </div>
 
-            <!-- Cover Letter -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-file-alt me-2"></i>Lettre de motivation
-                    </h5>
+            <!-- Cover Letter Section -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h3 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-file-alt text-primary me-2"></i>Lettre de motivation
+                    </h3>
                 </div>
                 <div class="card-body">
-                    <div class="cover-letter-content">
+                    <div class="cover-letter-content bg-light p-4 rounded">
                         {{ application.cover_letter|linebreaks }}
                     </div>
                 </div>
             </div>
 
-            <!-- Comments -->
+            <!-- Comments Section -->
             {% if comments %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-comments me-2"></i>Commentaires et feedback
-                    </h5>
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h3 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-comments text-primary me-2"></i>Commentaires et feedback
+                        <span class="badge bg-primary ms-2">{{ comments.count }}</span>
+                    </h3>
                 </div>
                 <div class="card-body">
                     {% for comment in comments %}
-                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                    <div class="comment-item d-flex mb-4 p-3 rounded hover-lift {% if not forloop.last %}border-bottom{% endif %}">
                         <div class="flex-shrink-0 me-3">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="fas fa-user"></i>
+                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px;">
+                                {% if comment.author.profile_picture and CLOUDINARY_ACTIVE %}
+                                    <img src="{{ comment.author.profile_picture.url }}" 
+                                         alt="{{ comment.author.full_name }}" 
+                                         class="rounded-circle w-100 h-100">
+                                {% else %}
+                                    <i class="fas fa-user fa-lg"></i>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="fw-bold mb-0">{{ comment.author.full_name }}</h6>
-                                <small class="text-muted">{{ comment.created_at|date:"d F Y à H:i" }}</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary">{{ comment.get_comment_type_display }}</span>
+                                    <small class="text-muted">{{ comment.created_at|date:"d F Y à H:i" }}</small>
+                                </div>
                             </div>
-                            <span class="badge bg-secondary mb-2">{{ comment.get_comment_type_display }}</span>
-                            <p class="mb-0">{{ comment.content|linebreaks }}</p>
+                            <p class="text-muted mb-0">{{ comment.content|linebreaks }}</p>
                         </div>
                     </div>
                     {% endfor %}
@@ -159,45 +195,52 @@
             </div>
             {% endif %}
 
-            <!-- Interviews -->
+            <!-- Interviews Section -->
             {% if interviews %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-handshake me-2"></i>Entretiens
-                    </h5>
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h3 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-handshake text-primary me-2"></i>Entretiens
+                        <span class="badge bg-primary ms-2">{{ interviews.count }}</span>
+                    </h3>
                 </div>
                 <div class="card-body">
                     {% for interview in interviews %}
-                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                    <div class="interview-item d-flex mb-4 p-3 rounded hover-lift {% if not forloop.last %}border-bottom{% endif %}">
                         <div class="flex-shrink-0 me-3">
-                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="fas fa-calendar"></i>
+                            <div class="avatar bg-info text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-calendar fa-lg"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1">{{ interview.get_interview_type_display }}</h6>
-                            <p class="text-muted mb-1">
-                                <i class="fas fa-clock me-2"></i>{{ interview.scheduled_date|date:"d F Y à H:i" }}
-                                ({{ interview.duration_minutes }} min)
-                            </p>
-                            {% if interview.location %}
-                            <p class="text-muted mb-1">
-                                <i class="fas fa-map-marker-alt me-2"></i>{{ interview.location }}
-                            </p>
-                            {% endif %}
-                            <span class="badge 
-                                {% if interview.status == 'scheduled' %}bg-primary
-                                {% elif interview.status == 'completed' %}bg-success
-                                {% elif interview.status == 'cancelled' %}bg-danger
-                                {% else %}bg-secondary{% endif %}">
-                                {{ interview.get_status_display }}
-                            </span>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="fw-bold mb-0">{{ interview.get_interview_type_display }}</h6>
+                                <span class="badge 
+                                    {% if interview.status == 'scheduled' %}bg-primary
+                                    {% elif interview.status == 'completed' %}bg-success
+                                    {% elif interview.status == 'cancelled' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ interview.get_status_display }}
+                                </span>
+                            </div>
+                            
+                            <div class="interview-details mb-2">
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-clock me-2"></i>
+                                    {{ interview.scheduled_date|date:"d F Y à H:i" }}
+                                    ({{ interview.duration_minutes }} min)
+                                </p>
+                                {% if interview.location %}
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-map-marker-alt me-2"></i>{{ interview.location }}
+                                </p>
+                                {% endif %}
+                            </div>
                             
                             {% if interview.overall_rating %}
-                            <div class="mt-2">
-                                <small class="text-muted">Note: </small>
+                            <div class="rating-display">
+                                <small class="text-muted me-2">Note:</small>
                                 {% for i in "12345" %}
                                     {% if forloop.counter <= interview.overall_rating %}
                                         <i class="fas fa-star text-warning"></i>
@@ -205,6 +248,13 @@
                                         <i class="far fa-star text-muted"></i>
                                     {% endif %}
                                 {% endfor %}
+                                <span class="text-muted ms-2">({{ interview.overall_rating }}/5)</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if interview.notes %}
+                            <div class="interview-notes mt-2 p-2 bg-light rounded">
+                                <small class="text-muted">{{ interview.notes|truncatewords:30 }}</small>
                             </div>
                             {% endif %}
                         </div>
@@ -216,24 +266,24 @@
 
             <!-- Status History -->
             {% if status_history %}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history me-2"></i>Historique des statuts
-                    </h5>
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h3 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-history text-primary me-2"></i>Historique des statuts
+                    </h3>
                 </div>
                 <div class="card-body">
                     <div class="timeline">
                         {% for history in status_history %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-item position-relative ps-4 pb-4">
+                            <div class="timeline-marker position-absolute start-0 top-0 bg-primary rounded-circle"></div>
                             <div class="timeline-content">
-                                <h6 class="mb-1">{{ history.get_new_status_display }}</h6>
-                                <p class="text-muted mb-1">
+                                <h6 class="fw-bold mb-1">{{ history.get_new_status_display }}</h6>
+                                <p class="text-muted mb-1 small">
                                     Par {{ history.changed_by.full_name }} le {{ history.changed_at|date:"d F Y à H:i" }}
                                 </p>
                                 {% if history.reason %}
-                                <p class="small mb-0">{{ history.reason }}</p>
+                                <p class="small text-muted mb-0 bg-light p-2 rounded">{{ history.reason }}</p>
                                 {% endif %}
                             </div>
                         </div>
@@ -246,113 +296,160 @@
 
         <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- Candidate Info -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0">Informations candidat</h6>
+            <!-- Candidate Profile Card -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="h6 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-user me-2"></i>Informations candidat
+                    </h4>
                 </div>
                 <div class="card-body">
-                    <div class="text-center mb-3">
-                        {% if application.candidate.profile_picture %}
+                    <div class="text-center mb-4">
+                        {% if application.candidate.profile_picture and CLOUDINARY_ACTIVE %}
                             <img src="{{ application.candidate.profile_picture.url }}" 
-                                 alt="Photo" class="rounded-circle" 
-                                 style="width: 80px; height: 80px; object-fit: cover;">
+                                 alt="Photo" class="rounded-circle shadow" 
+                                 style="width: 100px; height: 100px; object-fit: cover;">
                         {% else %}
-                            <div class="bg-primary text-white rounded-circle mx-auto d-flex align-items-center justify-content-center" 
-                                 style="width: 80px; height: 80px;">
+                            <div class="avatar-lg bg-primary text-white rounded-circle mx-auto d-flex align-items-center justify-content-center shadow">
                                 <i class="fas fa-user fa-2x"></i>
                             </div>
                         {% endif %}
-                        <h6 class="fw-bold mt-2 mb-1">{{ application.candidate.user.full_name }}</h6>
-                        <p class="text-muted small">{{ application.candidate.current_position|default:"Candidat" }}</p>
+                        <h5 class="fw-bold mt-3 mb-1">{{ application.candidate.user.full_name }}</h5>
+                        <p class="text-muted">{{ application.candidate.current_position|default:"Candidat" }}</p>
                     </div>
                     
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Email</small>
-                        <strong>{{ application.candidate.user.email }}</strong>
-                    </div>
-                    
-                    {% if application.candidate.mobile_phone %}
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Téléphone</small>
-                        <strong>{{ application.candidate.mobile_phone }}</strong>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Expérience</small>
-                        <strong>{{ application.candidate.years_of_experience }} ans</strong>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Profil complété</small>
-                        <div class="progress mt-1" style="height: 6px;">
-                            <div class="progress-bar bg-success" 
-                                 style="width: {{ application.candidate.profile_completion }}%"></div>
+                    <!-- Candidate Details -->
+                    <div class="candidate-details">
+                        <div class="detail-item mb-3">
+                            <small class="text-muted d-block">Email</small>
+                            <strong class="d-flex align-items-center">
+                                <i class="fas fa-envelope me-2 text-primary"></i>
+                                {{ application.candidate.user.email }}
+                            </strong>
                         </div>
-                        <small class="text-success">{{ application.candidate.profile_completion }}%</small>
+                        
+                        {% if application.candidate.mobile_phone %}
+                        <div class="detail-item mb-3">
+                            <small class="text-muted d-block">Téléphone</small>
+                            <strong class="d-flex align-items-center">
+                                <i class="fas fa-phone me-2 text-primary"></i>
+                                {{ application.candidate.mobile_phone }}
+                            </strong>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="detail-item mb-3">
+                            <small class="text-muted d-block">Expérience</small>
+                            <strong class="d-flex align-items-center">
+                                <i class="fas fa-briefcase me-2 text-primary"></i>
+                                {{ application.candidate.years_of_experience }} ans
+                            </strong>
+                        </div>
+                        
+                        <div class="detail-item mb-4">
+                            <small class="text-muted d-block mb-2">Profil complété</small>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" 
+                                     style="width: {{ application.candidate.profile_completion }}%"
+                                     role="progressbar">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">{{ application.candidate.profile_completion }}%</small>
+                                <small class="text-muted">Complet</small>
+                            </div>
+                        </div>
                     </div>
                     
                     {% if can_edit %}
                     <a href="{% url 'dashboard:candidate_profile' application.candidate.id %}" 
-                       class="btn btn-outline-primary btn-sm w-100">
+                       class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
                         <i class="fas fa-user me-2"></i>Voir le profil complet
                     </a>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Documents -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0">Documents</h6>
+            <!-- Documents Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h5 class="h6 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-folder text-primary me-2"></i>Documents
+                    </h5>
                 </div>
                 <div class="card-body">
-                    {% if application.resume_file %}
-                    <p class="mb-2">
-                        <i class="fas fa-file-pdf me-2 text-danger"></i>
-                        <a href="{{ application.resume_file.url }}" target="_blank">CV</a>
-                    </p>
-                    {% endif %}
-                    
-                    {% if application.candidate.cv_file %}
-                    <p class="mb-2">
-                        <i class="fas fa-file-pdf me-2 text-danger"></i>
-                        <a href="{{ application.candidate.cv_file.url }}" target="_blank">CV du profil</a>
-                    </p>
-                    {% endif %}
-                    
-                    {% if application.additional_documents %}
-                    <p class="mb-2">
-                        <i class="fas fa-file-alt me-2 text-primary"></i>
-                        <a href="{{ application.additional_documents.url }}" target="_blank">Documents supplémentaires</a>
-                    </p>
-                    {% endif %}
-                    
-                    {% if not application.resume_file and not application.candidate.cv_file and not application.additional_documents %}
-                    <p class="text-muted mb-0">Aucun document</p>
-                    {% endif %}
+                    <div class="document-list">
+                        {% if application.resume_file and CLOUDINARY_ACTIVE %}
+                        <div class="document-item mb-3 p-2 rounded hover-lift">
+                            <a href="{{ application.resume_file.url }}" target="_blank" 
+                               class="text-decoration-none d-flex align-items-center">
+                                <i class="fas fa-file-pdf text-danger me-2 fa-lg"></i>
+                                <div>
+                                    <strong class="d-block">CV de candidature</strong>
+                                    <small class="text-muted">Télécharger</small>
+                                </div>
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if application.candidate.cv_file and CLOUDINARY_ACTIVE %}
+                        <div class="document-item mb-3 p-2 rounded hover-lift">
+                            <a href="{{ application.candidate.cv_file.url }}" target="_blank" 
+                               class="text-decoration-none d-flex align-items-center">
+                                <i class="fas fa-file-pdf text-danger me-2 fa-lg"></i>
+                                <div>
+                                    <strong class="d-block">CV du profil</strong>
+                                    <small class="text-muted">Télécharger</small>
+                                </div>
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if application.additional_documents and CLOUDINARY_ACTIVE %}
+                        <div class="document-item mb-3 p-2 rounded hover-lift">
+                            <a href="{{ application.additional_documents.url }}" target="_blank" 
+                               class="text-decoration-none d-flex align-items-center">
+                                <i class="fas fa-file-alt text-primary me-2 fa-lg"></i>
+                                <div>
+                                    <strong class="d-block">Documents supplémentaires</strong>
+                                    <small class="text-muted">Télécharger</small>
+                                </div>
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if not application.resume_file and not application.candidate.cv_file and not application.additional_documents %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-folder-open fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Aucun document</p>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
-            <!-- Ratings -->
+            <!-- Ratings Card -->
             {% if ratings %}
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Évaluations</h6>
-                    {% if avg_rating %}
-                        <span class="badge bg-warning">{{ avg_rating|floatformat:1 }}/5</span>
-                    {% endif %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h5 class="h6 fw-bold mb-0 d-flex align-items-center justify-content-between">
+                        <span>
+                            <i class="fas fa-star text-warning me-2"></i>Évaluations
+                        </span>
+                        {% if avg_rating %}
+                            <span class="badge bg-warning">{{ avg_rating|floatformat:1 }}/5</span>
+                        {% endif %}
+                    </h5>
                 </div>
                 <div class="card-body">
                     {% for rating in ratings %}
-                    <div class="mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                    <div class="rating-item mb-3 p-2 rounded hover-lift {% if not forloop.last %}border-bottom{% endif %}">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <strong class="small">{{ rating.get_criteria_display }}</strong>
                             <span class="badge bg-primary">{{ rating.score }}/{{ rating.max_score }}</span>
                         </div>
                         {% if rating.comments %}
-                        <p class="small text-muted mb-0">{{ rating.comments }}</p>
+                        <p class="small text-muted mb-1">{{ rating.comments }}</p>
                         {% endif %}
                         <small class="text-muted">Par {{ rating.evaluator.full_name }}</small>
                     </div>
@@ -361,11 +458,13 @@
             </div>
             {% endif %}
 
-            <!-- Job Link -->
-            <div class="card">
-                <div class="card-body text-center">
+            <!-- Job Link Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-briefcase fa-2x text-primary mb-3"></i>
                     <h6 class="fw-bold mb-3">Offre d'emploi</h6>
-                    <a href="{% url 'jobs:job_detail' application.job.slug %}" class="btn btn-outline-primary w-100">
+                    <a href="{% url 'jobs:job_detail' application.job.slug %}" 
+                       class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
                         <i class="fas fa-external-link-alt me-2"></i>Voir l'offre complète
                     </a>
                 </div>
@@ -378,38 +477,129 @@
 {% block extra_css %}
 <style>
 .cover-letter-content {
-    line-height: 1.6;
-    white-space: pre-line;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
 }
 
 .timeline {
     position: relative;
-    padding-left: 30px;
 }
 
-.timeline-item {
-    position: relative;
-    margin-bottom: 20px;
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 25px;
+    bottom: -25px;
+    width: 2px;
+    background: linear-gradient(to bottom, #007bff, #dee2e6);
+}
+
+.timeline-item:last-child::before {
+    display: none;
 }
 
 .timeline-marker {
-    position: absolute;
-    left: -35px;
-    top: 5px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #007bff;
 }
 
-.timeline-item:not(:last-child)::before {
-    content: '';
-    position: absolute;
-    left: -31px;
-    top: 15px;
-    width: 2px;
-    height: calc(100% + 10px);
-    background-color: #dee2e6;
+.metric-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.metric-value {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.avatar-lg {
+    width: 100px;
+    height: 100px;
+    font-size: 2.5rem;
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.document-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.status-badge .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.comment-item, .interview-item, .rating-item {
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .metric-card {
+        margin-bottom: 1rem;
+    }
 }
 </style>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation for cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Auto-expand textareas in comments
+    document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    });
+});
+</script>
+{% endblock %}

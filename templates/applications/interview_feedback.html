@@ -1,78 +1,348 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Feedback d'entretien{% endblock %}
+{% block title %}Feedback d'entretien - {{ interview.application.candidate.user.full_name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Main Card -->
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-success text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-clipboard-check me-2"></i>Feedback d'entretien
-                    </h3>
-                    <small>{{ interview.application.candidate.user.full_name }} - {{ interview.get_interview_type_display }}</small>
+                <div class="card-header bg-gradient-success text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="feedback-icon me-3">
+                            <i class="fas fa-clipboard-check fa-2x"></i>
+                        </div>
+                        <div>
+                            <h1 class="h3 fw-bold mb-1">Feedback d'entretien</h1>
+                            <p class="mb-0 opacity-8">{{ interview.application.candidate.user.full_name }} - {{ interview.get_interview_type_display }}</p>
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="card-body p-4">
                     <!-- Interview Summary -->
-                    <div class="alert alert-light">
+                    <div class="interview-summary-card bg-light rounded p-4 mb-4">
                         <div class="row">
                             <div class="col-md-6">
-                                <h6><i class="fas fa-calendar me-2"></i>Entretien</h6>
-                                <p class="mb-1">{{ interview.get_interview_type_display }}</p>
-                                <p class="mb-1">{{ interview.scheduled_date|date:"d F Y à H:i" }}</p>
-                                <small class="text-muted">Durée : {{ interview.duration_minutes }} minutes</small>
+                                <h6 class="fw-semibold text-primary mb-3">
+                                    <i class="fas fa-calendar me-2"></i>Détails de l'entretien
+                                </h6>
+                                <div class="detail-item mb-2">
+                                    <small class="text-muted d-block">Type</small>
+                                    <strong>{{ interview.get_interview_type_display }}</strong>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <small class="text-muted d-block">Date et heure</small>
+                                    <strong>{{ interview.scheduled_date|date:"d F Y à H:i" }}</strong>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <small class="text-muted d-block">Durée</small>
+                                    <strong>{{ interview.duration_minutes }} minutes</strong>
+                                </div>
+                                {% if interview.location %}
+                                <div class="detail-item">
+                                    <small class="text-muted d-block">Lieu</small>
+                                    <strong>{{ interview.location }}</strong>
+                                </div>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
-                                <h6><i class="fas fa-user me-2"></i>Candidat</h6>
-                                <p class="mb-1">{{ interview.application.candidate.user.full_name }}</p>
-                                <p class="mb-1">{{ interview.application.job.title }}</p>
-                                <small class="text-muted">{{ interview.application.job.company }}</small>
+                                <h6 class="fw-semibold text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>Informations candidat
+                                </h6>
+                                <div class="detail-item mb-2">
+                                    <small class="text-muted d-block">Nom</small>
+                                    <strong>{{ interview.application.candidate.user.full_name }}</strong>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <small class="text-muted d-block">Poste</small>
+                                    <strong>{{ interview.application.job.title }}</strong>
+                                </div>
+                                <div class="detail-item mb-2">
+                                    <small class="text-muted d-block">Entreprise</small>
+                                    <strong>{{ interview.application.job.company }}</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <small class="text-muted d-block">Statut actuel</small>
+                                    <span class="badge bg-primary">{{ interview.application.get_status_display }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <form method="post">
+                    <!-- Feedback Form -->
+                    <form method="post" id="feedbackForm">
                         {% csrf_token %}
-                        {{ form|crispy }}
                         
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'applications:application_detail' interview.application.pk %}" class="btn btn-outline-secondary">
+                        <!-- Overall Rating -->
+                        <div class="rating-section mb-5">
+                            <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                <i class="fas fa-star me-2"></i>Évaluation globale
+                            </h4>
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <div class="star-rating-widget text-center mb-3">
+                                        <div class="d-flex justify-content-center mb-3">
+                                            {% for i in "12345" %}
+                                            <div class="star-container mx-1">
+                                                <input type="radio" id="overall_star{{ forloop.counter }}" 
+                                                       name="overall_rating" value="{{ forloop.counter }}" 
+                                                       class="star-radio" 
+                                                       {% if form.instance.overall_rating == forloop.counter %}checked{% endif %}>
+                                                <label for="overall_star{{ forloop.counter }}" class="star-label">
+                                                    <i class="fas fa-star fa-2x"></i>
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="text-center">
+                                            <small class="text-muted fw-semibold" id="overallRatingText">
+                                                {% if form.instance.overall_rating %}
+                                                    {{ form.instance.overall_rating }}/5 - 
+                                                    {% if form.instance.overall_rating == 1 %}Insuffisant
+                                                    {% elif form.instance.overall_rating == 2 %}En développement
+                                                    {% elif form.instance.overall_rating == 3 %}Compétent
+                                                    {% elif form.instance.overall_rating == 4 %}Très bon
+                                                    {% else %}Excellent{% endif %}
+                                                {% else %}
+                                                    Sélectionnez une note de 1 à 5 étoiles
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {{ form.overall_rating|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Feedback -->
+                        <div class="row g-4">
+                            <!-- Notes and Recommendation -->
+                            <div class="col-lg-8">
+                                <div class="form-section">
+                                    <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                        <i class="fas fa-edit me-2"></i>Notes détaillées
+                                    </h4>
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body">
+                                            {{ form.notes|as_crispy_field }}
+                                            <div class="form-text">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-lightbulb me-1 text-warning"></i>
+                                                    Décrivez vos impressions, les points forts du candidat, 
+                                                    les axes d'amélioration et toute information pertinente.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recommendation and Status -->
+                            <div class="col-lg-4">
+                                <div class="form-section">
+                                    <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                        <i class="fas fa-flag me-2"></i>Décision
+                                    </h4>
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body">
+                                            {{ form.recommendation|as_crispy_field }}
+                                            {{ form.status|as_crispy_field }}
+                                            
+                                            <!-- Quick Assessment -->
+                                            <div class="quick-assessment mt-4">
+                                                <h6 class="fw-semibold text-primary mb-3">Évaluation rapide</h6>
+                                                <div class="d-grid gap-2">
+                                                    <button type="button" class="btn btn-outline-success d-flex align-items-center justify-content-center" 
+                                                            data-assessment="positive">
+                                                        <i class="fas fa-thumbs-up me-2"></i>Impression positive
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-warning d-flex align-items-center justify-content-center" 
+                                                            data-assessment="mixed">
+                                                        <i class="fas fa-minus-circle me-2"></i>Résultats mitigés
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger d-flex align-items-center justify-content-center" 
+                                                            data-assessment="negative">
+                                                        <i class="fas fa-thumbs-down me-2"></i>Ne convient pas
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <a href="{% url 'applications:application_detail' interview.application.pk %}" 
+                               class="btn btn-outline-secondary btn-lg d-flex align-items-center">
                                 <i class="fas fa-arrow-left me-2"></i>Retour à la candidature
                             </a>
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-save me-2"></i>Enregistrer le feedback
-                            </button>
+                            <div class="d-flex gap-3">
+                                <button type="button" class="btn btn-outline-info btn-lg d-flex align-items-center" 
+                                        id="saveDraftBtn">
+                                    <i class="fas fa-save me-2"></i>Sauvegarder le brouillon
+                                </button>
+                                <button type="submit" class="btn btn-success btn-lg d-flex align-items-center shadow" id="submitBtn">
+                                    <i class="fas fa-check me-2"></i>Enregistrer le feedback
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Rating Guide -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-star me-2"></i>Guide d'évaluation
-                    </h5>
+            <!-- Evaluation Guide -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-graduation-cap text-primary me-2"></i>Guide d'évaluation
+                    </h4>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-success">Notes</h6>
-                            <ul class="small text-muted">
-                                <li><strong>5/5 :</strong> Excellent, dépasse les attentes</li>
-                                <li><strong>4/5 :</strong> Très bon, répond aux attentes</li>
-                                <li><strong>3/5 :</strong> Satisfaisant, quelques lacunes</li>
-                            </ul>
+                            <div class="guide-section mb-4">
+                                <h6 class="fw-bold text-success mb-3">Notes et significations</h6>
+                                <div class="guide-item mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="stars me-2">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                        </div>
+                                        <strong class="text-success">5/5 - Excellent</strong>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Candidat exceptionnel, dépasse toutes les attentes, 
+                                        compétences techniques et soft skills remarquables.
+                                    </p>
+                                </div>
+                                <div class="guide-item mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="stars me-2">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="far fa-star text-muted"></i>
+                                        </div>
+                                        <strong class="text-primary">4/5 - Très bon</strong>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Candidat solide, dépasse la plupart des attentes, 
+                                        bon équilibre entre compétences techniques et relationnelles.
+                                    </p>
+                                </div>
+                                <div class="guide-item">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="stars me-2">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="far fa-star text-muted"></i>
+                                            <i class="far fa-star text-muted"></i>
+                                        </div>
+                                        <strong class="text-info">3/5 - Compétent</strong>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Répond aux attentes de base, compétences adéquates, 
+                                        peut nécessiter un encadrement initial.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-info">Recommandations</h6>
-                            <ul class="small text-muted">
-                                <li><strong>Embauche :</strong> Candidat idéal</li>
-                                <li><strong>Mitigé :</strong> Besoin d'un autre entretien</li>
-                                <li><strong>Non :</strong> Ne correspond pas au poste</li>
-                            </ul>
+                            <div class="guide-section mb-4">
+                                <h6 class="fw-bold text-primary mb-3">Recommandations</h6>
+                                <div class="guide-item mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-user-check text-success me-2"></i>
+                                        <strong class="text-success">Recommande l'embauche</strong>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Le candidat est idéal pour le poste, 
+                                        forte adéquation avec l'équipe et la culture d'entreprise.
+                                    </p>
+                                </div>
+                                <div class="guide-item mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-minus-circle text-warning me-2"></i>
+                                        <strong class="text-warning">Mitigé</strong>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Points positifs et négatifs équilibrés, 
+                                        peut nécessiter un entretien supplémentaire ou une évaluation complémentaire.
+                                    </p>
+                                </div>
+                                <div class="guide-item">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-user-times text-danger me-2"></i>
+                                        <strong class="text-danger">Ne recommande pas</strong>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Le candidat ne correspond pas aux exigences du poste 
+                                        ou à la culture de l'entreprise.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Criteria -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-clipboard-list text-primary me-2"></i>Critères d'évaluation
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="criteria-item text-center mb-4">
+                                <div class="criteria-icon bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <h6 class="fw-bold text-primary mb-2">Compétences techniques</h6>
+                                <p class="text-muted small mb-0">
+                                    Maîtrise des technologies, résolution de problèmes, 
+                                    expertise métier, capacité d'apprentissage.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="criteria-item text-center mb-4">
+                                <div class="criteria-icon bg-success text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <h6 class="fw-bold text-success mb-2">Communication</h6>
+                                <p class="text-muted small mb-0">
+                                    Clarté d'expression, écoute active, présentation, 
+                                    adaptation au interlocuteur.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="criteria-item text-center mb-4">
+                                <div class="criteria-icon bg-info text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h6 class="fw-bold text-info mb-2">Adéquation culturelle</h6>
+                                <p class="text-muted small mb-0">
+                                    Valeurs partagées, intégration à l'équipe, 
+                                    motivation, alignement avec la vision.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -80,4 +350,309 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.feedback-icon {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+}
+
+.card-header.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.interview-summary-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-left: 4px solid #28a745;
+}
+
+.star-rating-widget {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 2px dashed #dee2e6;
+}
+
+.star-container {
+    position: relative;
+}
+
+.star-radio {
+    display: none;
+}
+
+.star-label {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #dee2e6;
+}
+
+.star-label:hover {
+    transform: scale(1.2);
+    color: #ffc107;
+}
+
+.star-radio:checked + .star-label {
+    color: #ffc107;
+    transform: scale(1.1);
+}
+
+.star-radio:checked ~ .star-label {
+    color: #ffc107;
+}
+
+.guide-item, .criteria-item {
+    transition: all 0.3s ease;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.guide-item:hover, .criteria-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: translateY(-2px);
+}
+
+.quick-assessment .btn {
+    transition: all 0.3s ease;
+}
+
+.quick-assessment .btn:hover {
+    transform: translateY(-2px);
+}
+
+.detail-item {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .star-rating-widget {
+        padding: 1rem;
+    }
+    
+    .star-label i {
+        font-size: 1.5rem !important;
+    }
+    
+    .quick-assessment .btn {
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const feedbackForm = document.getElementById('feedbackForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const saveDraftBtn = document.getElementById('saveDraftBtn');
+    const overallRatingText = document.getElementById('overallRatingText');
+    const overallRatingInput = document.querySelector('#id_overall_rating');
+
+    // Star rating functionality
+    const starRadios = document.querySelectorAll('.star-radio[name="overall_rating"]');
+    
+    const ratingDescriptions = {
+        1: '1/5 - Insuffisant - Ne répond pas aux attentes minimales',
+        2: '2/5 - En développement - Compétences de base, besoin d\'amélioration',
+        3: '3/5 - Compétent - Répond aux attentes du poste',
+        4: '4/5 - Très bon - Dépasse régulièrement les attentes',
+        5: '5/5 - Excellent - Exceptionnel, modèle pour les autres'
+    };
+    
+    starRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const rating = this.value;
+            overallRatingText.textContent = ratingDescriptions[rating];
+            overallRatingText.className = 'fw-bold ' + 
+                (rating <= 2 ? 'text-danger' : 
+                 rating == 3 ? 'text-info' : 
+                 rating == 4 ? 'text-primary' : 'text-success');
+            
+            // Update the hidden input
+            if (overallRatingInput) {
+                overallRatingInput.value = rating;
+            }
+        });
+    });
+    
+    // Initialize with current rating
+    const currentRating = document.querySelector('.star-radio:checked');
+    if (currentRating) {
+        currentRating.dispatchEvent(new Event('change'));
+    }
+
+    // Quick assessment buttons
+    document.querySelectorAll('[data-assessment]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const assessment = this.dataset.assessment;
+            
+            switch(assessment) {
+                case 'positive':
+                    setStarRating(5);
+                    setRecommendation('hire');
+                    setStatus('completed');
+                    break;
+                case 'mixed':
+                    setStarRating(3);
+                    setRecommendation('maybe');
+                    setStatus('completed');
+                    break;
+                case 'negative':
+                    setStarRating(2);
+                    setRecommendation('no_hire');
+                    setStatus('completed');
+                    break;
+            }
+            
+            showNotification(`Évaluation ${assessment} appliquée`);
+        });
+    });
+
+    function setStarRating(rating) {
+        const starRadio = document.querySelector(`#overall_star${rating}`);
+        if (starRadio) {
+            starRadio.checked = true;
+            starRadio.dispatchEvent(new Event('change'));
+        }
+    }
+
+    function setRecommendation(recommendation) {
+        const recommendationSelect = document.querySelector('#id_recommendation');
+        if (recommendationSelect) {
+            recommendationSelect.value = recommendation;
+        }
+    }
+
+    function setStatus(status) {
+        const statusSelect = document.querySelector('#id_status');
+        if (statusSelect) {
+            statusSelect.value = status;
+        }
+    }
+
+    // Save draft functionality
+    saveDraftBtn.addEventListener('click', function() {
+        const formData = new FormData(feedbackForm);
+        
+        // Convert FormData to object
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+        
+        // Save to localStorage
+        localStorage.setItem(`feedback_draft_${interview.id}`, JSON.stringify(data));
+        
+        showNotification('Brouillon sauvegardé avec succès');
+    });
+
+    // Load draft if exists
+    const savedDraft = localStorage.getItem(`feedback_draft_${interview.id}`);
+    if (savedDraft) {
+        try {
+            const data = JSON.parse(savedDraft);
+            Object.keys(data).forEach(key => {
+                const field = feedbackForm.querySelector(`[name="${key}"]`);
+                if (field) {
+                    if (field.type === 'radio') {
+                        const radio = feedbackForm.querySelector(`[name="${key}"][value="${data[key]}"]`);
+                        if (radio) radio.checked = true;
+                    } else {
+                        field.value = data[key];
+                    }
+                }
+            });
+            
+            // Trigger rating update
+            const currentRating = document.querySelector('.star-radio:checked');
+            if (currentRating) {
+                currentRating.dispatchEvent(new Event('change'));
+            }
+            
+            showNotification('Brouillon chargé', 'info');
+        } catch (e) {
+            console.log('Error loading draft:', e);
+        }
+    }
+
+    // Form submission
+    feedbackForm.addEventListener('submit', function(e) {
+        // Clear draft on successful submission
+        localStorage.removeItem(`feedback_draft_${interview.id}`);
+        
+        // Show loading state
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+        submitBtn.disabled = true;
+        
+        // Re-enable after 5 seconds (safety)
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 5000);
+    });
+
+    function showNotification(message, type = 'success') {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-info';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+        
+        const notification = document.createElement('div');
+        notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+        notification.style.zIndex = '1060';
+        notification.innerHTML = `
+            <i class="fas ${icon} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Auto-save every 30 seconds
+    let autoSaveInterval = setInterval(() => {
+        if (feedbackForm.checkValidity()) {
+            saveDraftBtn.click();
+        }
+    }, 30000);
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        clearInterval(autoSaveInterval);
+    });
+
+    // Animate criteria items
+    const criteriaItems = document.querySelectorAll('.criteria-item, .guide-item');
+    criteriaItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            item.style.transition = 'all 0.5s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
 {% endblock %}

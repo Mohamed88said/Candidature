@@ -4,49 +4,628 @@
 {% block title %}Ajouter un commentaire - {{ application.candidate.user.full_name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Main Card -->
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-success text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-comment me-2"></i>Ajouter un commentaire
-                    </h3>
-                    <small>{{ application.candidate.user.full_name }} - {{ application.job.title }}</small>
+                <div class="card-header bg-gradient-success text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="comment-icon me-3">
+                            <i class="fas fa-comment fa-2x"></i>
+                        </div>
+                        <div>
+                            <h1 class="h3 fw-bold mb-1">Ajouter un commentaire</h1>
+                            <p class="mb-0 opacity-8">{{ application.candidate.user.full_name }} - {{ application.job.title }}</p>
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="card-body p-4">
                     <!-- Application Summary -->
-                    <div class="alert alert-light">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="fas fa-user me-2"></i>Candidat</h6>
-                                <p class="mb-1">{{ application.candidate.user.full_name }}</p>
-                                <small class="text-muted">{{ application.candidate.user.email }}</small>
+                    <div class="application-summary-card bg-light rounded p-4 mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
+                                {% if application.candidate.profile_picture %}
+                                    <img src="{{ application.candidate.profile_picture.url }}" 
+                                         alt="Photo" class="rounded-circle shadow mb-3" 
+                                         style="width: 70px; height: 70px; object-fit: cover;">
+                                {% else %}
+                                    <div class="avatar-md bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center shadow">
+                                        <i class="fas fa-user fa-lg"></i>
+                                    </div>
+                                {% endif %}
+                                <h6 class="fw-bold mb-1">{{ application.candidate.user.full_name }}</h6>
+                                <small class="text-muted">{{ application.candidate.current_position|default:"Candidat" }}</small>
                             </div>
-                            <div class="col-md-6">
-                                <h6><i class="fas fa-briefcase me-2"></i>Poste</h6>
-                                <p class="mb-1">{{ application.job.title }}</p>
-                                <small class="text-muted">{{ application.job.company }}</small>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-semibold text-primary mb-2">
+                                            <i class="fas fa-briefcase me-2"></i>Candidature
+                                        </h6>
+                                        <p class="mb-2">{{ application.job.title }}</p>
+                                        <p class="mb-2">{{ application.job.company }}</p>
+                                        <div class="d-flex gap-2 mb-2">
+                                            <span class="badge bg-primary">{{ application.get_status_display }}</span>
+                                            <span class="badge bg-secondary">{{ application.get_priority_display }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="fw-semibold text-primary mb-2">
+                                            <i class="fas fa-info-circle me-2"></i>Détails
+                                        </h6>
+                                        <p class="mb-1">
+                                            <i class="fas fa-calendar me-2 text-muted"></i>
+                                            {{ application.applied_at|date:"d F Y" }}
+                                        </p>
+                                        <p class="mb-1">
+                                            <i class="fas fa-envelope me-2 text-muted"></i>
+                                            {{ application.candidate.user.email }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-phone me-2 text-muted"></i>
+                                            {{ application.candidate.mobile_phone|default:"Non renseigné" }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <form method="post">
+                    <!-- Comment Form -->
+                    <form method="post" id="commentForm">
                         {% csrf_token %}
-                        {{ form|crispy }}
                         
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'applications:application_detail' application.pk %}" class="btn btn-outline-secondary">
+                        <div class="form-section">
+                            <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
+                                <i class="fas fa-edit me-2"></i>Nouveau commentaire
+                            </h4>
+                            
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            {{ form.comment_type|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                {{ form.is_internal|as_crispy_field }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Comment Content -->
+                                    <div class="comment-content-section mt-4">
+                                        {{ form.content|as_crispy_field }}
+                                        <div class="form-text">
+                                            <small class="text-muted">
+                                                <i class="fas fa-lightbulb me-1 text-warning"></i>
+                                                Soyez précis et professionnel dans vos commentaires. 
+                                                Les commentaires constructifs aident à prendre de meilleures décisions.
+                                            </small>
+                                        </div>
+                                        <div class="character-counter mt-2 text-end">
+                                            <small class="text-muted">
+                                                <span id="charCount">0</span> / 2000 caractères
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Templates -->
+                        <div class="quick-templates-section mt-4">
+                            <h5 class="fw-semibold text-primary mb-3">Modèles rapides</h5>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center" 
+                                            data-template="positive">
+                                        <i class="fas fa-thumbs-up me-2"></i>Impression positive
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-outline-warning w-100 d-flex align-items-center justify-content-center" 
+                                            data-template="neutral">
+                                        <i class="fas fa-minus-circle me-2"></i>Commentaire neutre
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center" 
+                                            data-template="technical">
+                                        <i class="fas fa-code me-2"></i>Évaluation technique
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <a href="{% url 'applications:application_detail' application.pk %}" 
+                               class="btn btn-outline-secondary btn-lg d-flex align-items-center">
                                 <i class="fas fa-arrow-left me-2"></i>Retour à la candidature
                             </a>
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-comment me-2"></i>Ajouter le commentaire
-                            </button>
+                            <div class="d-flex gap-3">
+                                <button type="button" class="btn btn-outline-info btn-lg d-flex align-items-center" 
+                                        id="saveDraftBtn">
+                                    <i class="fas fa-save me-2"></i>Sauvegarder le brouillon
+                                </button>
+                                <button type="submit" class="btn btn-success btn-lg d-flex align-items-center shadow" id="submitBtn">
+                                    <i class="fas fa-comment me-2"></i>Ajouter le commentaire
+                                </button>
+                            </div>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Comment Types Guide -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Types de commentaires
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="comment-type-item mb-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="type-icon bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-comment"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-primary mb-2">Général</h6>
+                                        <p class="text-muted small mb-0">
+                                            Commentaires divers sur la candidature, impressions générales, 
+                                            remarques globales.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="comment-type-item mb-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="type-icon bg-success text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-filter"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-success mb-2">Présélection</h6>
+                                        <p class="text-muted small mb-0">
+                                            Évaluation initiale, adéquation avec les critères de base, 
+                                            décision de présélection.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="comment-type-item mb-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="type-icon bg-info text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-handshake"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-info mb-2">Entretien</h6>
+                                        <p class="text-muted small mb-0">
+                                            Feedback d'entretien, impressions lors de la rencontre, 
+                                            évaluation des compétences comportementales.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="comment-type-item">
+                                <div class="d-flex align-items-start">
+                                    <div class="type-icon bg-warning text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-flag"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-warning mb-2">Décision</h6>
+                                        <p class="text-muted small mb-0">
+                                            Recommandation finale, justification de la décision, 
+                                            points déterminants dans le choix.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Practices -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-graduation-cap text-primary me-2"></i>Bonnes pratiques
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="practice-item mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <h6 class="fw-bold mb-0">Soyez objectif</h6>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    Basez vos commentaires sur des faits observables plutôt que sur des impressions subjectives.
+                                </p>
+                            </div>
+                            <div class="practice-item mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <h6 class="fw-bold mb-0">Soyez constructif</h6>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    Mettez en avant les points forts et suggérez des axes d'amélioration.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="practice-item mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <h6 class="fw-bold mb-0">Soyez professionnel</h6>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    Utilisez un langage respectueux et professionnel dans tous vos commentaires.
+                                </p>
+                            </div>
+                            <div class="practice-item mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <h6 class="fw-bold mb-0">Soyez précis</h6>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    Donnez des exemples concrets pour étayer vos observations et recommandations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.comment-icon {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+}
+
+.card-header.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.application-summary-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-left: 4px solid #28a745;
+}
+
+.avatar-md {
+    width: 70px;
+    height: 70px;
+    font-size: 1.5rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.comment-content-section textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.character-counter {
+    font-size: 0.875rem;
+}
+
+#charCount {
+    font-weight: 600;
+}
+
+.quick-templates-section .btn {
+    transition: all 0.3s ease;
+    padding: 0.75rem;
+}
+
+.quick-templates-section .btn:hover {
+    transform: translateY(-2px);
+}
+
+.comment-type-item {
+    transition: all 0.3s ease;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.comment-type-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: translateX(5px);
+}
+
+.practice-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.practice-item:last-child {
+    border-bottom: none;
+}
+
+.type-icon {
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .application-summary-card .row {
+        text-align: center;
+    }
+    
+    .avatar-md {
+        margin: 0 auto 1rem;
+    }
+    
+    .comment-type-item {
+        text-align: center;
+    }
+    
+    .type-icon {
+        margin: 0 auto 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const commentForm = document.getElementById('commentForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const saveDraftBtn = document.getElementById('saveDraftBtn');
+    const contentTextarea = document.querySelector('#id_content');
+    const charCount = document.getElementById('charCount');
+    const commentTypeSelect = document.querySelector('#id_comment_type');
+    const isInternalCheckbox = document.querySelector('#id_is_internal');
+
+    // Character counter
+    if (contentTextarea && charCount) {
+        contentTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = count;
+            
+            if (count < 50) {
+                charCount.className = 'text-danger fw-bold';
+            } else if (count < 100) {
+                charCount.className = 'text-warning fw-bold';
+            } else {
+                charCount.className = 'text-success fw-bold';
+            }
+        });
+        
+        // Initialize count
+        contentTextarea.dispatchEvent(new Event('input'));
+    }
+
+    // Quick templates
+    document.querySelectorAll('[data-template]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const template = this.dataset.template;
+            let content = '';
+            let commentType = 'general';
+            let isInternal = true;
+            
+            switch(template) {
+                case 'positive':
+                    content = `Impression très positive sur ce candidat :
+
+• Compétences techniques solides et pertinentes
+• Excellente communication et aisance relationnelle
+• Motivation évidente pour le poste et l'entreprise
+• Adéquation culturelle avec notre environnement
+
+Recommandation : Poursuivre le processus.`;
+                    commentType = 'screening';
+                    break;
+                    
+                case 'neutral':
+                    content = `Évaluation équilibrée de ce candidat :
+
+Points positifs :
+• Expérience intéressante dans le domaine
+• Bonnes compétences de base
+
+Points à améliorer :
+• Manque d'expérience sur certaines technologies
+• Communication à développer
+
+À approfondir lors d'un éventuel entretien.`;
+                    commentType = 'general';
+                    break;
+                    
+                case 'technical':
+                    content = `Évaluation technique détaillée :
+
+Compétences maîtrisées :
+• Langage XYZ - Niveau avancé
+• Framework ABC - Bonne maîtrise
+• Base de données - Compétences solides
+
+Points à vérifier :
+• Expérience sur technologie DEF
+• Connaissance des bonnes pratiques
+
+Recommandation : Test technique à prévoir.`;
+                    commentType = 'interview';
+                    isInternal = true;
+                    break;
+            }
+            
+            if (contentTextarea) {
+                contentTextarea.value = content;
+                contentTextarea.dispatchEvent(new Event('input'));
+            }
+            
+            if (commentTypeSelect) {
+                commentTypeSelect.value = commentType;
+            }
+            
+            if (isInternalCheckbox) {
+                isInternalCheckbox.checked = isInternal;
+            }
+            
+            showNotification('Modèle appliqué avec succès');
+        });
+    });
+
+    // Save draft functionality
+    saveDraftBtn.addEventListener('click', function() {
+        const formData = new FormData(commentForm);
+        const data = {};
+        
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+        
+        localStorage.setItem(`comment_draft_${application.id}`, JSON.stringify(data));
+        showNotification('Brouillon sauvegardé');
+    });
+
+    // Load draft if exists
+    const savedDraft = localStorage.getItem(`comment_draft_${application.id}`);
+    if (savedDraft) {
+        try {
+            const data = JSON.parse(savedDraft);
+            Object.keys(data).forEach(key => {
+                const field = commentForm.querySelector(`[name="${key}"]`);
+                if (field) {
+                    if (field.type === 'checkbox') {
+                        field.checked = data[key] === 'on';
+                    } else {
+                        field.value = data[key];
+                    }
+                }
+            });
+            
+            // Trigger character count update
+            if (contentTextarea) {
+                contentTextarea.dispatchEvent(new Event('input'));
+            }
+            
+            showNotification('Brouillon chargé', 'info');
+        } catch (e) {
+            console.log('Error loading draft:', e);
+        }
+    }
+
+    // Form submission
+    commentForm.addEventListener('submit', function(e) {
+        const content = contentTextarea ? contentTextarea.value : '';
+        
+        if (content.length < 10) {
+            e.preventDefault();
+            showAlert('error', 'Le commentaire doit contenir au moins 10 caractères.');
+            return;
+        }
+        
+        // Clear draft on successful submission
+        localStorage.removeItem(`comment_draft_${application.id}`);
+        
+        // Show loading state
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Ajout en cours...';
+        submitBtn.disabled = true;
+        
+        // Re-enable after 5 seconds (safety)
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 5000);
+    });
+
+    function showNotification(message, type = 'success') {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-info';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+        
+        const notification = document.createElement('div');
+        notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+        notification.style.zIndex = '1060';
+        notification.innerHTML = `
+            <i class="fas ${icon} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    function showAlert(type, message) {
+        const alertHtml = `
+            <div class="alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show" role="alert">
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        commentForm.insertAdjacentHTML('beforebegin', alertHtml);
+    }
+
+    // Auto-save every 30 seconds
+    let autoSaveInterval = setInterval(() => {
+        if (contentTextarea && contentTextarea.value.length > 0) {
+            saveDraftBtn.click();
+        }
+    }, 30000);
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        clearInterval(autoSaveInterval);
+    });
+
+    // Animate comment type items
+    const commentTypeItems = document.querySelectorAll('.comment-type-item');
+    commentTypeItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            item.style.transition = 'all 0.5s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Auto-expand textarea as user types
+    if (contentTextarea) {
+        contentTextarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Initial adjustment
+        setTimeout(() => {
+            contentTextarea.dispatchEvent(new Event('input'));
+        }, 100);
+    }
+});
+</script>
 {% endblock %}

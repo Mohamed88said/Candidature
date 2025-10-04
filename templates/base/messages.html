@@ -1,0 +1,64 @@
+<!-- Enhanced Messages System -->
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" 
+         role="alert" data-alert-id="{{ forloop.counter }}">
+        <div class="d-flex align-items-center">
+            <!-- Alert Icon -->
+            <div class="alert-icon me-3">
+                <i class="fas 
+                    {% if message.tags == 'success' %}fa-check-circle
+                    {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}fa-times-circle
+                    {% else %}fa-info-circle{% endif %} 
+                    fa-lg"></i>
+            </div>
+            
+            <!-- Alert Content -->
+            <div class="flex-grow-1">
+                <h6 class="alert-title mb-1">
+                    {% if message.tags == 'success' %}Succès
+                    {% elif message.tags == 'warning' %}Attention
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}Erreur
+                    {% else %}Information{% endif %}
+                </h6>
+                <p class="alert-message mb-0">{{ message }}</p>
+            </div>
+            
+            <!-- Close Button -->
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="progress mt-2" style="height: 2px;">
+            <div class="progress-bar bg-{{ message.tags }}" role="progressbar" 
+                 style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+// Auto-hide alerts with progress bar
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    
+    alerts.forEach(alert => {
+        const progressBar = alert.querySelector('.progress-bar');
+        let width = 100;
+        
+        const interval = setInterval(() => {
+            if (width <= 0) {
+                clearInterval(interval);
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 300);
+            } else {
+                width -= 0.5;
+                progressBar.style.width = width + '%';
+            }
+        }, 50); // Adjust speed here
+    });
+});
+</script>
+{% endif %}

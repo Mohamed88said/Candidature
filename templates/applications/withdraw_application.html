@@ -1,46 +1,423 @@
 {% extends 'base.html' %}
 
-{% block title %}Retirer la candidature{% endblock %}
+{% block title %}Retirer la candidature - {{ application.job.title }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-6 mx-auto">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- Warning Card -->
             <div class="card shadow-lg border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h3 class="mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Retirer la candidature
-                    </h3>
-                </div>
-                <div class="card-body p-4 text-center">
-                    <div class="mb-4">
-                        <i class="fas fa-file-times fa-4x text-warning mb-3"></i>
-                        <h4>Êtes-vous sûr ?</h4>
-                        <p class="text-muted">
-                            Vous êtes sur le point de retirer votre candidature pour :
-                        </p>
-                        <div class="alert alert-info">
-                            <strong>{{ application.job.title }}</strong><br>
-                            <small class="text-muted">{{ application.job.company }}</small>
+                <div class="card-header bg-gradient-warning text-dark py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="warning-icon me-3">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
                         </div>
-                        <p class="text-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Vous ne pourrez plus postuler à nouveau à cette offre !
-                        </p>
+                        <div>
+                            <h1 class="h3 fw-bold mb-1">Retirer la candidature</h1>
+                            <p class="mb-0 opacity-8">Action irréversible</p>
+                        </div>
                     </div>
-                    
-                    <form method="post" class="d-inline">
-                        {% csrf_token %}
-                        <a href="{% url 'applications:application_detail' application.pk %}" class="btn btn-outline-secondary me-3">
-                            <i class="fas fa-times me-2"></i>Annuler
-                        </a>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-file-times me-2"></i>Retirer ma candidature
-                        </button>
-                    </form>
+                </div>
+                
+                <div class="card-body p-4 text-center">
+                    <!-- Warning Icon -->
+                    <div class="warning-animation mb-4">
+                        <div class="warning-circle">
+                            <i class="fas fa-file-times fa-4x text-warning"></i>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Message -->
+                    <div class="confirmation-message mb-4">
+                        <h4 class="fw-bold text-dark mb-3">Êtes-vous absolument sûr ?</h4>
+                        <p class="text-muted mb-4">
+                            Vous êtes sur le point de retirer définitivement votre candidature pour le poste suivant :
+                        </p>
+                        
+                        <!-- Job Details -->
+                        <div class="job-summary-card bg-light rounded p-4 mb-4">
+                            <h5 class="fw-bold text-primary mb-2">{{ application.job.title }}</h5>
+                            <div class="d-flex flex-column gap-2 text-muted">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-building me-2"></i>
+                                    {{ application.job.company }}
+                                </div>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    {{ application.job.location }}
+                                </div>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    Candidature du {{ application.applied_at|date:"d F Y" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Warning Details -->
+                        <div class="alert alert-warning text-start">
+                            <div class="d-flex">
+                                <i class="fas fa-exclamation-triangle me-3 mt-1 text-warning"></i>
+                                <div>
+                                    <h6 class="alert-heading fw-bold mb-2">Conséquences importantes</h6>
+                                    <ul class="mb-0 ps-3">
+                                        <li class="mb-1">Vous ne pourrez <strong>plus postuler à nouveau</strong> à cette offre</li>
+                                        <li class="mb-1">Votre candidature sera <strong>définitivement supprimée</strong> du processus</li>
+                                        <li class="mb-1">L'entreprise ne pourra <strong>plus vous contacter</strong> pour ce poste</li>
+                                        <li>Toutes les données associées seront <strong>archivées</strong></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Status -->
+                        <div class="current-status mb-4">
+                            <small class="text-muted d-block mb-2">Statut actuel de votre candidature</small>
+                            <span class="badge fs-6 px-3 py-2 
+                                {% if application.status == 'pending' %}bg-warning
+                                {% elif application.status == 'reviewing' %}bg-info
+                                {% elif application.status == 'shortlisted' %}bg-success
+                                {% elif application.status == 'interview_scheduled' %}bg-primary
+                                {% else %}bg-secondary{% endif %}">
+                                <i class="fas 
+                                    {% if application.status == 'pending' %}fa-clock
+                                    {% elif application.status == 'reviewing' %}fa-search
+                                    {% elif application.status == 'shortlisted' %}fa-star
+                                    {% elif application.status == 'interview_scheduled' %}fa-calendar
+                                    {% else %}fa-question{% endif %} me-2"></i>
+                                {{ application.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <div class="d-flex gap-3 justify-content-center flex-column flex-sm-row">
+                                <a href="{% url 'applications:application_detail' application.pk %}" 
+                                   class="btn btn-success btn-lg d-flex align-items-center justify-content-center order-2 order-sm-1">
+                                    <i class="fas fa-arrow-left me-2"></i>Non, conserver ma candidature
+                                </a>
+                                <button type="submit" 
+                                        class="btn btn-warning btn-lg d-flex align-items-center justify-content-center order-1 order-sm-2"
+                                        id="confirmWithdraw">
+                                    <i class="fas fa-file-times me-2"></i>Oui, retirer ma candidature
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="additional-info mt-4 pt-4 border-top">
+                        <h6 class="fw-semibold text-muted mb-3">Alternatives possibles</h6>
+                        <div class="row text-start">
+                            <div class="col-md-6">
+                                <div class="alternative-item mb-3">
+                                    <i class="fas fa-comment text-info me-2"></i>
+                                    <small class="text-muted">
+                                        <strong>Contactez le recruteur</strong> pour plus d'informations
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alternative-item mb-3">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    <small class="text-muted">
+                                        <strong>Attendez le processus</strong> de recrutement normal
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h5 class="h6 fw-bold mb-0 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>Vos statistiques de candidature
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number text-primary fw-bold h5 mb-1">{{ user_applications_count }}</div>
+                                <div class="stat-label text-muted small">Candidatures totales</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number text-info fw-bold h5 mb-1">{{ user_active_applications }}</div>
+                                <div class="stat-label text-muted small">En cours</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number text-success fw-bold h5 mb-1">{{ user_interviews_count }}</div>
+                                <div class="stat-label text-muted small">Entretiens</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
+{% block extra_css %}
+<style>
+.warning-icon {
+    animation: shake 2s infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+.card-header.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+}
+
+.warning-animation {
+    position: relative;
+}
+
+.warning-circle {
+    width: 100px;
+    height: 100px;
+    border: 3px solid #ffc107;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { 
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+    }
+    100% { 
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    }
+}
+
+.job-summary-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-left: 4px solid #ffc107;
+    transition: all 0.3s ease;
+}
+
+.job-summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.alert-warning {
+    border-left: 4px solid #ffc107;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+}
+
+.action-buttons .btn {
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-2px);
+}
+
+.alternative-item {
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.alternative-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: translateX(5px);
+}
+
+.stat-item {
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 1.75rem;
+}
+
+.current-status .badge {
+    font-size: 0.9rem;
+}
+
+/* Confirmation button emphasis */
+#confirmWithdraw {
+    position: relative;
+    overflow: hidden;
+}
+
+#confirmWithdraw::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+#confirmWithdraw:hover::before {
+    left: 100%;
+}
+
+@media (max-width: 576px) {
+    .warning-circle {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .warning-circle i {
+        font-size: 2.5rem !important;
+    }
+    
+    .action-buttons .btn {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .action-buttons .d-flex {
+        gap: 1rem !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmButton = document.getElementById('confirmWithdraw');
+    const withdrawForm = document.querySelector('form');
+    let confirmationClicked = false;
+
+    // Enhanced confirmation with countdown
+    confirmButton.addEventListener('click', function(e) {
+        if (!confirmationClicked) {
+            e.preventDefault();
+            
+            // First confirmation
+            showFirstConfirmation();
+        }
+    });
+
+    function showFirstConfirmation() {
+        const originalText = confirmButton.innerHTML;
+        confirmButton.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Êtes-vous vraiment sûr ?';
+        confirmButton.classList.remove('btn-warning');
+        confirmButton.classList.add('btn-danger');
+        
+        // Change button behavior for second click
+        confirmationClicked = true;
+        
+        // Revert after 3 seconds if not clicked
+        setTimeout(() => {
+            if (!confirmButton.classList.contains('confirmed')) {
+                confirmButton.innerHTML = originalText;
+                confirmButton.classList.remove('btn-danger');
+                confirmButton.classList.add('btn-warning');
+                confirmationClicked = false;
+            }
+        }, 3000);
+    }
+
+    // Final confirmation with countdown
+    confirmButton.addEventListener('click', function(e) {
+        if (confirmationClicked && !confirmButton.classList.contains('confirmed')) {
+            e.preventDefault();
+            
+            // Final confirmation with countdown
+            showFinalConfirmation();
+        }
+    });
+
+    function showFinalConfirmation() {
+        let countdown = 3;
+        const originalText = confirmButton.innerHTML;
+        
+        confirmButton.classList.add('confirmed');
+        confirmButton.disabled = true;
+        
+        const countdownInterval = setInterval(() => {
+            confirmButton.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Confirmation dans ${countdown}s...`;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                confirmButton.innerHTML = '<i class="fas fa-file-times me-2"></i>Retrait en cours...';
+                
+                // Submit the form
+                setTimeout(() => {
+                    withdrawForm.submit();
+                }, 1000);
+            }
+            
+            countdown--;
+        }, 1000);
+    }
+
+    // Add keyboard event listener for Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            window.location.href = "{% url 'applications:application_detail' application.pk %}";
+        }
+    });
+
+    // Add animation to warning elements
+    const warningElements = document.querySelectorAll('.alert-warning li');
+    warningElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            element.style.transition = 'all 0.5s ease';
+            element.style.opacity = '1';
+            element.style.transform = 'translateX(0)';
+        }, index * 200);
+    });
+
+    // Pulse animation for the main warning icon
+    const warningIcon = document.querySelector('.warning-circle');
+    setInterval(() => {
+        warningIcon.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            warningIcon.style.transform = 'scale(1)';
+        }, 500);
+    }, 2000);
+
+    // Add confirmation dialog for leaving the page
+    window.addEventListener('beforeunload', function(e) {
+        if (confirmationClicked) {
+            e.preventDefault();
+            e.returnValue = 'Vous êtes en train de retirer votre candidature. Êtes-vous sûr de vouloir quitter cette page ?';
+            return e.returnValue;
+        }
+    });
+
+    // Remove beforeunload when navigating away via the cancel button
+    document.querySelector('a[href*="application_detail"]').addEventListener('click', function() {
+        window.removeEventListener('beforeunload', arguments.callee);
+    });
+});
+</script>

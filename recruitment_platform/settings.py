@@ -156,6 +156,10 @@ os.makedirs(BASE_DIR / 'static' / 'images', exist_ok=True)
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# =============================================================================
+# CONFIGURATION CLOUDINARY AVEC FALLBACK
+# =============================================================================
+
 # Cloudinary Configuration for Media Files
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
@@ -163,10 +167,28 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
 }
 
-# Media files configuration with Cloudinary
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# Vérification si Cloudinary est configuré
+CLOUDINARY_ACTIVE = all([
+    CLOUDINARY_STORAGE['CLOUD_NAME'],
+    CLOUDINARY_STORAGE['API_KEY'], 
+    CLOUDINARY_STORAGE['API_SECRET']
+])
 
-# Media URL (Cloudinary)
+if CLOUDINARY_ACTIVE:
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    # Configuration Cloudinary supplémentaire
+    import cloudinary
+    cloudinary.config(
+        cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+        api_key=CLOUDINARY_STORAGE['API_KEY'],
+        api_secret=CLOUDINARY_STORAGE['API_SECRET']
+    )
+else:
+    # Fallback vers le stockage local si Cloudinary n'est pas configuré
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    print("⚠️ Cloudinary non configuré - utilisation du stockage local")
+
+# Media URL configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 os.makedirs(MEDIA_ROOT, exist_ok=True)
@@ -345,6 +367,6 @@ if DEBUG:
     print(f"Database: {DATABASES['default']['ENGINE']}")
     print(f"Redis URL: {REDIS_URL}")
     print(f"Celery Mode: {'SYNCHRONE' if CELERY_TASK_ALWAYS_EAGER else 'ASYNCHRONE'}")
-    print(f"Cloudinary: {'ACTIVE' if CLOUDINARY_STORAGE['CLOUD_NAME'] else 'INACTIVE'}")
+    print(f"Cloudinary: {'ACTIVE' if CLOUDINARY_ACTIVE else 'INACTIVE'}")
     print(f"Keep-alive: {'ACTIVE' if ENABLE_KEEP_ALIVE else 'INACTIVE'}")
     print("=" * 50)

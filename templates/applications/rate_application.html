@@ -4,58 +4,114 @@
 {% block title %}Évaluer la candidature - {{ application.candidate.user.full_name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Main Card -->
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-warning text-dark">
-                    <h3 class="mb-0">
-                        <i class="fas fa-star me-2"></i>Évaluer la candidature
-                    </h3>
-                    <small>{{ application.candidate.user.full_name }} - {{ application.job.title }}</small>
+                <div class="card-header bg-gradient-warning text-dark py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="rating-icon me-3">
+                            <i class="fas fa-star fa-2x"></i>
+                        </div>
+                        <div>
+                            <h1 class="h3 fw-bold mb-1">Évaluer la candidature</h1>
+                            <p class="mb-0 opacity-8">{{ application.candidate.user.full_name }} - {{ application.job.title }}</p>
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="card-body p-4">
                     <!-- Candidate Summary -->
-                    <div class="alert alert-light">
-                        <div class="row">
-                            <div class="col-md-4 text-center">
+                    <div class="candidate-summary-card bg-light rounded p-4 mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
                                 {% if application.candidate.profile_picture %}
                                     <img src="{{ application.candidate.profile_picture.url }}" 
-                                         alt="Photo" class="rounded-circle mb-2" 
-                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                         alt="Photo" class="rounded-circle shadow mb-3" 
+                                         style="width: 80px; height: 80px; object-fit: cover;">
                                 {% else %}
-                                    <div class="bg-primary text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" 
-                                         style="width: 60px; height: 60px;">
-                                        <i class="fas fa-user"></i>
+                                    <div class="avatar-lg bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center shadow">
+                                        <i class="fas fa-user fa-2x"></i>
                                     </div>
                                 {% endif %}
-                                <h6 class="fw-bold">{{ application.candidate.user.full_name }}</h6>
+                                <h6 class="fw-bold mb-1">{{ application.candidate.user.full_name }}</h6>
                                 <small class="text-muted">{{ application.candidate.current_position|default:"Candidat" }}</small>
                             </div>
-                            <div class="col-md-8">
-                                <h6><i class="fas fa-briefcase me-2"></i>Candidature</h6>
-                                <p class="mb-1">{{ application.job.title }} - {{ application.job.company }}</p>
-                                <p class="mb-1">
-                                    <span class="badge bg-primary">{{ application.get_status_display }}</span>
-                                    <span class="badge bg-secondary ms-1">{{ application.get_priority_display }}</span>
-                                </p>
-                                <small class="text-muted">
-                                    {{ application.candidate.years_of_experience }} ans d'expérience • 
-                                    Profil {{ application.candidate.profile_completion }}% complet
-                                </small>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-semibold text-primary mb-2">
+                                            <i class="fas fa-briefcase me-2"></i>Candidature
+                                        </h6>
+                                        <p class="mb-2">{{ application.job.title }}</p>
+                                        <p class="mb-2">{{ application.job.company }}</p>
+                                        <div class="d-flex gap-2 mb-2">
+                                            <span class="badge bg-primary">{{ application.get_status_display }}</span>
+                                            <span class="badge bg-secondary">{{ application.get_priority_display }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="fw-semibold text-primary mb-2">
+                                            <i class="fas fa-chart-line me-2"></i>Profil
+                                        </h6>
+                                        <p class="mb-1">
+                                            <i class="fas fa-briefcase me-2 text-muted"></i>
+                                            {{ application.candidate.years_of_experience }} ans d'expérience
+                                        </p>
+                                        <p class="mb-1">
+                                            <i class="fas fa-percentage me-2 text-muted"></i>
+                                            Profil {{ application.candidate.profile_completion }}% complet
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-calendar me-2 text-muted"></i>
+                                            Candidature du {{ application.applied_at|date:"d F Y" }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <form method="post">
+                    <!-- Rating Form -->
+                    <form method="post" id="ratingForm">
                         {% csrf_token %}
-                        {{ form|crispy }}
                         
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'applications:application_detail' application.pk %}" class="btn btn-outline-secondary">
+                        <!-- Star Rating System -->
+                        <div class="rating-section mb-4">
+                            <h4 class="fw-bold mb-3 text-primary">
+                                <i class="fas fa-star me-2"></i>Évaluation Globale
+                            </h4>
+                            <div class="star-rating-widget mb-3">
+                                <div class="d-flex justify-content-center mb-3">
+                                    {% for i in "12345" %}
+                                    <div class="star-container mx-1">
+                                        <input type="radio" id="star{{ forloop.counter }}" name="overall_rating" value="{{ forloop.counter }}" 
+                                               class="star-radio" {% if forloop.counter == 3 %}checked{% endif %}>
+                                        <label for="star{{ forloop.counter }}" class="star-label">
+                                            <i class="fas fa-star fa-2x"></i>
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-center">
+                                    <small class="text-muted" id="ratingText">Sélectionnez une note de 1 à 5 étoiles</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Crispy Form Fields -->
+                        <div class="form-content">
+                            {{ form|crispy }}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
+                            <a href="{% url 'applications:application_detail' application.pk %}" 
+                               class="btn btn-outline-secondary btn-lg d-flex align-items-center">
                                 <i class="fas fa-arrow-left me-2"></i>Retour à la candidature
                             </a>
-                            <button type="submit" class="btn btn-warning btn-lg">
+                            <button type="submit" class="btn btn-warning btn-lg d-flex align-items-center shadow">
                                 <i class="fas fa-star me-2"></i>Enregistrer l'évaluation
                             </button>
                         </div>
@@ -63,34 +119,150 @@
                 </div>
             </div>
 
-            <!-- Evaluation Criteria -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-clipboard-list me-2"></i>Critères d'évaluation
-                    </h5>
+            <!-- Evaluation Guide -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-clipboard-list text-primary me-2"></i>Critères d'évaluation
+                    </h4>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-primary">Compétences techniques</h6>
-                            <small class="text-muted">Maîtrise des technologies requises</small>
+                            <div class="criteria-item mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="criteria-icon bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-code"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-primary mb-0">Compétences techniques</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Maîtrise des technologies requises, qualité du code, résolution de problèmes techniques.</p>
+                            </div>
                             
-                            <h6 class="text-success mt-3">Expérience</h6>
-                            <small class="text-muted">Pertinence et qualité de l'expérience</small>
+                            <div class="criteria-item mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="criteria-icon bg-success text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-success mb-0">Expérience</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Pertinence et qualité de l'expérience, réalisations concrètes, progression de carrière.</p>
+                            </div>
                             
-                            <h6 class="text-info mt-3">Formation</h6>
-                            <small class="text-muted">Niveau et adéquation de la formation</small>
+                            <div class="criteria-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="criteria-icon bg-info text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-info mb-0">Formation</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Niveau et adéquation de la formation, certifications, apprentissage continu.</p>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-warning">Motivation</h6>
-                            <small class="text-muted">Intérêt pour le poste et l'entreprise</small>
+                            <div class="criteria-item mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="criteria-icon bg-warning text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-fire"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-warning mb-0">Motivation</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Intérêt pour le poste et l'entreprise, alignement avec les valeurs, enthousiasme.</p>
+                            </div>
                             
-                            <h6 class="text-danger mt-3">Adéquation culturelle</h6>
-                            <small class="text-muted">Compatibilité avec la culture d'entreprise</small>
+                            <div class="criteria-item mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="criteria-icon bg-danger text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-danger mb-0">Adéquation culturelle</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Compatibilité avec la culture d'entreprise, valeurs partagées, intégration d'équipe.</p>
+                            </div>
                             
-                            <h6 class="text-secondary mt-3">Communication</h6>
-                            <small class="text-muted">Qualité de l'expression et de l'écoute</small>
+                            <div class="criteria-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="criteria-icon bg-secondary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-secondary mb-0">Communication</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Qualité de l'expression et de l'écoute, présentation, capacité à communiquer clairement.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rating Scale Guide -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-transparent border-bottom-0 py-3">
+                    <h4 class="h5 fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>Échelle d'évaluation
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="rating-scale-item">
+                                <div class="stars mb-2">
+                                    <i class="fas fa-star text-warning"></i>
+                                </div>
+                                <h6 class="fw-bold text-danger">1 - Insuffisant</h6>
+                                <small class="text-muted">Ne répond pas aux attentes minimales</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="rating-scale-item">
+                                <div class="stars mb-2">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                </div>
+                                <h6 class="fw-bold text-warning">2 - En développement</h6>
+                                <small class="text-muted">Compétences de base, besoin d'amélioration</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="rating-scale-item">
+                                <div class="stars mb-2">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                </div>
+                                <h6 class="fw-bold text-info">3 - Compétent</h6>
+                                <small class="text-muted">Répond aux attentes du poste</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="rating-scale-item">
+                                <div class="stars mb-2">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                </div>
+                                <h6 class="fw-bold text-primary">4 - Très bon</h6>
+                                <small class="text-muted">Dépasse régulièrement les attentes</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="rating-scale-item">
+                                <div class="stars mb-2">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                </div>
+                                <h6 class="fw-bold text-success">5 - Excellent</h6>
+                                <small class="text-muted">Exceptionnel, modèle pour les autres</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -100,3 +272,162 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+.card-header.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+}
+
+.rating-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.star-rating-widget {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 2px dashed #dee2e6;
+}
+
+.star-container {
+    position: relative;
+}
+
+.star-radio {
+    display: none;
+}
+
+.star-label {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #dee2e6;
+}
+
+.star-label:hover {
+    transform: scale(1.2);
+    color: #ffc107;
+}
+
+.star-radio:checked + .star-label {
+    color: #ffc107;
+    transform: scale(1.1);
+}
+
+.star-radio:checked ~ .star-label {
+    color: #ffc107;
+}
+
+.criteria-item {
+    transition: all 0.3s ease;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.criteria-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: translateX(5px);
+}
+
+.rating-scale-item {
+    transition: all 0.3s ease;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.rating-scale-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transform: translateY(-5px);
+}
+
+.avatar-lg {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+}
+
+.candidate-summary-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-left: 4px solid #ffc107;
+}
+
+@media (max-width: 768px) {
+    .star-rating-widget {
+        padding: 1rem;
+    }
+    
+    .star-label i {
+        font-size: 1.5rem !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Star rating functionality
+    const starRadios = document.querySelectorAll('.star-radio');
+    const ratingText = document.getElementById('ratingText');
+    
+    const ratingDescriptions = {
+        1: 'Insuffisant - Ne répond pas aux attentes minimales',
+        2: 'En développement - Compétences de base, besoin d\'amélioration',
+        3: 'Compétent - Répond aux attentes du poste',
+        4: 'Très bon - Dépasse régulièrement les attentes',
+        5: 'Excellent - Exceptionnel, modèle pour les autres'
+    };
+    
+    starRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const rating = this.value;
+            ratingText.textContent = ratingDescriptions[rating];
+            ratingText.className = 'fw-bold ' + 
+                (rating <= 2 ? 'text-danger' : 
+                 rating == 3 ? 'text-info' : 
+                 rating == 4 ? 'text-primary' : 'text-success');
+        });
+    });
+    
+    // Initialize with default rating
+    const defaultRating = document.querySelector('.star-radio:checked');
+    if (defaultRating) {
+        defaultRating.dispatchEvent(new Event('change'));
+    }
+    
+    // Form submission handling
+    const ratingForm = document.getElementById('ratingForm');
+    ratingForm.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+        submitBtn.disabled = true;
+        
+        // Re-enable after 5 seconds (safety)
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 5000);
+    });
+    
+    // Animate criteria items
+    const criteriaItems = document.querySelectorAll('.criteria-item');
+    criteriaItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            item.style.transition = 'all 0.5s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}
