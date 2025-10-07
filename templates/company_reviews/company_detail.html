@@ -1,0 +1,515 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ company.name }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- En-tête de l'entreprise -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="company-header">
+                {% if company.cover_image %}
+                <div class="company-cover">
+                    <img src="{{ company.cover_image.url }}" alt="{{ company.name }}" class="cover-image">
+                </div>
+                {% endif %}
+                
+                <div class="company-info">
+                    <div class="d-flex align-items-start">
+                        {% if company.logo %}
+                        <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="company-logo me-4">
+                        {% else %}
+                        <div class="company-logo-placeholder me-4">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="flex-grow-1">
+                            <h1 class="company-name">{{ company.name }}</h1>
+                            {% if company.industry %}
+                            <p class="company-industry">{{ company.industry }}</p>
+                            {% endif %}
+                            
+                            <div class="company-details">
+                                {% if company.size %}
+                                <span class="detail-item">
+                                    <i class="fas fa-users"></i>
+                                    {{ company.size }} employés
+                                </span>
+                                {% endif %}
+                                
+                                {% if company.founded_year %}
+                                <span class="detail-item">
+                                    <i class="fas fa-calendar"></i>
+                                    Fondée en {{ company.founded_year }}
+                                </span>
+                                {% endif %}
+                                
+                                {% if company.headquarters %}
+                                <span class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ company.headquarters }}
+                                </span>
+                                {% endif %}
+                                
+                                {% if company.website %}
+                                <span class="detail-item">
+                                    <i class="fas fa-globe"></i>
+                                    <a href="{{ company.website }}" target="_blank" class="text-decoration-none">Site web</a>
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="company-actions">
+                            {% if user.is_authenticated %}
+                            {% if is_following %}
+                            <a href="{% url 'company_reviews:unfollow_company' company.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-heart-broken"></i>
+                                Ne plus suivre
+                            </a>
+                            {% else %}
+                            <a href="{% url 'company_reviews:follow_company' company.id %}" class="btn btn-primary">
+                                <i class="fas fa-heart"></i>
+                                Suivre
+                            </a>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques et notes -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star"></i>
+                        Avis des employés
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if total_reviews > 0 %}
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="overall-rating">
+                                <div class="rating-number">{{ average_rating|floatformat:1 }}</div>
+                                <div class="rating-stars">
+                                    {% for i in "12345" %}
+                                    {% if forloop.counter <= average_rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                    <i class="far fa-star text-muted"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="rating-count">{{ total_reviews }} avis</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="rating-breakdown">
+                                {% for rating, count in rating_distribution.items %}
+                                <div class="rating-bar">
+                                    <span class="rating-label">{{ rating }} étoile{{ rating|pluralize }}</span>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {% if total_reviews > 0 %}{{ count|mul:100|div:total_reviews }}{% else %}0{% endif %}%"></div>
+                                    </div>
+                                    <span class="rating-count">{{ count }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                        <h5>Aucun avis pour le moment</h5>
+                        <p class="text-muted">Soyez le premier à partager votre expérience !</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i>
+                        Statistiques
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="stat-item">
+                        <i class="fas fa-comments text-primary"></i>
+                        <span>{{ total_reviews }} avis</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-euro-sign text-success"></i>
+                        <span>{{ salaries|length }} salaires</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-user-tie text-info"></i>
+                        <span>{{ interviews|length }} entretiens</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-camera text-warning"></i>
+                        <span>{{ photos|length }} photos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="row">
+        <!-- Avis récents -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments"></i>
+                        Avis récents
+                    </h5>
+                    <a href="{% url 'company_reviews:company_reviews' company.slug %}" class="btn btn-outline-primary btn-sm">
+                        Voir tous les avis
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                    {% for review in reviews %}
+                    <div class="review-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-1">
+                                    {% if review.is_anonymous %}
+                                    Employé anonyme
+                                    {% else %}
+                                    {{ review.user.full_name|default:review.user.username }}
+                                    {% endif %}
+                                </h6>
+                                <small class="text-muted">{{ review.job_title }} • {{ review.get_employment_status_display }}</small>
+                            </div>
+                            <div class="rating-stars">
+                                {% for i in "12345" %}
+                                {% if forloop.counter <= review.overall_rating %}
+                                <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                <i class="far fa-star text-muted"></i>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <p class="review-pros">
+                            <strong>Points positifs :</strong> {{ review.pros|truncatewords:30 }}
+                        </p>
+                        
+                        <p class="review-cons">
+                            <strong>Points négatifs :</strong> {{ review.cons|truncatewords:30 }}
+                        </p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">{{ review.created_at|date:"d/m/Y" }}</small>
+                            <div class="review-actions">
+                                <button class="btn btn-sm btn-outline-primary" onclick="voteHelpful({{ review.id }}, true)">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span id="helpful-{{ review.id }}">0</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="voteHelpful({{ review.id }}, false)">
+                                    <i class="fas fa-thumbs-down"></i>
+                                    <span id="not-helpful-{{ review.id }}">0</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <h5>Aucun avis pour le moment</h5>
+                        <p class="text-muted">Soyez le premier à partager votre expérience !</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus"></i>
+                        Contribuer
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'company_reviews:write_review' company.id %}" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-star"></i>
+                        Écrire un avis
+                    </a>
+                    <a href="{% url 'company_reviews:add_salary' company.id %}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-euro-sign"></i>
+                        Ajouter un salaire
+                    </a>
+                    <a href="{% url 'company_reviews:add_interview' company.id %}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-user-tie"></i>
+                        Partager un entretien
+                    </a>
+                    <a href="{% url 'company_reviews:add_photo' company.id %}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-camera"></i>
+                        Ajouter une photo
+                    </a>
+                    {% else %}
+                    <p class="text-muted text-center">Connectez-vous pour contribuer</p>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100">Se connecter</a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Avantages -->
+            {% if benefits %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gift"></i>
+                        Avantages
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for benefit in benefits %}
+                    <div class="benefit-item">
+                        <i class="fas fa-check text-success"></i>
+                        <span>{{ benefit.name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Description -->
+            {% if company.description %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        À propos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ company.description }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.company-header {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.company-cover {
+    height: 200px;
+    overflow: hidden;
+}
+
+.cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.company-info {
+    padding: 2rem;
+}
+
+.company-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    border-radius: 12px;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.company-logo-placeholder {
+    width: 100px;
+    height: 100px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 40px;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.company-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.company-industry {
+    font-size: 1.2rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.company-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.overall-rating {
+    text-align: center;
+}
+
+.rating-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.rating-stars {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+}
+
+.rating-count {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.rating-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rating-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.rating-label {
+    min-width: 80px;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.progress {
+    flex-grow: 1;
+    height: 8px;
+}
+
+.progress-bar {
+    background-color: #ffc107;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.review-item {
+    padding: 1rem 0;
+}
+
+.review-pros, .review-cons {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.review-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.benefit-item:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .company-name {
+        font-size: 2rem;
+    }
+    
+    .company-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .company-actions {
+        margin-top: 1rem;
+    }
+}
+</style>
+
+<script>
+function voteHelpful(reviewId, isHelpful) {
+    fetch(`/company-reviews/api/review/${reviewId}/vote-helpful/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `is_helpful=${isHelpful}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`helpful-${reviewId}`).textContent = data.helpful_count;
+            document.getElementById(`not-helpful-${reviewId}`).textContent = data.not_helpful_count;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

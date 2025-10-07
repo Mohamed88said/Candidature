@@ -1,0 +1,528 @@
+/* Recruitment Platform Theme Configuration */
+
+/* =============================================================================
+   THEME VARIABLES
+   ============================================================================= */
+
+:root {
+    /* Primary Brand Colors */
+    --recruitment-primary: #2563eb;
+    --recruitment-primary-dark: #1d4ed8;
+    --recruitment-primary-light: #3b82f6;
+    --recruitment-primary-lighter: #60a5fa;
+    
+    /* Secondary Brand Colors */
+    --recruitment-secondary: #64748b;
+    --recruitment-secondary-dark: #475569;
+    --recruitment-secondary-light: #94a3b8;
+    
+    /* Accent Colors */
+    --recruitment-accent: #f59e0b;
+    --recruitment-accent-dark: #d97706;
+    --recruitment-accent-light: #fbbf24;
+    
+    /* Success Colors */
+    --recruitment-success: #10b981;
+    --recruitment-success-dark: #059669;
+    --recruitment-success-light: #34d399;
+    
+    /* Warning Colors */
+    --recruitment-warning: #f59e0b;
+    --recruitment-warning-dark: #d97706;
+    --recruitment-warning-light: #fbbf24;
+    
+    /* Danger Colors */
+    --recruitment-danger: #ef4444;
+    --recruitment-danger-dark: #dc2626;
+    --recruitment-danger-light: #f87171;
+    
+    /* Info Colors */
+    --recruitment-info: #06b6d4;
+    --recruitment-info-dark: #0891b2;
+    --recruitment-info-light: #22d3ee;
+    
+    /* Neutral Colors */
+    --recruitment-gray-50: #f8fafc;
+    --recruitment-gray-100: #f1f5f9;
+    --recruitment-gray-200: #e2e8f0;
+    --recruitment-gray-300: #cbd5e1;
+    --recruitment-gray-400: #94a3b8;
+    --recruitment-gray-500: #64748b;
+    --recruitment-gray-600: #475569;
+    --recruitment-gray-700: #334155;
+    --recruitment-gray-800: #1e293b;
+    --recruitment-gray-900: #0f172a;
+    
+    /* Background Colors */
+    --recruitment-bg-primary: #ffffff;
+    --recruitment-bg-secondary: #f8fafc;
+    --recruitment-bg-tertiary: #f1f5f9;
+    --recruitment-bg-dark: #0f172a;
+    --recruitment-bg-card: #ffffff;
+    --recruitment-bg-overlay: rgba(15, 23, 42, 0.8);
+    
+    /* Text Colors */
+    --recruitment-text-primary: #0f172a;
+    --recruitment-text-secondary: #475569;
+    --recruitment-text-tertiary: #64748b;
+    --recruitment-text-muted: #94a3b8;
+    --recruitment-text-inverse: #ffffff;
+    --recruitment-text-link: #2563eb;
+    --recruitment-text-link-hover: #1d4ed8;
+    
+    /* Border Colors */
+    --recruitment-border-light: #e2e8f0;
+    --recruitment-border-medium: #cbd5e1;
+    --recruitment-border-dark: #94a3b8;
+    --recruitment-border-focus: #2563eb;
+    
+    /* Shadow Colors */
+    --recruitment-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --recruitment-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --recruitment-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --recruitment-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --recruitment-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Border Radius */
+    --recruitment-radius-sm: 0.25rem;
+    --recruitment-radius: 0.375rem;
+    --recruitment-radius-md: 0.5rem;
+    --recruitment-radius-lg: 0.75rem;
+    --recruitment-radius-xl: 1rem;
+    --recruitment-radius-2xl: 1.5rem;
+    --recruitment-radius-full: 9999px;
+    
+    /* Spacing */
+    --recruitment-space-1: 0.25rem;
+    --recruitment-space-2: 0.5rem;
+    --recruitment-space-3: 0.75rem;
+    --recruitment-space-4: 1rem;
+    --recruitment-space-5: 1.25rem;
+    --recruitment-space-6: 1.5rem;
+    --recruitment-space-8: 2rem;
+    --recruitment-space-10: 2.5rem;
+    --recruitment-space-12: 3rem;
+    --recruitment-space-16: 4rem;
+    --recruitment-space-20: 5rem;
+    --recruitment-space-24: 6rem;
+    
+    /* Typography */
+    --recruitment-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --recruitment-font-serif: 'Playfair Display', Georgia, 'Times New Roman', Times, serif;
+    --recruitment-font-mono: 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    
+    /* Font Sizes */
+    --recruitment-text-xs: 0.75rem;
+    --recruitment-text-sm: 0.875rem;
+    --recruitment-text-base: 1rem;
+    --recruitment-text-lg: 1.125rem;
+    --recruitment-text-xl: 1.25rem;
+    --recruitment-text-2xl: 1.5rem;
+    --recruitment-text-3xl: 1.875rem;
+    --recruitment-text-4xl: 2.25rem;
+    --recruitment-text-5xl: 3rem;
+    --recruitment-text-6xl: 3.75rem;
+    
+    /* Font Weights */
+    --recruitment-font-thin: 100;
+    --recruitment-font-extralight: 200;
+    --recruitment-font-light: 300;
+    --recruitment-font-normal: 400;
+    --recruitment-font-medium: 500;
+    --recruitment-font-semibold: 600;
+    --recruitment-font-bold: 700;
+    --recruitment-font-extrabold: 800;
+    --recruitment-font-black: 900;
+    
+    /* Line Heights */
+    --recruitment-leading-none: 1;
+    --recruitment-leading-tight: 1.25;
+    --recruitment-leading-snug: 1.375;
+    --recruitment-leading-normal: 1.5;
+    --recruitment-leading-relaxed: 1.625;
+    --recruitment-leading-loose: 2;
+    
+    /* Transitions */
+    --recruitment-transition-fast: 150ms ease-in-out;
+    --recruitment-transition-normal: 300ms ease-in-out;
+    --recruitment-transition-slow: 500ms ease-in-out;
+    
+    /* Z-Index */
+    --recruitment-z-dropdown: 1000;
+    --recruitment-z-sticky: 1020;
+    --recruitment-z-fixed: 1030;
+    --recruitment-z-modal-backdrop: 1040;
+    --recruitment-z-modal: 1050;
+    --recruitment-z-popover: 1060;
+    --recruitment-z-tooltip: 1070;
+    --recruitment-z-toast: 1080;
+}
+
+/* =============================================================================
+   DARK THEME VARIABLES
+   ============================================================================= */
+
+[data-theme="dark"] {
+    /* Background Colors */
+    --recruitment-bg-primary: #0f172a;
+    --recruitment-bg-secondary: #1e293b;
+    --recruitment-bg-tertiary: #334155;
+    --recruitment-bg-card: #1e293b;
+    --recruitment-bg-overlay: rgba(0, 0, 0, 0.8);
+    
+    /* Text Colors */
+    --recruitment-text-primary: #f8fafc;
+    --recruitment-text-secondary: #cbd5e1;
+    --recruitment-text-tertiary: #94a3b8;
+    --recruitment-text-muted: #64748b;
+    --recruitment-text-inverse: #0f172a;
+    --recruitment-text-link: #60a5fa;
+    --recruitment-text-link-hover: #93c5fd;
+    
+    /* Border Colors */
+    --recruitment-border-light: #334155;
+    --recruitment-border-medium: #475569;
+    --recruitment-border-dark: #64748b;
+    --recruitment-border-focus: #3b82f6;
+    
+    /* Shadow Colors */
+    --recruitment-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --recruitment-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --recruitment-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --recruitment-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --recruitment-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* =============================================================================
+   BASE STYLES
+   ============================================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--recruitment-font-sans);
+    font-size: var(--recruitment-text-base);
+    font-weight: var(--recruitment-font-normal);
+    line-height: var(--recruitment-leading-normal);
+    color: var(--recruitment-text-primary);
+    background-color: var(--recruitment-bg-primary);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--recruitment-transition-normal), color var(--recruitment-transition-normal);
+}
+
+/* =============================================================================
+   TYPOGRAPHY
+   ============================================================================= */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--recruitment-font-sans);
+    font-weight: var(--recruitment-font-bold);
+    line-height: var(--recruitment-leading-tight);
+    margin-bottom: var(--recruitment-space-4);
+    color: var(--recruitment-text-primary);
+}
+
+h1 {
+    font-size: var(--recruitment-text-4xl);
+    margin-bottom: var(--recruitment-space-6);
+}
+
+h2 {
+    font-size: var(--recruitment-text-3xl);
+}
+
+h3 {
+    font-size: var(--recruitment-text-2xl);
+}
+
+h4 {
+    font-size: var(--recruitment-text-xl);
+}
+
+h5 {
+    font-size: var(--recruitment-text-lg);
+}
+
+h6 {
+    font-size: var(--recruitment-text-base);
+}
+
+p {
+    margin-bottom: var(--recruitment-space-4);
+    line-height: var(--recruitment-leading-relaxed);
+    color: var(--recruitment-text-secondary);
+}
+
+a {
+    color: var(--recruitment-text-link);
+    text-decoration: none;
+    transition: color var(--recruitment-transition-fast);
+}
+
+a:hover {
+    color: var(--recruitment-text-link-hover);
+    text-decoration: underline;
+}
+
+a:focus {
+    outline: 2px solid var(--recruitment-border-focus);
+    outline-offset: 2px;
+}
+
+/* =============================================================================
+   COMPONENT STYLES
+   ============================================================================= */
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--recruitment-space-2);
+    padding: var(--recruitment-space-3) var(--recruitment-space-6);
+    font-size: var(--recruitment-text-base);
+    font-weight: var(--recruitment-font-medium);
+    line-height: var(--recruitment-leading-normal);
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: var(--recruitment-radius-md);
+    transition: all var(--recruitment-transition-fast);
+    user-select: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    color: var(--recruitment-text-inverse);
+    background-color: var(--recruitment-primary);
+    border-color: var(--recruitment-primary);
+}
+
+.btn-primary:hover {
+    color: var(--recruitment-text-inverse);
+    background-color: var(--recruitment-primary-dark);
+    border-color: var(--recruitment-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--recruitment-shadow-md);
+}
+
+/* Cards */
+.card {
+    background-color: var(--recruitment-bg-card);
+    border: 1px solid var(--recruitment-border-light);
+    border-radius: var(--recruitment-radius-lg);
+    box-shadow: var(--recruitment-shadow-sm);
+    transition: all var(--recruitment-transition-normal);
+}
+
+.card:hover {
+    box-shadow: var(--recruitment-shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Forms */
+.form-control {
+    display: block;
+    width: 100%;
+    padding: var(--recruitment-space-3) var(--recruitment-space-4);
+    font-size: var(--recruitment-text-base);
+    font-weight: var(--recruitment-font-normal);
+    line-height: var(--recruitment-leading-normal);
+    color: var(--recruitment-text-primary);
+    background-color: var(--recruitment-bg-primary);
+    background-clip: padding-box;
+    border: 1px solid var(--recruitment-border-medium);
+    border-radius: var(--recruitment-radius-md);
+    transition: border-color var(--recruitment-transition-fast), box-shadow var(--recruitment-transition-fast);
+}
+
+.form-control:focus {
+    color: var(--recruitment-text-primary);
+    background-color: var(--recruitment-bg-primary);
+    border-color: var(--recruitment-border-focus);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* Alerts */
+.alert {
+    position: relative;
+    padding: var(--recruitment-space-4) var(--recruitment-space-6);
+    margin-bottom: var(--recruitment-space-6);
+    border: 1px solid transparent;
+    border-radius: var(--recruitment-radius-md);
+    font-weight: var(--recruitment-font-medium);
+}
+
+.alert-success {
+    color: var(--recruitment-success-dark);
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.alert-danger {
+    color: var(--recruitment-danger-dark);
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.alert-warning {
+    color: var(--recruitment-warning-dark);
+    background-color: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.alert-info {
+    color: var(--recruitment-info-dark);
+    background-color: rgba(6, 182, 212, 0.1);
+    border-color: rgba(6, 182, 212, 0.2);
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
+/* Text Colors */
+.text-primary { color: var(--recruitment-text-primary) !important; }
+.text-secondary { color: var(--recruitment-text-secondary) !important; }
+.text-tertiary { color: var(--recruitment-text-tertiary) !important; }
+.text-muted { color: var(--recruitment-text-muted) !important; }
+.text-inverse { color: var(--recruitment-text-inverse) !important; }
+.text-link { color: var(--recruitment-text-link) !important; }
+
+/* Background Colors */
+.bg-primary { background-color: var(--recruitment-bg-primary) !important; }
+.bg-secondary { background-color: var(--recruitment-bg-secondary) !important; }
+.bg-tertiary { background-color: var(--recruitment-bg-tertiary) !important; }
+.bg-card { background-color: var(--recruitment-bg-card) !important; }
+
+/* Border Colors */
+.border-light { border-color: var(--recruitment-border-light) !important; }
+.border-medium { border-color: var(--recruitment-border-medium) !important; }
+.border-dark { border-color: var(--recruitment-border-dark) !important; }
+.border-focus { border-color: var(--recruitment-border-focus) !important; }
+
+/* Border Radius */
+.rounded-sm { border-radius: var(--recruitment-radius-sm) !important; }
+.rounded { border-radius: var(--recruitment-radius) !important; }
+.rounded-md { border-radius: var(--recruitment-radius-md) !important; }
+.rounded-lg { border-radius: var(--recruitment-radius-lg) !important; }
+.rounded-xl { border-radius: var(--recruitment-radius-xl) !important; }
+.rounded-2xl { border-radius: var(--recruitment-radius-2xl) !important; }
+.rounded-full { border-radius: var(--recruitment-radius-full) !important; }
+
+/* Shadows */
+.shadow-sm { box-shadow: var(--recruitment-shadow-sm) !important; }
+.shadow { box-shadow: var(--recruitment-shadow) !important; }
+.shadow-md { box-shadow: var(--recruitment-shadow-md) !important; }
+.shadow-lg { box-shadow: var(--recruitment-shadow-lg) !important; }
+.shadow-xl { box-shadow: var(--recruitment-shadow-xl) !important; }
+
+/* Spacing */
+.p-1 { padding: var(--recruitment-space-1) !important; }
+.p-2 { padding: var(--recruitment-space-2) !important; }
+.p-3 { padding: var(--recruitment-space-3) !important; }
+.p-4 { padding: var(--recruitment-space-4) !important; }
+.p-5 { padding: var(--recruitment-space-5) !important; }
+.p-6 { padding: var(--recruitment-space-6) !important; }
+.p-8 { padding: var(--recruitment-space-8) !important; }
+
+.m-1 { margin: var(--recruitment-space-1) !important; }
+.m-2 { margin: var(--recruitment-space-2) !important; }
+.m-3 { margin: var(--recruitment-space-3) !important; }
+.m-4 { margin: var(--recruitment-space-4) !important; }
+.m-5 { margin: var(--recruitment-space-5) !important; }
+.m-6 { margin: var(--recruitment-space-6) !important; }
+.m-8 { margin: var(--recruitment-space-8) !important; }
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+
+@media (max-width: 767.98px) {
+    :root {
+        --recruitment-space-4: 0.75rem;
+        --recruitment-space-6: 1rem;
+        --recruitment-space-8: 1.5rem;
+    }
+    
+    .card {
+        margin-bottom: var(--recruitment-space-4);
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: var(--recruitment-space-2);
+    }
+    
+    .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* =============================================================================
+   ACCESSIBILITY
+   ============================================================================= */
+
+/* Focus styles */
+*:focus {
+    outline: 2px solid var(--recruitment-border-focus);
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    :root {
+        --recruitment-border-light: #000000;
+        --recruitment-text-secondary: #000000;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* =============================================================================
+   PRINT STYLES
+   ============================================================================= */
+
+@media print {
+    *,
+    *::before,
+    *::after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+    
+    .btn {
+        border: 1px solid #000 !important;
+        background: transparent !important;
+    }
+}

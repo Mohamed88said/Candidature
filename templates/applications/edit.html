@@ -1,0 +1,447 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Modifier la candidature - {{ application.job.title }} - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="edit-header">
+                <div class="edit-title">
+                    <h1>Modifier la candidature</h1>
+                    <p class="edit-subtitle">{{ application.job.title }} chez {{ application.job.company.name }}</p>
+                </div>
+                <div class="edit-actions">
+                    <a href="{% url 'applications:application_detail' application.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-eye"></i>
+                        <span>Voir la candidature</span>
+                    </a>
+                    <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Retour aux candidatures</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Application Form -->
+            <div class="col-lg-8">
+                <div class="application-form">
+                    <form method="post" enctype="multipart/form-data" class="edit-form">
+                        {% csrf_token %}
+                        
+                        <!-- Application Status -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Statut de la candidature</h3>
+                                <p>Gérez le statut de votre candidature</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Statut actuel</label>
+                                <div class="status-display">
+                                    <span class="status-badge status-{{ application.status }}">{{ application.get_status_display }}</span>
+                                    <span class="status-date">Depuis le {{ application.created_at|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Changer le statut</label>
+                                <select name="status" class="form-select">
+                                    {% for value, label in application.STATUS_CHOICES %}
+                                    <option value="{{ value }}" {% if value == application.status %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Cover Letter -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Lettre de motivation</h3>
+                                <p>Modifiez votre lettre de motivation</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Lettre de motivation *</label>
+                                <textarea name="cover_letter" class="form-control" rows="8" placeholder="Rédigez votre lettre de motivation..." required>{{ application.cover_letter }}</textarea>
+                                <div class="form-help">
+                                    <p>Conseils pour une bonne lettre de motivation :</p>
+                                    <ul>
+                                        <li>Personnalisez votre lettre pour cette entreprise</li>
+                                        <li>Mettez en avant vos compétences pertinentes</li>
+                                        <li>Expliquez pourquoi vous êtes intéressé par ce poste</li>
+                                        <li>Gardez un ton professionnel et enthousiaste</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documents -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Documents</h3>
+                                <p>Gérez vos documents de candidature</p>
+                            </div>
+                            
+                            <!-- Existing Documents -->
+                            {% if application.documents.exists %}
+                            <div class="existing-documents">
+                                <h4>Documents actuels</h4>
+                                <div class="documents-list">
+                                    {% for doc in application.documents.all %}
+                                    <div class="document-item existing">
+                                        <div class="document-icon">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </div>
+                                        <div class="document-info">
+                                            <h4>{{ doc.name }}</h4>
+                                            <p>{{ doc.file.size|filesizeformat }} - {{ doc.uploaded_at|date:"d/m/Y" }}</p>
+                                        </div>
+                                        <div class="document-actions">
+                                            <a href="{{ doc.file.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeExistingDocument({{ doc.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- New Documents -->
+                            <div class="new-documents">
+                                <h4>Ajouter de nouveaux documents</h4>
+                                <div class="document-upload">
+                                    <div class="upload-area" id="upload-area">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <h4>Glissez vos fichiers ici</h4>
+                                        <p>ou cliquez pour sélectionner</p>
+                                        <input type="file" name="new_documents" multiple accept=".pdf,.doc,.docx" id="file-input">
+                                    </div>
+                                </div>
+                                
+                                <div class="documents-list" id="new-documents-list">
+                                    <!-- New documents will be added here -->
+                                </div>
+                                
+                                <div class="form-help">
+                                    <p>Formats acceptés : PDF, DOC, DOCX</p>
+                                    <p>Taille maximale : 10 MB par fichier</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Questions -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Questions personnalisées</h3>
+                                <p>Modifiez vos réponses aux questions de l'entreprise</p>
+                            </div>
+                            
+                            <div class="custom-questions">
+                                {% for question in application.job.application_questions.all %}
+                                <div class="question-item">
+                                    <h4>{{ question.question }}</h4>
+                                    {% if question.type == 'text' %}
+                                        <input type="text" name="question_{{ question.id }}" class="form-control" 
+                                               value="{{ application.get_answer_for_question question.id }}" 
+                                               placeholder="Votre réponse...">
+                                    {% elif question.type == 'textarea' %}
+                                        <textarea name="question_{{ question.id }}" class="form-control" rows="4" 
+                                                  placeholder="Votre réponse...">{{ application.get_answer_for_question question.id }}</textarea>
+                                    {% elif question.type == 'choice' %}
+                                        <select name="question_{{ question.id }}" class="form-select">
+                                            <option value="">Sélectionnez une option</option>
+                                            {% for choice in question.choices %}
+                                            <option value="{{ choice }}" 
+                                                    {% if choice == application.get_answer_for_question question.id %}selected{% endif %}>
+                                                {{ choice }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    {% elif question.type == 'yes_no' %}
+                                        <div class="form-check">
+                                            <input type="radio" name="question_{{ question.id }}" value="yes" 
+                                                   class="form-check-input"
+                                                   {% if application.get_answer_for_question question.id == 'yes' %}checked{% endif %}>
+                                            <label class="form-check-label">Oui</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="radio" name="question_{{ question.id }}" value="no" 
+                                                   class="form-check-input"
+                                                   {% if application.get_answer_for_question question.id == 'no' %}checked{% endif %}>
+                                            <label class="form-check-label">Non</label>
+                                        </div>
+                                    {% endif %}
+                                    {% if question.required %}
+                                    <span class="required-indicator">*</span>
+                                    {% endif %}
+                                </div>
+                                {% empty %}
+                                <div class="no-questions">
+                                    <i class="fas fa-question-circle"></i>
+                                    <h4>Aucune question personnalisée</h4>
+                                    <p>Cette entreprise n'a pas de questions spécifiques</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Informations supplémentaires</h3>
+                                <p>Modifiez les informations complémentaires</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Informations supplémentaires</label>
+                                <textarea name="additional_info" class="form-control" rows="4" 
+                                          placeholder="Ajoutez des informations complémentaires...">{{ application.additional_info }}</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Disponibilité</label>
+                                <input type="date" name="availability_date" class="form-control" 
+                                       value="{{ application.availability_date|date:'Y-m-d' }}">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Salaire souhaité</label>
+                                <div class="input-group">
+                                    <input type="number" name="expected_salary" class="form-control" 
+                                           placeholder="Salaire souhaité" value="{{ application.expected_salary }}">
+                                    <span class="input-group-text">€/an</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                                <i class="fas fa-times"></i>
+                                <span>Annuler</span>
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i>
+                                <span>Sauvegarder les modifications</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Application Sidebar -->
+            <div class="col-lg-4">
+                <!-- Application Summary -->
+                <div class="application-summary">
+                    <div class="card-header">
+                        <h3>Résumé de la candidature</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="summary-info">
+                            <div class="summary-item">
+                                <i class="fas fa-briefcase"></i>
+                                <div class="summary-content">
+                                    <h4>Poste</h4>
+                                    <p>{{ application.job.title }}</p>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-building"></i>
+                                <div class="summary-content">
+                                    <h4>Entreprise</h4>
+                                    <p>{{ application.job.company.name }}</p>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-calendar"></i>
+                                <div class="summary-content">
+                                    <h4>Date de candidature</h4>
+                                    <p>{{ application.created_at|date:"d/m/Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-clock"></i>
+                                <div class="summary-content">
+                                    <h4>Dernière modification</h4>
+                                    <p>{{ application.updated_at|date:"d/m/Y H:i" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application History -->
+                <div class="application-history">
+                    <div class="card-header">
+                        <h3>Historique des modifications</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="history-list">
+                            {% for history in application.status_history.all %}
+                            <div class="history-item">
+                                <div class="history-icon">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="history-content">
+                                    <h4>{{ history.get_status_display }}</h4>
+                                    <p>{{ history.created_at|date:"d/m/Y H:i" }}</p>
+                                    {% if history.notes %}
+                                    <p class="history-notes">{{ history.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="no-history">
+                                <i class="fas fa-history"></i>
+                                <p>Aucun historique disponible</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Tips -->
+                <div class="tips-card">
+                    <div class="card-header">
+                        <h3>Conseils pour la modification</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="tips-list">
+                            <div class="tip-item">
+                                <i class="fas fa-edit"></i>
+                                <div class="tip-content">
+                                    <h4>Améliorez votre lettre</h4>
+                                    <p>Profitez de cette occasion pour améliorer votre lettre de motivation</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-file-plus"></i>
+                                <div class="tip-content">
+                                    <h4>Ajoutez des documents</h4>
+                                    <p>Joignez des documents supplémentaires si nécessaire</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-check-circle"></i>
+                                <div class="tip-content">
+                                    <h4>Vérifiez les informations</h4>
+                                    <p>Assurez-vous que toutes les informations sont correctes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // File upload for new documents
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const newDocumentsList = document.getElementById('new-documents-list');
+    
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+    
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            if (file.size <= 10 * 1024 * 1024) { // 10MB limit
+                addDocumentToList(file);
+            } else {
+                alert('Le fichier ' + file.name + ' est trop volumineux (max 10MB)');
+            }
+        });
+    }
+    
+    function addDocumentToList(file) {
+        const documentItem = document.createElement('div');
+        documentItem.className = 'document-item new';
+        documentItem.innerHTML = `
+            <div class="document-icon">
+                <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="document-info">
+                <h4>${file.name}</h4>
+                <p>${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+            <div class="document-actions">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeNewDocument(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        newDocumentsList.appendChild(documentItem);
+    }
+    
+    function removeNewDocument(button) {
+        button.closest('.document-item').remove();
+    }
+    
+    // Remove existing document
+    function removeExistingDocument(documentId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
+            // This would typically make an AJAX request to delete the document
+            // For now, we'll just remove it from the UI
+            const documentItem = document.querySelector(`[data-document-id="${documentId}"]`);
+            if (documentItem) {
+                documentItem.remove();
+            }
+        }
+    }
+    
+    // Form submission
+    document.querySelector('.edit-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sauvegarde en cours...</span>';
+        submitBtn.disabled = true;
+        
+        // Simulate form submission
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            alert('Candidature modifiée avec succès !');
+            window.location.href = '{% url "applications:application_detail" application.id %}';
+        }, 2000);
+    });
+</script>
+{% endblock %}

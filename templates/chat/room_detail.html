@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - {{ room.title|default:other_user.full_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-room-detail">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <a href="{% url 'chat:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+                
+                <!-- Informations de la conversation -->
+                <div class="room-info">
+                    <div class="room-avatar">
+                        {% if other_user.candidate_profile.profile_picture %}
+                            <img src="{{ other_user.candidate_profile.profile_picture.url }}" 
+                                 alt="{{ other_user.full_name }}">
+                        {% else %}
+                            <div class="avatar-placeholder">
+                                {{ other_user.first_name|first }}{{ other_user.last_name|first }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h5>{{ other_user.full_name }}</h5>
+                    <p class="room-type">{{ room.get_room_type_display }}</p>
+                    
+                    {% if room.job %}
+                    <div class="job-info">
+                        <i class="fas fa-briefcase"></i>
+                        <a href="{% url 'jobs:job_detail' room.job.slug %}">{{ room.job.title }}</a>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Actions -->
+                <div class="room-actions">
+                    <a href="{% url 'chat:report_user' other_user.id %}" class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-flag"></i> Signaler
+                    </a>
+                    <a href="{% url 'chat:block_user' other_user.id %}" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-ban"></i> Bloquer
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Zone de chat -->
+            <div class="col-md-9 chat-main">
+                <div class="chat-header">
+                    <h4>{{ room.title|default:other_user.full_name }}</h4>
+                    <div class="chat-header-actions">
+                        <span class="message-count">{{ room.message_count }} messages</span>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Messages -->
+                <div class="chat-messages" id="chat-messages">
+                    {% for message in page_obj %}
+                    <div class="message-item {% if message.sender == request.user %}own-message{% endif %}" 
+                         data-message-id="{{ message.id }}">
+                        <div class="message-avatar">
+                            {% if message.sender.candidate_profile.profile_picture %}
+                                <img src="{{ message.sender.candidate_profile.profile_picture.url }}" 
+                                     alt="{{ message.sender.full_name }}">
+                            {% else %}
+                                <div class="avatar-placeholder">
+                                    {{ message.sender.first_name|first }}{{ message.sender.last_name|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="sender-name">{{ message.sender.full_name }}</span>
+                                <span class="message-time">{{ message.created_at|date:"H:i" }}</span>
+                            </div>
+                            
+                            <div class="message-text">
+                                {{ message.content|linebreaks }}
+                            </div>
+                            
+                            {% if message.attachment %}
+                            <div class="message-attachment">
+                                <a href="{{ message.attachment.url }}" target="_blank">
+                                    <i class="fas fa-paperclip"></i>
+                                    {{ message.attachment.name|basename }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="message-reactions">
+                                <!-- Réactions seront ajoutées via JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="message-actions">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                        type="button" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="#" onclick="replyToMessage({{ message.id }})">
+                                        <i class="fas fa-reply"></i> Répondre
+                                    </a>
+                                    <a class="dropdown-item" href="#" onclick="addReaction({{ message.id }}, '👍')">
+                                        <i class="fas fa-thumbs-up"></i> 👍
+                                    </a>
+                                    <a class="dropdown-item" href="#" onclick="addReaction({{ message.id }}, '❤️')">
+                                        <i class="fas fa-heart"></i> ❤️
+                                    </a>
+                                    {% if message.sender == request.user %}
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item text-danger" href="#" onclick="deleteMessage({{ message.id }})">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-messages">
+                        <i class="fas fa-comment-slash fa-2x"></i>
+                        <p>Aucun message dans cette conversation</p>
+                        <p>Soyez le premier à envoyer un message !</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Formulaire d'envoi de message -->
+                <div class="chat-input">
+                    <form id="message-form" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleEmojiPicker()">
+                                    <i class="fas fa-smile"></i>
+                                </button>
+                            </div>
+                            
+                            <input type="text" name="content" class="form-control" 
+                                   placeholder="Tapez votre message..." required>
+                            
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleFileUpload()">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <input type="file" name="attachment" id="file-upload" style="display: none;" 
+                               accept="image/*,video/*,.pdf,.doc,.docx">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/chat.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Auto-scroll vers le bas
+    scrollToBottom();
+    
+    // Auto-refresh des messages
+    setInterval(function() {
+        loadNewMessages();
+    }, 5000);
+    
+    // Gestion de l'envoi de message
+    $('#message-form').submit(function(e) {
+        e.preventDefault();
+        sendMessage();
+    });
+    
+    // Gestion de la touche Entrée
+    $('input[name="content"]').keypress(function(e) {
+        if (e.which == 13) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+});
+
+function scrollToBottom() {
+    var chatMessages = document.getElementById('chat-messages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function sendMessage() {
+    var form = $('#message-form')[0];
+    var formData = new FormData(form);
+    
+    $.ajax({
+        url: '{% url "chat:send_message" room.id %}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(data) {
+            if (data.success) {
+                // Ajouter le nouveau message à l'interface
+                addMessageToChat(data.message);
+                // Vider le formulaire
+                form.reset();
+                // Scroll vers le bas
+                scrollToBottom();
+            } else {
+                alert('Erreur lors de l\'envoi du message');
+            }
+        },
+        error: function() {
+            alert('Erreur lors de l\'envoi du message');
+        }
+    });
+}
+
+function addMessageToChat(message) {
+    var messageHtml = createMessageHtml(message);
+    $('#chat-messages').append(messageHtml);
+}
+
+function createMessageHtml(message) {
+    var isOwn = message.is_own;
+    var messageClass = isOwn ? 'own-message' : '';
+    
+    return `
+        <div class="message-item ${messageClass}" data-message-id="${message.id}">
+            <div class="message-avatar">
+                <div class="avatar-placeholder">
+                    ${message.sender.name.charAt(0)}
+                </div>
+            </div>
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="sender-name">${message.sender.name}</span>
+                    <span class="message-time">${new Date(message.created_at).toLocaleTimeString()}</span>
+                </div>
+                <div class="message-text">
+                    ${message.content}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function loadNewMessages() {
+    // AJAX call pour charger les nouveaux messages
+    // Implementation à compléter
+}
+
+function addReaction(messageId, emoji) {
+    $.post('/chat/message/' + messageId + '/reaction/add/', {
+        'emoji': emoji,
+        'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+    }, function(data) {
+        if (data.success) {
+            // Mettre à jour l'affichage des réactions
+            updateReactions(messageId, emoji, data.reaction_count, data.has_user_reacted);
+        }
+    });
+}
+
+function updateReactions(messageId, emoji, count, hasReacted) {
+    // Mettre à jour l'affichage des réactions
+    // Implementation à compléter
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,468 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord notifications - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Centre de notifications</h1>
+                    <p class="welcome-subtitle">Gérez vos notifications et alertes</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double"></i>
+                        <span>Tout marquer comme lu</span>
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="clearAllNotifications()">
+                        <i class="fas fa-trash"></i>
+                        <span>Effacer tout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Notification Statistics -->
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_notifications }}</h3>
+                            <p>Total notifications</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-envelope-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ read_notifications }}</h3>
+                            <p>Notifications lues</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ unread_notifications }}</h3>
+                            <p>Non lues</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ notification_settings }}</h3>
+                            <p>Paramètres actifs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Notification Filters -->
+                <div class="filters-section">
+                    <div class="filters-header">
+                        <h3>Filtrer les notifications</h3>
+                    </div>
+                    <div class="filters-content">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">
+                                <i class="fas fa-list"></i>
+                                <span>Toutes ({{ total_notifications }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="unread">
+                                <i class="fas fa-envelope"></i>
+                                <span>Non lues ({{ unread_notifications }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="read">
+                                <i class="fas fa-envelope-open"></i>
+                                <span>Lues ({{ read_notifications }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="important">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Importantes</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications List -->
+                <div class="notifications-section">
+                    <div class="section-header">
+                        <h3>Notifications</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshNotifications()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        {% if notifications %}
+                        <div class="notifications-list">
+                            {% for notification in notifications %}
+                            <div class="notification-item {% if not notification.is_read %}unread{% endif %}" data-notification-id="{{ notification.id }}">
+                                <div class="notification-icon">
+                                    <i class="fas fa-{{ notification.icon }}"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-header">
+                                        <h5>{{ notification.title }}</h5>
+                                        <span class="notification-time">{{ notification.created_at|timesince }} ago</span>
+                                    </div>
+                                    <p class="notification-message">{{ notification.message }}</p>
+                                    {% if notification.action_url %}
+                                    <div class="notification-actions">
+                                        <a href="{{ notification.action_url }}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                            <span>Voir</span>
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="notification-actions">
+                                    {% if not notification.is_read %}
+                                    <button class="btn btn-outline-primary btn-sm" onclick="markAsRead({{ notification.id }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteNotification({{ notification.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                        <div class="pagination-wrapper">
+                            <nav aria-label="Pagination des notifications">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                        
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-bell-slash"></i>
+                            <h4>Aucune notification</h4>
+                            <p>Vous n'avez actuellement aucune notification</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Notification Settings -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Paramètres de notification</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="notification-settings">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h5>Notifications par email</h5>
+                                    <p>Recevez des notifications par email</p>
+                                </div>
+                                <div class="setting-toggle">
+                                    <input type="checkbox" id="email-notifications" checked>
+                                    <label for="email-notifications"></label>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h5>Notifications push</h5>
+                                    <p>Recevez des notifications push</p>
+                                </div>
+                                <div class="setting-toggle">
+                                    <input type="checkbox" id="push-notifications" checked>
+                                    <label for="push-notifications"></label>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h5>Notifications SMS</h5>
+                                    <p>Recevez des notifications par SMS</p>
+                                </div>
+                                <div class="setting-toggle">
+                                    <input type="checkbox" id="sms-notifications">
+                                    <label for="sms-notifications"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="saveNotificationSettings()">
+                            <i class="fas fa-save"></i>
+                            <span>Sauvegarder</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification Types -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Types de notifications</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="notification-types">
+                            <div class="type-item">
+                                <div class="type-icon">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <div class="type-info">
+                                    <h5>Offres d'emploi</h5>
+                                    <p>Nouvelles offres correspondant à votre profil</p>
+                                </div>
+                                <div class="type-toggle">
+                                    <input type="checkbox" id="job-notifications" checked>
+                                    <label for="job-notifications"></label>
+                                </div>
+                            </div>
+                            <div class="type-item">
+                                <div class="type-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="type-info">
+                                    <h5>Candidatures</h5>
+                                    <p>Mises à jour sur vos candidatures</p>
+                                </div>
+                                <div class="type-toggle">
+                                    <input type="checkbox" id="application-notifications" checked>
+                                    <label for="application-notifications"></label>
+                                </div>
+                            </div>
+                            <div class="type-item">
+                                <div class="type-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <div class="type-info">
+                                    <h5>Messages</h5>
+                                    <p>Nouveaux messages des recruteurs</p>
+                                </div>
+                                <div class="type-toggle">
+                                    <input type="checkbox" id="message-notifications" checked>
+                                    <label for="message-notifications"></label>
+                                </div>
+                            </div>
+                            <div class="type-item">
+                                <div class="type-icon">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="type-info">
+                                    <h5>Alertes</h5>
+                                    <p>Alertes importantes du système</p>
+                                </div>
+                                <div class="type-toggle">
+                                    <input type="checkbox" id="alert-notifications" checked>
+                                    <label for="alert-notifications"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Frequency -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Fréquence des notifications</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="frequency-settings">
+                            <div class="frequency-item">
+                                <div class="frequency-info">
+                                    <h5>Notifications immédiates</h5>
+                                    <p>Recevez les notifications dès qu'elles arrivent</p>
+                                </div>
+                                <div class="frequency-radio">
+                                    <input type="radio" name="frequency" value="immediate" id="immediate" checked>
+                                    <label for="immediate"></label>
+                                </div>
+                            </div>
+                            <div class="frequency-item">
+                                <div class="frequency-info">
+                                    <h5>Résumé quotidien</h5>
+                                    <p>Recevez un résumé une fois par jour</p>
+                                </div>
+                                <div class="frequency-radio">
+                                    <input type="radio" name="frequency" value="daily" id="daily">
+                                    <label for="daily"></label>
+                                </div>
+                            </div>
+                            <div class="frequency-item">
+                                <div class="frequency-info">
+                                    <h5>Résumé hebdomadaire</h5>
+                                    <p>Recevez un résumé une fois par semaine</p>
+                                </div>
+                                <div class="frequency-radio">
+                                    <input type="radio" name="frequency" value="weekly" id="weekly">
+                                    <label for="weekly"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter tabs functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Filter notifications based on selected tab
+            const filter = this.dataset.filter;
+            filterNotifications(filter);
+        });
+    });
+
+    // Filter notifications
+    function filterNotifications(filter) {
+        const notifications = document.querySelectorAll('.notification-item');
+        
+        notifications.forEach(notification => {
+            switch(filter) {
+                case 'all':
+                    notification.style.display = 'flex';
+                    break;
+                case 'unread':
+                    notification.style.display = notification.classList.contains('unread') ? 'flex' : 'none';
+                    break;
+                case 'read':
+                    notification.style.display = notification.classList.contains('unread') ? 'none' : 'flex';
+                    break;
+                case 'important':
+                    // This would typically filter by importance level
+                    notification.style.display = 'flex';
+                    break;
+            }
+        });
+    }
+
+    // Mark notification as read
+    function markAsRead(notificationId) {
+        // This would typically make an AJAX request to mark the notification as read
+        const notification = document.querySelector(`[data-notification-id="${notificationId}"]`);
+        notification.classList.remove('unread');
+        alert('Notification marquée comme lue !');
+    }
+
+    // Mark all notifications as read
+    function markAllAsRead() {
+        // This would typically make an AJAX request to mark all notifications as read
+        document.querySelectorAll('.notification-item.unread').forEach(notification => {
+            notification.classList.remove('unread');
+        });
+        alert('Toutes les notifications ont été marquées comme lues !');
+    }
+
+    // Delete notification
+    function deleteNotification(notificationId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
+            // This would typically make an AJAX request to delete the notification
+            const notification = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            notification.remove();
+            alert('Notification supprimée avec succès !');
+        }
+    }
+
+    // Clear all notifications
+    function clearAllNotifications() {
+        if (confirm('Êtes-vous sûr de vouloir effacer toutes les notifications ?')) {
+            // This would typically make an AJAX request to clear all notifications
+            document.querySelectorAll('.notification-item').forEach(notification => {
+                notification.remove();
+            });
+            alert('Toutes les notifications ont été effacées !');
+        }
+    }
+
+    // Refresh notifications
+    function refreshNotifications() {
+        // This would typically refresh the notifications list
+        location.reload();
+    }
+
+    // Save notification settings
+    function saveNotificationSettings() {
+        // This would typically save the notification settings
+        alert('Paramètres de notification sauvegardés !');
+    }
+
+    // Auto-refresh notifications
+    setInterval(function() {
+        // This would typically check for new notifications
+        console.log('Checking for new notifications...');
+    }, 30000); // Check every 30 seconds
+</script>
+{% endblock %}

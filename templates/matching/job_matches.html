@@ -1,0 +1,460 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Matches - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/matching.css' %}">
+<style>
+.match-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.match-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.match-score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 1rem;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.score-excellent { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+.score-very-good { background: linear-gradient(135deg, #17a2b8, #6f42c1); color: white; }
+.score-good { background: linear-gradient(135deg, #ffc107, #fd7e14); color: white; }
+.score-correct { background: linear-gradient(135deg, #fd7e14, #e83e8c); color: white; }
+.score-faible { background: linear-gradient(135deg, #dc3545, #6f42c1); color: white; }
+
+.match-level-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.level-excellent { background: #28a745; color: white; }
+.level-very-good { background: #17a2b8; color: white; }
+.level-good { background: #ffc107; color: #212529; }
+.level-correct { background: #fd7e14; color: white; }
+.level-faible { background: #dc3545; color: white; }
+
+.filter-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.skill-tag {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin: 0.1rem;
+}
+
+.company-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+.match-stats {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+.interest-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.interest-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-interested {
+    background: #28a745;
+    color: white;
+}
+
+.btn-very-interested {
+    background: #007bff;
+    color: white;
+}
+
+.btn-not-interested {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-applied {
+    background: #17a2b8;
+    color: white;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-heart text-danger me-2"></i>
+                        Mes Matches d'Emploi
+                    </h1>
+                    <p class="text-muted">{{ total_matches }} matches trouvés</p>
+                </div>
+                <div>
+                    <a href="{% url 'matching:dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour au dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="row">
+        <div class="col-12">
+            <div class="filter-card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-white">Recherche</label>
+                            <input type="text" name="search" class="form-control" 
+                                   value="{{ search_query }}" 
+                                   placeholder="Titre, entreprise, localisation...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-white">Score minimum</label>
+                            <input type="number" name="min_score" class="form-control" 
+                                   value="{{ min_score }}" min="0" max="100" 
+                                   placeholder="Ex: 70">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-white">Niveau de match</label>
+                            <select name="match_level" class="form-select">
+                                <option value="">Tous les niveaux</option>
+                                <option value="excellent" {% if match_level == 'excellent' %}selected{% endif %}>Excellent (90%+)</option>
+                                <option value="very_good" {% if match_level == 'very_good' %}selected{% endif %}>Très bon (80-89%)</option>
+                                <option value="good" {% if match_level == 'good' %}selected{% endif %}>Bon (70-79%)</option>
+                                <option value="correct" {% if match_level == 'correct' %}selected{% endif %}>Correct (60-69%)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-light me-2">
+                                <i class="fas fa-search me-1"></i>Filtrer
+                            </button>
+                            <a href="{% url 'matching:job_matches' %}" class="btn btn-outline-light">
+                                <i class="fas fa-times me-1"></i>Effacer
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des matches -->
+    <div class="row">
+        {% if page_obj %}
+            {% for match in page_obj %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card match-card h-100 position-relative">
+                    <div class="match-level-badge level-{{ match.match_level }}">
+                        {{ match.match_level_display }}
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Score et logo -->
+                        <div class="row mb-3">
+                            <div class="col-4 text-center">
+                                <div class="match-score score-{{ match.match_level }}">
+                                    {{ match.overall_score }}%
+                                </div>
+                            </div>
+                            <div class="col-8">
+                                {% if match.job.company_logo %}
+                                <img src="{{ match.job.company_logo.url }}" alt="{{ match.job.company }}" 
+                                     class="company-logo float-end">
+                                {% else %}
+                                <div class="company-logo float-end bg-light d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-building text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Informations du poste -->
+                        <h5 class="card-title">{{ match.job.title }}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-building me-1"></i>{{ match.job.company }}
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ match.job.location }}
+                        </p>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-clock me-1"></i>{{ match.job.get_job_type_display }}
+                        </p>
+
+                        <!-- Statistiques détaillées -->
+                        <div class="match-stats">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ match.experience_score }}%</div>
+                                        <div class="stat-label">Expérience</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ match.skills_score }}%</div>
+                                        <div class="stat-label">Compétences</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ match.location_score }}%</div>
+                                        <div class="stat-label">Localisation</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compétences matching -->
+                        {% if match.matching_skills %}
+                        <div class="mb-3">
+                            <small class="text-muted">Compétences correspondantes:</small>
+                            <div>
+                                {% for skill in match.matching_skills|slice:":3" %}
+                                <span class="skill-tag">{{ skill.skill }}</span>
+                                {% endfor %}
+                                {% if match.matching_skills|length > 3 %}
+                                <span class="skill-tag">+{{ match.matching_skills|length|add:"-3" }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Forces -->
+                        {% if match.strengths %}
+                        <div class="mb-3">
+                            <small class="text-success">
+                                <i class="fas fa-check-circle me-1"></i>
+                                {{ match.strengths.0 }}
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <div class="interest-buttons">
+                            <a href="{% url 'matching:match_detail' match.id %}" 
+                               class="btn btn-outline-primary flex-fill">
+                                <i class="fas fa-eye me-1"></i>Détails
+                            </a>
+                            <a href="{% url 'jobs:job_detail' match.job.slug %}" 
+                               class="btn btn-primary flex-fill">
+                                <i class="fas fa-external-link-alt me-1"></i>Voir offre
+                            </a>
+                        </div>
+
+                        <!-- Statut d'intérêt -->
+                        {% if match.candidate_interest %}
+                        <div class="mt-2 text-center">
+                            {% if match.candidate_interest == 'interested' %}
+                            <span class="badge bg-success">Intéressé</span>
+                            {% elif match.candidate_interest == 'very_interested' %}
+                            <span class="badge bg-primary">Très intéressé</span>
+                            {% elif match.candidate_interest == 'applied' %}
+                            <span class="badge bg-info">Candidature envoyée</span>
+                            {% elif match.candidate_interest == 'not_interested' %}
+                            <span class="badge bg-secondary">Pas intéressé</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h4>Aucun match trouvé</h4>
+                <p>Essayez de modifier vos critères de recherche ou générez de nouveaux matches.</p>
+                <div class="mt-3">
+                    <a href="{% url 'matching:generate_matches' %}" class="btn btn-primary me-2">
+                        <i class="fas fa-sync-alt me-2"></i>Générer des matches
+                    </a>
+                    <a href="{% url 'matching:preferences' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-cog me-2"></i>Modifier les préférences
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-wrapper">
+        <nav aria-label="Pagination des matches">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if min_score %}&min_score={{ min_score }}{% endif %}{% if match_level %}&match_level={{ match_level }}{% endif %}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if min_score %}&min_score={{ min_score }}{% endif %}{% if match_level %}&match_level={{ match_level }}{% endif %}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if min_score %}&min_score={{ min_score }}{% endif %}{% if match_level %}&match_level={{ match_level }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if min_score %}&min_score={{ min_score }}{% endif %}{% if match_level %}&match_level={{ match_level }}{% endif %}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if min_score %}&min_score={{ min_score }}{% endif %}{% if match_level %}&match_level={{ match_level }}{% endif %}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des scores au chargement
+    const scoreElements = document.querySelectorAll('.match-score');
+    scoreElements.forEach(element => {
+        const finalScore = parseInt(element.textContent);
+        let currentScore = 0;
+        const increment = finalScore / 30;
+        
+        const timer = setInterval(() => {
+            currentScore += increment;
+            if (currentScore >= finalScore) {
+                currentScore = finalScore;
+                clearInterval(timer);
+            }
+            element.textContent = Math.round(currentScore) + '%';
+        }, 30);
+    });
+    
+    // Animation des cartes au scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    const matchCards = document.querySelectorAll('.match-card');
+    matchCards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}
+

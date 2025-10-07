@@ -1,0 +1,689 @@
+/* ========================================
+   NOTIFICATIONS STYLES
+   ======================================== */
+
+/* ========================================
+   NOTIFICATIONS PAGE
+   ======================================== */
+
+.notifications-page {
+    padding: var(--spacing-8) 0;
+    background: var(--gray-50);
+    min-height: 100vh;
+}
+
+.page-header {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-8);
+    margin-bottom: var(--spacing-8);
+    box-shadow: var(--shadow-lg);
+}
+
+.header-content h1 {
+    margin: 0 0 var(--spacing-2) 0;
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.header-content p {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    color: var(--gray-600);
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--spacing-3);
+}
+
+/* ========================================
+   STATS GRID
+   ======================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+}
+
+.stat-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    transition: all var(--transition-normal);
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+.stat-icon.unread {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.stat-icon.read {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.stat-icon:not(.unread):not(.read) {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+}
+
+.stat-content h3 {
+    margin: 0;
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+.stat-content p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+}
+
+/* ========================================
+   WEEKLY STATS
+   ======================================== */
+
+.weekly-stats {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+    box-shadow: var(--shadow-lg);
+}
+
+.stats-header h3 {
+    margin: 0 0 var(--spacing-4) 0;
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.stats-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-6);
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-1);
+}
+
+.stat-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+}
+
+/* ========================================
+   NOTIFICATIONS SECTION
+   ======================================== */
+
+.notifications-section {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+    box-shadow: var(--shadow-lg);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-6);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+    opacity: 0;
+    transform: translateX(-20px);
+    position: relative;
+}
+
+.notification-item.unread {
+    background: linear-gradient(135deg, var(--primary-light), var(--white));
+    border-left: 4px solid var(--primary-color);
+}
+
+.notification-item.read {
+    background: var(--gray-50);
+    opacity: 0.8;
+}
+
+.notification-item:hover {
+    background: var(--gray-100);
+    transform: translateX(0);
+}
+
+.notification-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+.notification-icon i.fa-briefcase {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.notification-icon i.fa-file-alt {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.notification-icon i.fa-comment {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.notification-icon i.fa-trophy {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.notification-icon i.fa-bell {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content h4 {
+    margin: 0 0 var(--spacing-1) 0;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.notification-content p {
+    margin: 0 0 var(--spacing-2) 0;
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    line-height: 1.5;
+}
+
+.notification-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+}
+
+.notification-time {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+}
+
+.notification-status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.notification-actions {
+    display: flex;
+    gap: var(--spacing-2);
+    flex-shrink: 0;
+}
+
+/* ========================================
+   WIDGETS
+   ======================================== */
+
+.preferences-widget,
+.devices-widget,
+.quick-actions-widget {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+    box-shadow: var(--shadow-lg);
+}
+
+.widget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.widget-header h4 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.preferences-content,
+.devices-list,
+.actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.preference-item,
+.device-item,
+.action-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-3);
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.preference-item:hover,
+.device-item:hover {
+    background: var(--gray-100);
+}
+
+.preference-label,
+.device-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.preference-label i,
+.device-icon {
+    width: 20px;
+    text-align: center;
+    color: var(--gray-500);
+}
+
+.preference-label span,
+.device-info h5 {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.device-info p {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+}
+
+.device-last-seen {
+    font-size: var(--font-size-xs);
+    color: var(--gray-400);
+}
+
+.preference-status,
+.device-status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.status-enabled {
+    color: var(--success-color);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.status-disabled {
+    color: var(--gray-400);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.status-active {
+    color: var(--success-color);
+}
+
+.status-inactive {
+    color: var(--gray-400);
+}
+
+.device-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+.device-icon i.fa-desktop {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.device-icon i.fa-android {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.device-icon i.fa-apple {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.device-icon i.fa-mobile-alt {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.action-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+    color: var(--gray-700);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.action-item:hover {
+    background: var(--gray-100);
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.action-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--gray-500);
+}
+
+.action-item span {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+/* ========================================
+   EMPTY STATES
+   ======================================== */
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-16);
+    color: var(--gray-500);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-4);
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    margin: 0 0 var(--spacing-2) 0;
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: var(--font-size-base);
+    color: var(--gray-500);
+}
+
+/* ========================================
+   MODAL STYLES
+   ======================================== */
+
+.modal-content {
+    border: none;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--gray-200);
+    padding: var(--spacing-6);
+}
+
+.modal-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.modal-body {
+    padding: var(--spacing-6);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--gray-200);
+    padding: var(--spacing-6);
+}
+
+/* ========================================
+   FORM STYLES
+   ======================================== */
+
+.form-group {
+    margin-bottom: var(--spacing-4);
+}
+
+.form-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: var(--spacing-2);
+}
+
+.form-control,
+.form-select {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--gray-400);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+    .notifications-page {
+        padding: var(--spacing-4) 0;
+    }
+    
+    .page-header {
+        padding: var(--spacing-6);
+    }
+    
+    .header-content h1 {
+        font-size: var(--font-size-3xl);
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        gap: var(--spacing-2);
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-4);
+    }
+    
+    .stats-content {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+    }
+    
+    .stat-card {
+        padding: var(--spacing-4);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .notifications-section,
+    .preferences-widget,
+    .devices-widget,
+    .quick-actions-widget {
+        padding: var(--spacing-4);
+    }
+    
+    .notification-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-3);
+    }
+    
+    .notification-actions {
+        align-self: flex-end;
+    }
+    
+    .preference-item,
+    .device-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-2);
+    }
+    
+    .preference-status,
+    .device-status {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        padding: var(--spacing-4);
+    }
+    
+    .header-content h1 {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        padding: var(--spacing-3);
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .stat-content h3 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .notifications-section,
+    .preferences-widget,
+    .devices-widget,
+    .quick-actions-widget {
+        padding: var(--spacing-3);
+    }
+    
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: var(--spacing-4);
+    }
+}

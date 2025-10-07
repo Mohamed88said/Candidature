@@ -1,0 +1,346 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord candidat - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Bonjour, {{ user.get_full_name }} !</h1>
+                    <p class="welcome-subtitle">Bienvenue sur votre tableau de bord candidat</p>
+                </div>
+                <div class="quick-actions">
+                    <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        <span>Rechercher des emplois</span>
+                    </a>
+                    <a href="{% url 'applications:create' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i>
+                        <span>Nouvelle candidature</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_applications }}</h3>
+                            <p>Total candidatures</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ pending_applications }}</h3>
+                            <p>En attente</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ accepted_applications }}</h3>
+                            <p>Acceptées</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ profile_completion }}%</h3>
+                            <p>Profil complété</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Recent Applications -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>Mes dernières candidatures</h3>
+                        <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir toutes</span>
+                        </a>
+                    </div>
+                    <div class="section-content">
+                        {% if recent_applications %}
+                        <div class="applications-list">
+                            {% for application in recent_applications %}
+                            <div class="application-item">
+                                <div class="application-info">
+                                    <h4><a href="{% url 'applications:application_detail' application.id %}">{{ application.job.title }}</a></h4>
+                                    <p class="company-name">{{ application.job.company.name }}</p>
+                                    <div class="application-meta">
+                                        <span class="meta-item">
+                                            <i class="fas fa-calendar"></i>
+                                            {{ application.created_at|date:"d/m/Y" }}
+                                        </span>
+                                        <span class="meta-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            {{ application.job.location }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="application-status">
+                                    <span class="status-badge status-{{ application.status }}">{{ application.get_status_display }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h4>Aucune candidature récente</h4>
+                            <p>Commencez par postuler à des offres d'emploi</p>
+                            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                                <span>Rechercher des emplois</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Job Recommendations -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>Recommandations d'emplois</h3>
+                        <a href="{% url 'matching:recommendations' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir toutes</span>
+                        </a>
+                    </div>
+                    <div class="section-content">
+                        {% if recommended_jobs %}
+                        <div class="jobs-grid">
+                            {% for job in recommended_jobs %}
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <h4><a href="{% url 'jobs:job_detail' job.id %}">{{ job.title }}</a></h4>
+                                    <p class="company-name">{{ job.company.name }}</p>
+                                </div>
+                                <div class="job-meta">
+                                    <span class="meta-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ job.location }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <i class="fas fa-briefcase"></i>
+                                        {{ job.get_job_type_display }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        {{ job.get_experience_level_display }}
+                                    </span>
+                                </div>
+                                <div class="job-actions">
+                                    <a href="{% url 'applications:apply' job.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>Postuler</span>
+                                    </a>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="saveJob({{ job.id }})">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-lightbulb"></i>
+                            <h4>Aucune recommandation</h4>
+                            <p>Complétez votre profil pour recevoir des recommandations personnalisées</p>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-primary">
+                                <i class="fas fa-user-edit"></i>
+                                <span>Compléter le profil</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Profile Completion -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Complétion du profil</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="progress-section">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: {{ profile_completion }}%"></div>
+                            </div>
+                            <p class="progress-text">{{ profile_completion }}% complété</p>
+                        </div>
+                        <div class="profile-steps">
+                            {% if not user.candidateprofile.profile_picture %}
+                            <div class="step-item incomplete">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Photo de profil</span>
+                            </div>
+                            {% else %}
+                            <div class="step-item complete">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Photo de profil</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if not user.candidateprofile.bio %}
+                            <div class="step-item incomplete">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Biographie</span>
+                            </div>
+                            {% else %}
+                            <div class="step-item complete">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Biographie</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if not user.candidateprofile.skills.exists %}
+                            <div class="step-item incomplete">
+                                <i class="fas fa-tools"></i>
+                                <span>Compétences</span>
+                            </div>
+                            {% else %}
+                            <div class="step-item complete">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Compétences</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if not user.candidateprofile.experiences.exists %}
+                            <div class="step-item incomplete">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Expérience</span>
+                            </div>
+                            {% else %}
+                            <div class="step-item complete">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Expérience</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-block">
+                            <i class="fas fa-edit"></i>
+                            <span>Compléter le profil</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Statistiques rapides</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="quick-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ profile_views }}</h4>
+                                    <p>Vues du profil</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ saved_jobs }}</h4>
+                                    <p>Emplois sauvegardés</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ unread_notifications }}</h4>
+                                    <p>Notifications</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Activité récente</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="activity-list">
+                            {% for activity in recent_activities %}
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-{{ activity.icon }}"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p>{{ activity.description }}</p>
+                                    <span class="activity-time">{{ activity.created_at|timesince }} ago</span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-activity">
+                                <i class="fas fa-history"></i>
+                                <p>Aucune activité récente</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Save job functionality
+    function saveJob(jobId) {
+        // This would typically make an AJAX request to save the job
+        alert('Emploi sauvegardé avec succès !');
+    }
+    
+    // Auto-refresh dashboard data
+    setInterval(function() {
+        // This would typically refresh dashboard statistics
+        console.log('Refreshing dashboard data...');
+    }, 30000); // Refresh every 30 seconds
+</script>
+{% endblock %}

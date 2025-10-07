@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Alertes - Liste{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="alerts-list-page">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Filtres -->
+            <div class="col-md-3">
+                <div class="card filters-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-filter"></i> Filtres</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="filters-form">
+                            <div class="form-group">
+                                <label>Recherche</label>
+                                {{ search_form.search }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Type d'alerte</label>
+                                {{ search_form.alert_type }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Statut</label>
+                                {{ search_form.status }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Date de début</label>
+                                {{ search_form.date_from }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Date de fin</label>
+                                {{ search_form.date_to }}
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-search"></i> Filtrer
+                                </button>
+                                <a href="{% url 'alerts:alerts_list' %}" class="btn btn-outline-secondary btn-block">
+                                    <i class="fas fa-times"></i> Effacer
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Liste des alertes -->
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-bell"></i> Mes alertes</h4>
+                        <div class="header-actions">
+                            <span class="results-count">{{ page_obj.paginator.count }} alerte(s) trouvée(s)</span>
+                            <div class="bulk-actions">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="selectAllAlerts()">
+                                    <i class="fas fa-check-square"></i> Tout sélectionner
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="bulkAction()">
+                                    <i class="fas fa-tasks"></i> Actions en lot
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if page_obj %}
+                            <div class="alerts-list">
+                                {% for alert in page_obj %}
+                                <div class="alert-item {% if alert.status == 'delivered' %}unread{% endif %}" 
+                                     data-alert-id="{{ alert.id }}">
+                                    <div class="alert-checkbox">
+                                        <input type="checkbox" class="alert-select" value="{{ alert.id }}">
+                                    </div>
+                                    
+                                    <div class="alert-icon">
+                                        <i class="{{ alert.alert_type.icon }}" style="color: {{ alert.alert_type.color }}"></i>
+                                    </div>
+                                    
+                                    <div class="alert-content">
+                                        <div class="alert-header">
+                                            <h6 class="alert-title">{{ alert.title }}</h6>
+                                            <span class="alert-time">{{ alert.created_at|date:"d/m/Y H:i" }}</span>
+                                        </div>
+                                        
+                                        <div class="alert-message">
+                                            {{ alert.message|truncatechars:200 }}
+                                        </div>
+                                        
+                                        <div class="alert-meta">
+                                            <span class="alert-type">{{ alert.alert_type.name }}</span>
+                                            <span class="match-score score-{{ alert.match_score|floatformat:0 }}">
+                                                {{ alert.match_score|floatformat:0 }}% match
+                                            </span>
+                                            <span class="job-company">{{ alert.job.company }}</span>
+                                            <span class="job-location">{{ alert.job.location }}</span>
+                                        </div>
+                                        
+                                        {% if alert.match_reasons %}
+                                        <div class="match-reasons">
+                                            <strong>Raisons de correspondance :</strong>
+                                            {% for reason in alert.match_reasons %}
+                                                <span class="reason-tag">{{ reason }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="alert-actions">
+                                        <div class="action-buttons">
+                                            <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'jobs:job_detail' alert.job.slug %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="markAsRead({{ alert.id }})">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteAlert({{ alert.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="alert-status">
+                                            {% if alert.status == 'delivered' %}
+                                                <span class="status-badge unread">Non lue</span>
+                                            {% elif alert.status == 'opened' %}
+                                                <span class="status-badge read">Lue</span>
+                                            {% elif alert.status == 'clicked' %}
+                                                <span class="status-badge clicked">Cliquée</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Pagination -->
+                            {% if page_obj.has_other_pages %}
+                            <nav aria-label="Pagination des alertes">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if alert_type_id %}&alert_type={{ alert_type_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">
+                                                <i class="fas fa-angle-double-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if alert_type_id %}&alert_type={{ alert_type_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if alert_type_id %}&alert_type={{ alert_type_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if alert_type_id %}&alert_type={{ alert_type_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if alert_type_id %}&alert_type={{ alert_type_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">
+                                                <i class="fas fa-angle-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        {% else %}
+                            <div class="no-alerts">
+                                <i class="fas fa-bell-slash fa-3x"></i>
+                                <h5>Aucune alerte trouvée</h5>
+                                <p>
+                                    {% if search_query or alert_type_id or status or date_from or date_to %}
+                                        Aucune alerte ne correspond à vos critères de recherche.
+                                        <br>
+                                        Essayez de modifier vos filtres.
+                                    {% else %}
+                                        Vous n'avez pas encore reçu d'alertes.
+                                    {% endif %}
+                                </p>
+                                {% if search_query or alert_type_id or status or date_from or date_to %}
+                                    <a href="{% url 'alerts:alerts_list' %}" class="btn btn-outline-primary">
+                                        Voir toutes les alertes
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'alerts:preferences' %}" class="btn btn-primary">
+                                        Configurer mes alertes
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les actions en lot -->
+<div class="modal fade" id="bulkActionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Actions en lot</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="bulkActionForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Action à effectuer</label>
+                        <select name="action" class="form-control" required>
+                            <option value="">Sélectionner une action</option>
+                            <option value="mark_read">Marquer comme lues</option>
+                            <option value="mark_unread">Marquer comme non lues</option>
+                            <option value="delete">Supprimer</option>
+                            <option value="archive">Archiver</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="alert_ids" id="selectedAlertIds">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="submitBulkAction()">Exécuter</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/alerts.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Animation des alertes
+    $('.alert-item').each(function(index) {
+        $(this).css('animation-delay', (index * 0.1) + 's');
+    });
+    
+    // Gestion des filtres en temps réel
+    $('.filters-form select, .filters-form input').change(function() {
+        // Optionnel: soumettre automatiquement le formulaire
+    });
+});
+
+function selectAllAlerts() {
+    const checkboxes = $('.alert-select');
+    const allChecked = checkboxes.length === checkboxes.filter(':checked').length;
+    
+    checkboxes.prop('checked', !allChecked);
+    
+    if (!allChecked) {
+        $('.alert-item').addClass('selected');
+    } else {
+        $('.alert-item').removeClass('selected');
+    }
+}
+
+function bulkAction() {
+    const selectedIds = $('.alert-select:checked').map(function() {
+        return this.value;
+    }).get();
+    
+    if (selectedIds.length === 0) {
+        alert('Veuillez sélectionner au moins une alerte.');
+        return;
+    }
+    
+    $('#selectedAlertIds').val(selectedIds.join(','));
+    $('#bulkActionModal').modal('show');
+}
+
+function submitBulkAction() {
+    const form = $('#bulkActionForm');
+    const formData = form.serialize();
+    
+    $.ajax({
+        url: '{% url "alerts:bulk_alert_action" %}',
+        type: 'POST',
+        data: formData,
+        success: function(response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert('Erreur lors de l\'exécution de l\'action.');
+            }
+        },
+        error: function() {
+            alert('Erreur lors de l\'exécution de l\'action.');
+        }
+    });
+}
+
+function markAsRead(alertId) {
+    $.post('/alerts/alert/' + alertId + '/mark-read/', {
+        'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+    }, function(data) {
+        if (data.success) {
+            $('.alert-item[data-alert-id="' + alertId + '"]').removeClass('unread');
+            $('.alert-item[data-alert-id="' + alertId + '"] .status-badge').text('Lue').removeClass('unread').addClass('read');
+        }
+    });
+}
+
+function deleteAlert(alertId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
+        $.post('/alerts/alert/' + alertId + '/delete/', {
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        }, function(data) {
+            if (data.success) {
+                $('.alert-item[data-alert-id="' + alertId + '"]').fadeOut();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Impression - Plateforme de recrutement{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}impression, print, recrutement{% endblock %}">
+    <meta name="author" content="Recruitment Platform">
+    
+    <title>{% block title %}Impression - Plateforme de Recrutement{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/modern-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Print Styles -->
+    <style>
+        @media print {
+            body {
+                font-size: 12pt;
+                line-height: 1.4;
+                color: #000;
+                background: #fff;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #000;
+            }
+            
+            .print-footer {
+                display: block !important;
+                text-align: center;
+                margin-top: 20px;
+                padding-top: 10px;
+                border-top: 1px solid #000;
+                font-size: 10pt;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+            
+            .no-break {
+                page-break-inside: avoid;
+            }
+            
+            h1, h2, h3, h4, h5, h6 {
+                page-break-after: avoid;
+            }
+            
+            table {
+                page-break-inside: avoid;
+            }
+            
+            img {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            
+            .btn {
+                display: none !important;
+            }
+            
+            .alert {
+                border: 1px solid #000;
+                background: #fff !important;
+                color: #000 !important;
+            }
+            
+            .card {
+                border: 1px solid #000;
+                background: #fff !important;
+            }
+            
+            .text-muted {
+                color: #666 !important;
+            }
+            
+            .text-primary {
+                color: #000 !important;
+            }
+            
+            .text-success {
+                color: #000 !important;
+            }
+            
+            .text-warning {
+                color: #000 !important;
+            }
+            
+            .text-danger {
+                color: #000 !important;
+            }
+            
+            .bg-primary {
+                background: #fff !important;
+                color: #000 !important;
+            }
+            
+            .bg-success {
+                background: #fff !important;
+                color: #000 !important;
+            }
+            
+            .bg-warning {
+                background: #fff !important;
+                color: #000 !important;
+            }
+            
+            .bg-danger {
+                background: #fff !important;
+                color: #000 !important;
+            }
+            
+            .border {
+                border: 1px solid #000 !important;
+            }
+            
+            .border-primary {
+                border: 1px solid #000 !important;
+            }
+            
+            .border-success {
+                border: 1px solid #000 !important;
+            }
+            
+            .border-warning {
+                border: 1px solid #000 !important;
+            }
+            
+            .border-danger {
+                border: 1px solid #000 !important;
+            }
+        }
+        
+        @media screen {
+            .print-header {
+                display: none;
+            }
+            
+            .print-footer {
+                display: none;
+            }
+        }
+    </style>
+    
+    <!-- CSRF Token -->
+    {% csrf_token %}
+</head>
+<body class="print-page">
+    <!-- Print Header -->
+    <div class="print-header">
+        <h1>RecruitPro</h1>
+        <p>Plateforme de Recrutement</p>
+        <p>Document généré le {{ now|date:"d/m/Y à H:i" }}</p>
+    </div>
+
+    <!-- Print Content -->
+    <div class="print-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+        <p>RecruitPro - Plateforme de Recrutement</p>
+        <p>www.recruitpro.com | contact@recruitpro.com</p>
+        <p>Page <span class="page-number"></span></p>
+    </div>
+
+    <!-- Print Actions (Screen Only) -->
+    <div class="print-actions no-print">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="print-actions-content">
+                        <button class="btn btn-primary" onclick="window.print()">
+                            <i class="fas fa-print"></i>
+                            <span>Imprimer</span>
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="window.close()">
+                            <i class="fas fa-times"></i>
+                            <span>Fermer</span>
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="window.history.back()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Retour</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/modern-ui.js' %}"></script>
+    <script>
+        // Add page numbers
+        function addPageNumbers() {
+            const pageNumbers = document.querySelectorAll('.page-number');
+            pageNumbers.forEach((pageNumber, index) => {
+                pageNumber.textContent = index + 1;
+            });
+        }
+        
+        // Initialize page numbers
+        addPageNumbers();
+        
+        // Auto-print on load (optional)
+        // window.onload = function() {
+        //     setTimeout(function() {
+        //         window.print();
+        //     }, 1000);
+        // };
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

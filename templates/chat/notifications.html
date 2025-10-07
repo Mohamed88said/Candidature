@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - Notifications{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-notifications">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-bell"></i> Notifications de chat</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if page_obj %}
+                            <div class="notifications-list">
+                                {% for notification in page_obj %}
+                                <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                                    <div class="notification-icon">
+                                        {% if notification.notification_type == 'new_message' %}
+                                            <i class="fas fa-comment"></i>
+                                        {% elif notification.notification_type == 'message_reaction' %}
+                                            <i class="fas fa-heart"></i>
+                                        {% elif notification.notification_type == 'user_joined' %}
+                                            <i class="fas fa-user-plus"></i>
+                                        {% elif notification.notification_type == 'user_left' %}
+                                            <i class="fas fa-user-minus"></i>
+                                        {% else %}
+                                            <i class="fas fa-bell"></i>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="notification-content">
+                                        <div class="notification-header">
+                                            <h6>{{ notification.title }}</h6>
+                                            <span class="notification-time">
+                                                {{ notification.created_at|timesince }} ago
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="notification-text">
+                                            {{ notification.content }}
+                                        </div>
+                                        
+                                        {% if notification.room %}
+                                        <div class="notification-room">
+                                            <i class="fas fa-comments"></i>
+                                            {{ notification.room.title|default:notification.room.get_other_participant.full_name }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="notification-actions">
+                                        {% if notification.room %}
+                                        <a href="{% url 'chat:room_detail' notification.room.id %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            Voir
+                                        </a>
+                                        {% endif %}
+                                        
+                                        <button class="btn btn-sm btn-outline-secondary" 
+                                                onclick="markAsRead({{ notification.id }})">
+                                            Marquer comme lu
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Pagination -->
+                            {% if page_obj.has_other_pages %}
+                            <nav aria-label="Pagination des notifications">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">
+                                                <i class="fas fa-angle-double-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                                <i class="fas fa-angle-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        {% else %}
+                            <div class="no-notifications">
+                                <i class="fas fa-bell-slash fa-3x"></i>
+                                <p>Aucune notification</p>
+                                <a href="{% url 'chat:dashboard' %}" class="btn btn-primary">
+                                    Retour au dashboard
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-outline-primary btn-block" onclick="markAllAsRead()">
+                                <i class="fas fa-check"></i> Tout marquer comme lu
+                            </button>
+                            
+                            <button class="btn btn-outline-warning btn-block" onclick="clearAllNotifications()">
+                                <i class="fas fa-trash"></i> Effacer toutes les notifications
+                            </button>
+                            
+                            <a href="{% url 'chat:settings' %}" class="btn btn-outline-secondary btn-block">
+                                <i class="fas fa-cog"></i> Paramètres
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function markAsRead(notificationId) {
+    $.post('/chat/api/notification/' + notificationId + '/mark-read/', {
+        'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+    }, function(data) {
+        if (data.success) {
+            $('.notification-item[data-notification-id="' + notificationId + '"]').removeClass('unread');
+        }
+    });
+}
+
+function markAllAsRead() {
+    if (confirm('Marquer toutes les notifications comme lues ?')) {
+        $.post('/chat/api/notifications/mark-all-read/', {
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        }, function(data) {
+            if (data.success) {
+                $('.notification-item').removeClass('unread');
+                alert('Toutes les notifications ont été marquées comme lues');
+            }
+        });
+    }
+}
+
+function clearAllNotifications() {
+    if (confirm('Effacer toutes les notifications ? Cette action est irréversible.')) {
+        $.post('/chat/api/notifications/clear-all/', {
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        }, function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur lors de l\'effacement des notifications');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,438 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Alertes emploi - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Alertes emploi</h1>
+            <p>Recevez des notifications personnalisées pour les offres qui vous intéressent</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Alert Stats -->
+            <div class="col-12">
+                <div class="alert-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ active_alerts }}</h3>
+                            <p>Alertes actives</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ notifications_sent }}</h3>
+                            <p>Notifications envoyées</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ jobs_found }}</h3>
+                            <p>Offres trouvées</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ click_rate }}%</h3>
+                            <p>Taux de clic</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alert Management -->
+            <div class="col-lg-4">
+                <div class="alert-management">
+                    <div class="management-header">
+                        <h3>Gestion des alertes</h3>
+                        <button class="btn btn-sm btn-primary" id="create-alert-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>Créer une alerte</span>
+                        </button>
+                    </div>
+                    
+                    <div class="alert-types">
+                        <h4>Types d'alertes</h4>
+                        <div class="alert-type-list">
+                            <div class="alert-type-item">
+                                <i class="fas fa-search"></i>
+                                <span>Recherche personnalisée</span>
+                            </div>
+                            <div class="alert-type-item">
+                                <i class="fas fa-magic"></i>
+                                <span>Matching intelligent</span>
+                            </div>
+                            <div class="alert-type-item">
+                                <i class="fas fa-building"></i>
+                                <span>Nouvelles entreprises</span>
+                            </div>
+                            <div class="alert-type-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Offres locales</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert-preferences">
+                        <h4>Préférences</h4>
+                        <form method="post" class="preferences-form">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label class="form-label">Fréquence des alertes</label>
+                                <select name="frequency" class="form-select">
+                                    <option value="immediate">Immédiatement</option>
+                                    <option value="daily">Quotidien</option>
+                                    <option value="weekly">Hebdomadaire</option>
+                                    <option value="monthly">Mensuel</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Heure de réception</label>
+                                <input type="time" name="preferred_time" class="form-control" value="09:00">
+                            </div>
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="email_notifications" checked>
+                                    <label class="form-check-label">Notifications par email</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="push_notifications" checked>
+                                    <label class="form-check-label">Notifications push</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-save"></i>
+                                <span>Sauvegarder</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alerts List -->
+            <div class="col-lg-8">
+                <div class="alerts-content">
+                    <div class="alerts-header">
+                        <div class="alerts-count">
+                            <h3>{{ alerts|length }} alerte{{ alerts|length|pluralize }} configurée{{ alerts|length|pluralize }}</h3>
+                        </div>
+                        <div class="alerts-sort">
+                            <select class="form-select" id="sort-select">
+                                <option value="newest">Plus récentes</option>
+                                <option value="oldest">Plus anciennes</option>
+                                <option value="frequency">Par fréquence</option>
+                                <option value="activity">Par activité</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="alerts-list">
+                        {% for alert in alerts %}
+                        <div class="alert-card" data-alert-id="{{ alert.id }}">
+                            <div class="alert-card-header">
+                                <div class="alert-title">
+                                    <h4>{{ alert.name }}</h4>
+                                    <p class="alert-type">{{ alert.get_alert_type_display }}</p>
+                                </div>
+                                <div class="alert-status">
+                                    <span class="status-badge status-{{ alert.status }}">
+                                        {{ alert.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-card-body">
+                                <div class="alert-description">
+                                    <p>{{ alert.description|truncatewords:30 }}</p>
+                                </div>
+                                
+                                <div class="alert-criteria">
+                                    <h5>Critères de recherche</h5>
+                                    <div class="criteria-list">
+                                        {% if alert.keywords %}
+                                        <div class="criterion">
+                                            <i class="fas fa-key"></i>
+                                            <span>Mots-clés: {{ alert.keywords }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if alert.location %}
+                                        <div class="criterion">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>Localisation: {{ alert.location }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if alert.job_type %}
+                                        <div class="criterion">
+                                            <i class="fas fa-briefcase"></i>
+                                            <span>Type: {{ alert.get_job_type_display }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if alert.experience_level %}
+                                        <div class="criterion">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Expérience: {{ alert.get_experience_level_display }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if alert.salary_min or alert.salary_max %}
+                                        <div class="criterion">
+                                            <i class="fas fa-euro-sign"></i>
+                                            <span>
+                                                Salaire: 
+                                                {% if alert.salary_min and alert.salary_max %}
+                                                    {{ alert.salary_min|floatformat:0 }}€ - {{ alert.salary_max|floatformat:0 }}€
+                                                {% elif alert.salary_min %}
+                                                    À partir de {{ alert.salary_min|floatformat:0 }}€
+                                                {% elif alert.salary_max %}
+                                                    Jusqu'à {{ alert.salary_max|floatformat:0 }}€
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-stats">
+                                    <div class="alert-stat">
+                                        <span class="stat-label">Dernière recherche</span>
+                                        <span class="stat-value">{{ alert.last_search|timesince }} ago</span>
+                                    </div>
+                                    <div class="alert-stat">
+                                        <span class="stat-label">Offres trouvées</span>
+                                        <span class="stat-value">{{ alert.jobs_found }}</span>
+                                    </div>
+                                    <div class="alert-stat">
+                                        <span class="stat-label">Notifications envoyées</span>
+                                        <span class="stat-value">{{ alert.notifications_sent }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-card-footer">
+                                <div class="alert-meta">
+                                    <span class="alert-date">
+                                        <i class="fas fa-calendar"></i>
+                                        Créé {{ alert.created_at|timesince }} ago
+                                    </span>
+                                    <span class="alert-frequency">
+                                        <i class="fas fa-clock"></i>
+                                        {{ alert.get_frequency_display }}
+                                    </span>
+                                </div>
+                                <div class="alert-actions">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="editAlert({{ alert.id }})">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Modifier</span>
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="testAlert({{ alert.id }})">
+                                        <i class="fas fa-search"></i>
+                                        <span>Tester</span>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="toggleAlert({{ alert.id }})">
+                                        <i class="fas fa-{% if alert.status == 'active' %}pause{% else %}play{% endif %}"></i>
+                                        <span>{% if alert.status == 'active' %}Désactiver{% else %}Activer{% endif %}</span>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteAlert({{ alert.id }})">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Supprimer</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-alerts">
+                            <div class="no-alerts-icon">
+                                <i class="fas fa-bell-slash"></i>
+                            </div>
+                            <h3>Aucune alerte configurée</h3>
+                            <p>Créez votre première alerte pour recevoir des notifications personnalisées</p>
+                            <button class="btn btn-primary" onclick="createAlert()">
+                                <i class="fas fa-plus"></i>
+                                <span>Créer une alerte</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if alerts.has_other_pages %}
+                    <nav class="pagination-nav">
+                        <ul class="pagination">
+                            {% if alerts.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ alerts.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in alerts.paginator.page_range %}
+                            {% if alerts.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > alerts.number|add:'-3' and num < alerts.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if alerts.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ alerts.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Alert Modal -->
+<div class="modal fade" id="createAlertModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Créer une nouvelle alerte</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" class="create-alert-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">Nom de l'alerte</label>
+                        <input type="text" name="name" class="form-control" placeholder="Ex: Développeur Python Paris" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" placeholder="Description de l'alerte..." rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mots-clés</label>
+                        <input type="text" name="keywords" class="form-control" placeholder="Ex: Python, Django, React">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Localisation</label>
+                        <input type="text" name="location" class="form-control" placeholder="Ex: Paris, France">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label">Type de contrat</label>
+                            <select name="job_type" class="form-select">
+                                <option value="">Tous les types</option>
+                                <option value="full_time">CDI</option>
+                                <option value="part_time">CDD</option>
+                                <option value="contract">Contrat</option>
+                                <option value="internship">Stage</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label">Niveau d'expérience</label>
+                            <select name="experience_level" class="form-select">
+                                <option value="">Tous les niveaux</option>
+                                <option value="entry">Débutant</option>
+                                <option value="mid">Intermédiaire</option>
+                                <option value="senior">Senior</option>
+                                <option value="executive">Direction</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label">Salaire minimum</label>
+                            <input type="number" name="salary_min" class="form-control" placeholder="€">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label">Salaire maximum</label>
+                            <input type="number" name="salary_max" class="form-control" placeholder="€">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fréquence</label>
+                        <select name="frequency" class="form-select">
+                            <option value="immediate">Immédiatement</option>
+                            <option value="daily">Quotidien</option>
+                            <option value="weekly">Hebdomadaire</option>
+                            <option value="monthly">Mensuel</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="createAlert()">Créer l'alerte</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Create alert
+    function createAlert() {
+        const modal = new bootstrap.Modal(document.getElementById('createAlertModal'));
+        modal.show();
+    }
+    
+    // Edit alert
+    function editAlert(alertId) {
+        // Implementation for editing alert
+        console.log('Editing alert:', alertId);
+    }
+    
+    // Test alert
+    function testAlert(alertId) {
+        // Implementation for testing alert
+        console.log('Testing alert:', alertId);
+    }
+    
+    // Toggle alert
+    function toggleAlert(alertId) {
+        // Implementation for toggling alert
+        console.log('Toggling alert:', alertId);
+    }
+    
+    // Delete alert
+    function deleteAlert(alertId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
+            // Implementation for deleting alert
+            console.log('Deleting alert:', alertId);
+        }
+    }
+    
+    // Sort functionality
+    document.getElementById('sort-select').addEventListener('change', function() {
+        const sortValue = this.value;
+        const url = new URL(window.location);
+        url.searchParams.set('sort', sortValue);
+        window.location.href = url.toString();
+    });
+</script>
+{% endblock %}

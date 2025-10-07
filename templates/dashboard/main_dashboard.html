@@ -1,0 +1,361 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Bienvenue sur la plateforme de recrutement</h1>
+                    <p class="welcome-subtitle">Trouvez votre emploi idéal ou recrutez les meilleurs talents</p>
+                </div>
+                <div class="quick-actions">
+                    {% if user.is_authenticated %}
+                        {% if user.user_type == 'candidate' %}
+                        <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            <span>Rechercher des emplois</span>
+                        </a>
+                        <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Mes candidatures</span>
+                        </a>
+                        {% elif user.user_type == 'company' %}
+                        <a href="{% url 'jobs:job_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            <span>Publier une offre</span>
+                        </a>
+                        <a href="{% url 'applications:company_applications' user.company.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Voir les candidatures</span>
+                        </a>
+                        {% endif %}
+                    {% else %}
+                    <a href="{% url 'accounts:register' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        <span>S'inscrire</span>
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Se connecter</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Platform Statistics -->
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_users }}</h3>
+                            <p>Utilisateurs</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_jobs }}</h3>
+                            <p>Offres d'emploi</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_applications }}</h3>
+                            <p>Candidatures</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_companies }}</h3>
+                            <p>Entreprises</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Featured Jobs -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>Offres d'emploi en vedette</h3>
+                        <a href="{% url 'jobs:job_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir toutes</span>
+                        </a>
+                    </div>
+                    <div class="section-content">
+                        {% if featured_jobs %}
+                        <div class="jobs-grid">
+                            {% for job in featured_jobs %}
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <h4><a href="{% url 'jobs:job_detail' job.id %}">{{ job.title }}</a></h4>
+                                    <p class="company-name">{{ job.company.name }}</p>
+                                </div>
+                                <div class="job-meta">
+                                    <span class="meta-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ job.location }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <i class="fas fa-briefcase"></i>
+                                        {{ job.get_job_type_display }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        {{ job.get_experience_level_display }}
+                                    </span>
+                                </div>
+                                <div class="job-description">
+                                    <p>{{ job.description|truncatewords:20 }}</p>
+                                </div>
+                                <div class="job-actions">
+                                    {% if user.is_authenticated and user.user_type == 'candidate' %}
+                                    <a href="{% url 'applications:apply' job.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>Postuler</span>
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'jobs:job_detail' job.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Voir détails</span>
+                                    </a>
+                                    {% endif %}
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="saveJob({{ job.id }})">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-briefcase"></i>
+                            <h4>Aucune offre en vedette</h4>
+                            <p>Les offres d'emploi en vedette apparaîtront ici</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Companies -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>Entreprises récentes</h3>
+                        <a href="{% url 'company_reviews:companies_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir toutes</span>
+                        </a>
+                    </div>
+                    <div class="section-content">
+                        {% if recent_companies %}
+                        <div class="companies-grid">
+                            {% for company in recent_companies %}
+                            <div class="company-card">
+                                <div class="company-logo">
+                                    {% if company.logo %}
+                                    <img src="{{ company.logo.url }}" alt="{{ company.name }}">
+                                    {% else %}
+                                    <div class="logo-placeholder">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="company-info">
+                                    <h4><a href="{% url 'company_reviews:company_detail' company.id %}">{{ company.name }}</a></h4>
+                                    <p class="company-location">{{ company.location }}</p>
+                                    <div class="company-meta">
+                                        <span class="meta-item">
+                                            <i class="fas fa-users"></i>
+                                            {{ company.size }} employés
+                                        </span>
+                                        <span class="meta-item">
+                                            <i class="fas fa-star"></i>
+                                            {{ company.rating|default:"N/A" }}/5
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="company-actions">
+                                    <a href="{% url 'jobs:company_jobs' company.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span>Voir les offres</span>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-building"></i>
+                            <h4>Aucune entreprise récente</h4>
+                            <p>Les entreprises récentes apparaîtront ici</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Platform Features -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Fonctionnalités de la plateforme</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="features-list">
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h5>Recherche intelligente</h5>
+                                    <p>Trouvez des emplois qui correspondent à votre profil</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h5>Candidatures vidéo</h5>
+                                    <p>Présentez-vous en vidéo pour vous démarquer</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h5>Chat en direct</h5>
+                                    <p>Communiquez directement avec les recruteurs</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-map"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h5>Carte interactive</h5>
+                                    <p>Visualisez les offres par localisation</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success Stories -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Histoires de succès</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="success-stories">
+                            {% for story in success_stories %}
+                            <div class="story-item">
+                                <div class="story-avatar">
+                                    {% if story.user.profile_picture %}
+                                    <img src="{{ story.user.profile_picture.url }}" alt="{{ story.user.get_full_name }}">
+                                    {% else %}
+                                    <div class="avatar-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="story-content">
+                                    <h5>{{ story.user.get_full_name }}</h5>
+                                    <p>{{ story.testimonial|truncatewords:15 }}</p>
+                                    <span class="story-company">{{ story.company.name }}</span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-stories">
+                                <i class="fas fa-quote-left"></i>
+                                <p>Aucune histoire de succès disponible</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Liens rapides</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="quick-links">
+                            <a href="{% url 'core:about' %}" class="link-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>À propos</span>
+                            </a>
+                            <a href="{% url 'core:contact' %}" class="link-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>Contact</span>
+                            </a>
+                            <a href="{% url 'core:faq' %}" class="link-item">
+                                <i class="fas fa-question-circle"></i>
+                                <span>FAQ</span>
+                            </a>
+                            <a href="{% url 'core:privacy' %}" class="link-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Confidentialité</span>
+                            </a>
+                            <a href="{% url 'core:terms' %}" class="link-item">
+                                <i class="fas fa-file-contract"></i>
+                                <span>Conditions</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Save job functionality
+    function saveJob(jobId) {
+        // This would typically make an AJAX request to save the job
+        alert('Emploi sauvegardé avec succès !');
+    }
+    
+    // Auto-refresh dashboard data
+    setInterval(function() {
+        // This would typically refresh dashboard statistics
+        console.log('Refreshing main dashboard data...');
+    }, 60000); // Refresh every minute
+</script>
+{% endblock %}

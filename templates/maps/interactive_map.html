@@ -1,0 +1,507 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carte interactive{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/maps.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="interactive-map-page">
+    <div class="map-container">
+        <!-- Barre d'outils -->
+        <div class="map-toolbar">
+            <div class="toolbar-left">
+                <a href="{% url 'maps:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+                <div class="search-box">
+                    <input type="text" id="location-search" class="form-control" placeholder="Rechercher une localisation...">
+                    <button class="btn btn-primary btn-sm" onclick="searchLocation()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="toolbar-center">
+                <div class="map-controls">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="resetMapView()">
+                        <i class="fas fa-home"></i> Centrer
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleClustering()">
+                        <i class="fas fa-layer-group"></i> Clustering
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleHeatmap()">
+                        <i class="fas fa-fire"></i> Heatmap
+                    </button>
+                </div>
+            </div>
+            
+            <div class="toolbar-right">
+                {% if user.is_authenticated %}
+                <button class="btn btn-outline-primary btn-sm" onclick="saveBookmark()">
+                    <i class="fas fa-bookmark"></i> Signet
+                </button>
+                <button class="btn btn-outline-success btn-sm" onclick="saveView()">
+                    <i class="fas fa-save"></i> Sauvegarder
+                </button>
+                {% endif %}
+                <button class="btn btn-outline-info btn-sm" onclick="showFilters()">
+                    <i class="fas fa-filter"></i> Filtres
+                </button>
+            </div>
+        </div>
+        
+        <!-- Carte principale -->
+        <div id="interactive-map" style="height: calc(100vh - 120px); width: 100%;"></div>
+        
+        <!-- Panneau de filtres -->
+        <div id="filters-panel" class="filters-panel">
+            <div class="filters-header">
+                <h5><i class="fas fa-filter"></i> Filtres</h5>
+                <button class="btn btn-sm btn-outline-secondary" onclick="hideFilters()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="filters-content">
+                <form id="filters-form">
+                    <!-- Recherche -->
+                    <div class="filter-group">
+                        <label>Recherche</label>
+                        <input type="text" name="query" class="form-control" placeholder="Mots-clés...">
+                    </div>
+                    
+                    <!-- Localisation -->
+                    <div class="filter-group">
+                        <label>Localisation</label>
+                        <input type="text" name="location_query" class="form-control" placeholder="Ville, région...">
+                    </div>
+                    
+                    <!-- Rayon -->
+                    <div class="filter-group">
+                        <label>Rayon (km)</label>
+                        <input type="number" name="radius" class="form-control" value="50" min="1" max="500">
+                    </div>
+                    
+                    <!-- Type d'emploi -->
+                    <div class="filter-group">
+                        <label>Type d'emploi</label>
+                        <select name="job_type" class="form-control">
+                            <option value="">Tous les types</option>
+                            <option value="CDI">CDI</option>
+                            <option value="CDD">CDD</option>
+                            <option value="stage">Stage</option>
+                            <option value="freelance">Freelance</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Niveau d'expérience -->
+                    <div class="filter-group">
+                        <label>Expérience</label>
+                        <select name="experience_level" class="form-control">
+                            <option value="">Tous les niveaux</option>
+                            <option value="debutant">Débutant</option>
+                            <option value="junior">Junior</option>
+                            <option value="intermediaire">Intermédiaire</option>
+                            <option value="senior">Senior</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Télétravail -->
+                    <div class="filter-group">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_remote" class="form-check-input" id="remote-check">
+                            <label class="form-check-label" for="remote-check">
+                                Télétravail
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" name="is_hybrid" class="form-check-input" id="hybrid-check">
+                            <label class="form-check-label" for="hybrid-check">
+                                Hybride
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="filter-actions">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="applyFilters()">
+                            <i class="fas fa-search"></i> Appliquer
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearFilters()">
+                            <i class="fas fa-times"></i> Effacer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Panneau d'informations -->
+        <div id="info-panel" class="info-panel">
+            <div class="info-header">
+                <h6>Informations</h6>
+                <button class="btn btn-sm btn-outline-secondary" onclick="hideInfoPanel()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="info-content">
+                <div id="info-content">
+                    <p>Sélectionnez un marqueur pour voir les détails.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Légende -->
+        <div class="map-legend">
+            <div class="legend-item">
+                <div class="legend-marker remote"></div>
+                <span>Télétravail</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-marker hybrid"></div>
+                <span>Hybride</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-marker on-site"></div>
+                <span>Sur site</span>
+            </div>
+        </div>
+        
+        <!-- Compteur de résultats -->
+        <div class="results-counter">
+            <span id="results-count">{{ total_jobs }}</span> offres trouvées
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour créer un signet -->
+<div class="modal fade" id="bookmarkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Créer un signet</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="bookmark-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Nom du signet</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description (optionnel)</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="is_public" class="form-check-input" id="public-check">
+                        <label class="form-check-label" for="public-check">
+                            Rendre public
+                        </label>
+                    </div>
+                    <input type="hidden" name="center_latitude" id="bookmark-lat">
+                    <input type="hidden" name="center_longitude" id="bookmark-lng">
+                    <input type="hidden" name="zoom_level" id="bookmark-zoom">
+                    <input type="hidden" name="filters" id="bookmark-filters">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="createBookmark()">Créer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry,places,visualization"></script>
+<script src="{% static 'js/maps.js' %}"></script>
+<script>
+// Données de la carte
+const mapData = {{ map_data|safe }};
+const mapSettings = {{ map_settings|safe }};
+
+// Variables globales
+let map;
+let markers = [];
+let clusters = [];
+let heatmap;
+let infoWindow;
+let autocomplete;
+
+$(document).ready(function() {
+    initInteractiveMap();
+    initLocationSearch();
+    loadMapData();
+});
+
+function initInteractiveMap() {
+    const mapElement = document.getElementById('interactive-map');
+    
+    map = new google.maps.Map(mapElement, {
+        zoom: mapSettings.zoom,
+        center: { lat: mapSettings.center_lat, lng: mapSettings.center_lng },
+        mapTypeId: mapSettings.style,
+        styles: [
+            {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+            }
+        ]
+    });
+    
+    infoWindow = new google.maps.InfoWindow();
+    
+    // Événements de la carte
+    map.addListener('bounds_changed', updateResultsCount);
+    map.addListener('center_changed', saveCurrentView);
+    map.addListener('zoom_changed', saveCurrentView);
+    
+    // Charger les paramètres depuis l'URL
+    loadUrlParams();
+}
+
+function initLocationSearch() {
+    const searchInput = document.getElementById('location-search');
+    autocomplete = new google.maps.places.Autocomplete(searchInput);
+    
+    autocomplete.addListener('place_changed', function() {
+        const place = autocomplete.getPlace();
+        if (place.geometry) {
+            map.setCenter(place.geometry.location);
+            map.setZoom(12);
+        }
+    });
+}
+
+function loadMapData() {
+    clearMarkers();
+    
+    mapData.forEach(job => {
+        const marker = createMarker(job);
+        markers.push(marker);
+    });
+    
+    if (mapSettings.enable_clustering) {
+        enableClustering();
+    }
+    
+    updateResultsCount();
+}
+
+function createMarker(job) {
+    const position = { lat: job.latitude, lng: job.longitude };
+    
+    // Icône selon le type de localisation
+    let iconUrl = '{% static "images/map-marker.png" %}';
+    if (job.is_remote) {
+        iconUrl = '{% static "images/map-marker-remote.png" %}';
+    } else if (job.is_hybrid) {
+        iconUrl = '{% static "images/map-marker-hybrid.png" %}';
+    }
+    
+    const marker = new google.maps.Marker({
+        position: position,
+        map: map,
+        title: job.job_title,
+        icon: {
+            url: iconUrl,
+            scaledSize: new google.maps.Size(30, 30)
+        }
+    });
+    
+    // InfoWindow
+    marker.addListener('click', function() {
+        showInfoWindow(marker, job);
+    });
+    
+    return marker;
+}
+
+function showInfoWindow(marker, job) {
+    const content = `
+        <div class="info-window">
+            <h6>${job.job_title}</h6>
+            <p><strong>${job.company}</strong></p>
+            <p><i class="fas fa-map-marker-alt"></i> ${job.location}, ${job.city}</p>
+            <p><i class="fas fa-briefcase"></i> ${job.job_type}</p>
+            <p><i class="fas fa-user"></i> ${job.experience_level}</p>
+            ${job.salary_min ? `<p><i class="fas fa-euro-sign"></i> ${job.salary_min} - ${job.salary_max} €</p>` : ''}
+            <div class="info-actions">
+                <a href="${job.url}" class="btn btn-primary btn-sm" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Voir l'offre
+                </a>
+            </div>
+        </div>
+    `;
+    
+    infoWindow.setContent(content);
+    infoWindow.open(map, marker);
+}
+
+function clearMarkers() {
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+}
+
+function enableClustering() {
+    // Implémentation du clustering avec MarkerClusterer
+    // (nécessite d'ajouter la bibliothèque MarkerClusterer)
+}
+
+function toggleClustering() {
+    // Basculer le clustering
+}
+
+function toggleHeatmap() {
+    // Basculer la heatmap
+}
+
+function searchLocation() {
+    const query = document.getElementById('location-search').value;
+    if (query) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: query }, function(results, status) {
+            if (status === 'OK') {
+                map.setCenter(results[0].geometry.location);
+                map.setZoom(12);
+            }
+        });
+    }
+}
+
+function resetMapView() {
+    map.setCenter({ lat: mapSettings.center_lat, lng: mapSettings.center_lng });
+    map.setZoom(mapSettings.zoom);
+}
+
+function showFilters() {
+    document.getElementById('filters-panel').style.display = 'block';
+}
+
+function hideFilters() {
+    document.getElementById('filters-panel').style.display = 'none';
+}
+
+function applyFilters() {
+    // Appliquer les filtres et recharger les données
+    const formData = new FormData(document.getElementById('filters-form'));
+    const filters = Object.fromEntries(formData.entries());
+    
+    // Recharger les données avec les filtres
+    loadFilteredData(filters);
+}
+
+function clearFilters() {
+    document.getElementById('filters-form').reset();
+    loadMapData();
+}
+
+function saveView() {
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+    
+    fetch('{% url "maps:save_map_view" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            center_lat: center.lat(),
+            center_lng: center.lng(),
+            zoom: zoom,
+            filters: getCurrentFilters()
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Vue sauvegardée avec succès', 'success');
+        }
+    });
+}
+
+function saveBookmark() {
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+    
+    document.getElementById('bookmark-lat').value = center.lat();
+    document.getElementById('bookmark-lng').value = center.lng();
+    document.getElementById('bookmark-zoom').value = zoom;
+    document.getElementById('bookmark-filters').value = JSON.stringify(getCurrentFilters());
+    
+    $('#bookmarkModal').modal('show');
+}
+
+function createBookmark() {
+    const formData = new FormData(document.getElementById('bookmark-form'));
+    
+    fetch('{% url "maps:create_bookmark" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#bookmarkModal').modal('hide');
+            showNotification('Signet créé avec succès', 'success');
+        }
+    });
+}
+
+function updateResultsCount() {
+    const visibleMarkers = markers.filter(marker => {
+        return map.getBounds().contains(marker.getPosition());
+    });
+    
+    document.getElementById('results-count').textContent = visibleMarkers.length;
+}
+
+function getCurrentFilters() {
+    const formData = new FormData(document.getElementById('filters-form'));
+    return Object.fromEntries(formData.entries());
+}
+
+function loadUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const lat = urlParams.get('lat');
+    const lng = urlParams.get('lng');
+    const zoom = urlParams.get('zoom');
+    
+    if (lat && lng) {
+        map.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
+        if (zoom) {
+            map.setZoom(parseInt(zoom));
+        }
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Afficher une notification
+    const notification = $(`
+        <div class="alert alert-${type} alert-dismissible fade show notification-toast">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.alert('close');
+    }, 3000);
+}
+</script>
+{% endblock %}

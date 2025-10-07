@@ -1,0 +1,68 @@
+{% extends 'base_error.html' %}
+{% load static %}
+
+{% block title %}Erreur serveur - Plateforme de Recrutement{% endblock %}
+
+{% block error_icon %}
+<i class="fas fa-exclamation-triangle"></i>
+{% endblock %}
+
+{% block error_title %}500 - Erreur serveur{% endblock %}
+
+{% block error_subtitle %}Une erreur interne s'est produite. Notre équipe technique a été notifiée et travaille à résoudre le problème.{% endblock %}
+
+{% block error_content %}
+<div class="error-actions">
+    <a href="{% url 'core:home' %}" class="btn btn-primary">
+        <i class="fas fa-home"></i>
+        <span>Retour à l'accueil</span>
+    </a>
+    <button class="btn btn-outline-primary" onclick="window.location.reload()">
+        <i class="fas fa-refresh"></i>
+        <span>Réessayer</span>
+    </button>
+</div>
+
+<div class="error-info">
+    <div class="info-item">
+        <i class="fas fa-clock"></i>
+        <div class="info-content">
+            <h4>Délai de résolution</h4>
+            <p>Généralement résolu en moins de 30 minutes</p>
+        </div>
+    </div>
+    <div class="info-item">
+        <i class="fas fa-envelope"></i>
+        <div class="info-content">
+            <h4>Notification</h4>
+            <p>Nous vous informerons dès que le problème sera résolu</p>
+        </div>
+    </div>
+    <div class="info-item">
+        <i class="fas fa-headset"></i>
+        <div class="info-content">
+            <h4>Support</h4>
+            <p>Notre équipe technique est disponible 24/7</p>
+        </div>
+    </div>
+</div>
+
+<div class="error-suggestions">
+    <h4>En attendant, vous pouvez :</h4>
+    <ul>
+        <li><a href="{% url 'core:home' %}">Retourner à la page d'accueil</a></li>
+        <li><a href="{% url 'jobs:job_list' %}">Parcourir les offres d'emploi</a></li>
+        <li><a href="{% url 'core:contact' %}">Nous contacter pour signaler le problème</a></li>
+        <li><a href="{% url 'core:status' %}">Vérifier le statut de nos services</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block error_footer %}
+<div class="error-footer-content">
+    <p>Si le problème persiste, contactez notre <a href="{% url 'core:contact' %}">équipe de support</a>.</p>
+    <div class="error-id">
+        <p>ID d'erreur : <code>{{ request.META.HTTP_X_REQUEST_ID|default:"N/A" }}</code></p>
+    </div>
+</div>
+{% endblock %}

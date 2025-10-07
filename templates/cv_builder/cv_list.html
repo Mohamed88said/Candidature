@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes CV - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-file-alt"></i>
+                    Mes CV
+                </h1>
+                <p class="page-subtitle">Gérez et personnalisez vos CV</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="quick-actions">
+                    <a href="{% url 'cv_builder:create_cv' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Créer un nouveau CV
+                    </a>
+                    <a href="{% url 'cv_builder:template_gallery' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-palette"></i>
+                        Galerie de modèles
+                    </a>
+                </div>
+                <div class="view-options">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary active" id="grid-view">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="list-view">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des CV -->
+    <div class="row" id="cv-grid">
+        {% for cv in cvs %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card cv-card h-100">
+                <div class="cv-preview">
+                    <div class="cv-preview-content">
+                        <div class="cv-preview-header">
+                            <h3>{{ cv.title }}</h3>
+                            <p class="cv-preview-subtitle">{{ cv.template.name }}</p>
+                        </div>
+                        <div class="cv-preview-body">
+                            <div class="cv-preview-section">
+                                <h4>Informations personnelles</h4>
+                                <p>{{ cv.personal_info.first_name }} {{ cv.personal_info.last_name }}</p>
+                                <p>{{ cv.personal_info.email }}</p>
+                            </div>
+                            <div class="cv-preview-section">
+                                <h4>Expérience</h4>
+                                <p>{{ cv.experiences.count }} expérience(s)</p>
+                            </div>
+                            <div class="cv-preview-section">
+                                <h4>Formation</h4>
+                                <p>{{ cv.educations.count }} formation(s)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ cv.title }}</h5>
+                    <p class="card-text text-muted">
+                        Modèle: {{ cv.template.name }}
+                    </p>
+                    <div class="cv-meta">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i>
+                            Créé le {{ cv.created_at|date:"d/m/Y" }}
+                        </small>
+                        {% if cv.updated_at != cv.created_at %}
+                        <small class="text-muted ms-3">
+                            <i class="fas fa-edit"></i>
+                            Modifié le {{ cv.updated_at|date:"d/m/Y" }}
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group w-100" role="group">
+                        <a href="{% url 'cv_builder:edit_cv' cv.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i>
+                            Modifier
+                        </a>
+                        <a href="{% url 'cv_builder:preview_cv' cv.id %}" class="btn btn-outline-secondary" target="_blank">
+                            <i class="fas fa-eye"></i>
+                            Aperçu
+                        </a>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'cv_builder:duplicate_cv' cv.id %}">
+                                    <i class="fas fa-copy me-2"></i>Dupliquer
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'cv_builder:export_cv' cv.id 'pdf' %}">
+                                    <i class="fas fa-file-pdf me-2"></i>Exporter PDF
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'cv_builder:export_cv' cv.id 'docx' %}">
+                                    <i class="fas fa-file-word me-2"></i>Exporter Word
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'cv_builder:delete_cv' cv.id %}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce CV ?')">
+                                    <i class="fas fa-trash me-2"></i>Supprimer
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                <h3>Aucun CV créé</h3>
+                <p class="text-muted">Commencez par créer votre premier CV</p>
+                <a href="{% url 'cv_builder:create_cv' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Créer mon premier CV
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Vue liste (cachée par défaut) -->
+    <div class="row d-none" id="cv-list">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>CV</th>
+                                    <th>Modèle</th>
+                                    <th>Statut</th>
+                                    <th>Créé le</th>
+                                    <th>Modifié le</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cv in cvs %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="cv-thumbnail me-3">
+                                                <i class="fas fa-file-alt fa-2x text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ cv.title }}</h6>
+                                                <small class="text-muted">{{ cv.personal_info.first_name }} {{ cv.personal_info.last_name }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ cv.template.name }}</span>
+                                    </td>
+                                    <td>
+                                        {% if cv.is_complete %}
+                                        <span class="badge bg-success">Complet</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Incomplet</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ cv.created_at|date:"d/m/Y" }}</td>
+                                    <td>{{ cv.updated_at|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'cv_builder:edit_cv' cv.id %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'cv_builder:preview_cv' cv.id %}" class="btn btn-outline-secondary" target="_blank">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="{% url 'cv_builder:duplicate_cv' cv.id %}">
+                                                        <i class="fas fa-copy me-2"></i>Dupliquer
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'cv_builder:export_cv' cv.id 'pdf' %}">
+                                                        <i class="fas fa-file-pdf me-2"></i>Exporter PDF
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'cv_builder:export_cv' cv.id 'docx' %}">
+                                                        <i class="fas fa-file-word me-2"></i>Exporter Word
+                                                    </a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="{% url 'cv_builder:delete_cv' cv.id %}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce CV ?')">
+                                                        <i class="fas fa-trash me-2"></i>Supprimer
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.cv-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.cv-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.cv-preview {
+    height: 200px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cv-preview-content {
+    width: 80%;
+    height: 80%;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: scale(0.8);
+    transform-origin: top left;
+}
+
+.cv-preview-header h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.cv-preview-subtitle {
+    font-size: 10px;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.cv-preview-section {
+    margin-bottom: 8px;
+}
+
+.cv-preview-section h4 {
+    font-size: 10px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 3px;
+}
+
+.cv-preview-section p {
+    font-size: 9px;
+    color: #6c757d;
+    margin-bottom: 2px;
+}
+
+.cv-meta {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e9ecef;
+}
+
+.cv-thumbnail {
+    width: 40px;
+    height: 40px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-actions .btn {
+    margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+    .quick-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .quick-actions .btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .view-options {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const gridViewBtn = document.getElementById('grid-view');
+    const listViewBtn = document.getElementById('list-view');
+    const cvGrid = document.getElementById('cv-grid');
+    const cvList = document.getElementById('cv-list');
+    
+    gridViewBtn.addEventListener('click', function() {
+        this.classList.add('active');
+        listViewBtn.classList.remove('active');
+        cvGrid.classList.remove('d-none');
+        cvList.classList.add('d-none');
+    });
+    
+    listViewBtn.addEventListener('click', function() {
+        this.classList.add('active');
+        gridViewBtn.classList.remove('active');
+        cvGrid.classList.add('d-none');
+        cvList.classList.remove('d-none');
+    });
+});
+</script>
+{% endblock %}

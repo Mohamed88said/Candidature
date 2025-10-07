@@ -1,103 +1,390 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}FAQ - Questions Fréquentes{% endblock %}
+{% block title %}FAQ - Plateforme de Recrutement{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <!-- Header -->
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <h1 class="fw-bold mb-3">Questions Fréquentes</h1>
-            <p class="lead text-muted">
-                Trouvez rapidement les réponses à vos questions
-            </p>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Questions fréquentes</h1>
+            <p>Trouvez rapidement les réponses à vos questions</p>
         </div>
     </div>
+</div>
 
-    <!-- Search FAQ -->
-    <div class="row mb-4">
-        <div class="col-lg-6 mx-auto">
-            <div class="input-group input-group-lg">
-                <input type="text" class="form-control" id="faq-search" 
-                       placeholder="Rechercher dans la FAQ...">
-                <button class="btn btn-primary" type="button">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- FAQ Categories -->
-    <div class="row">
-        {% for category, faqs in faq_by_category.items %}
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-question-circle me-2"></i>{{ category }}
-                    </h5>
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="container">
+        <div class="row">
+            <!-- FAQ Categories -->
+            <div class="col-lg-3">
+                <div class="faq-categories">
+                    <h3>Catégories</h3>
+                    <div class="category-list">
+                        <div class="category-item active" data-category="all">
+                            <i class="fas fa-th-large"></i>
+                            <span>Toutes les questions</span>
+                        </div>
+                        <div class="category-item" data-category="account">
+                            <i class="fas fa-user"></i>
+                            <span>Compte et profil</span>
+                        </div>
+                        <div class="category-item" data-category="jobs">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Offres d'emploi</span>
+                        </div>
+                        <div class="category-item" data-category="applications">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Candidatures</span>
+                        </div>
+                        <div class="category-item" data-category="matching">
+                            <i class="fas fa-magic"></i>
+                            <span>Matching intelligent</span>
+                        </div>
+                        <div class="category-item" data-category="chat">
+                            <i class="fas fa-comments"></i>
+                            <span>Messages</span>
+                        </div>
+                        <div class="category-item" data-category="tests">
+                            <i class="fas fa-clipboard-check"></i>
+                            <span>Tests en ligne</span>
+                        </div>
+                        <div class="category-item" data-category="technical">
+                            <i class="fas fa-cog"></i>
+                            <span>Support technique</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="accordion" id="accordion{{ forloop.counter }}">
-                        {% for faq in faqs %}
-                        <div class="accordion-item faq-item">
-                            <h2 class="accordion-header" id="heading{{ faq.id }}">
-                                <button class="accordion-button collapsed" type="button" 
-                                        data-bs-toggle="collapse" data-bs-target="#collapse{{ faq.id }}">
-                                    {{ faq.question }}
-                                </button>
-                            </h2>
-                            <div id="collapse{{ faq.id }}" class="accordion-collapse collapse" 
-                                 data-bs-parent="#accordion{{ forloop.parentloop.counter }}">
-                                <div class="accordion-body">
-                                    {{ faq.answer|linebreaks }}
+            </div>
+            
+            <!-- FAQ Content -->
+            <div class="col-lg-9">
+                <div class="faq-content">
+                    <div class="faq-search">
+                        <div class="search-box">
+                            <input type="text" class="form-control" placeholder="Rechercher une question..." id="faq-search">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-list">
+                        <!-- Account and Profile Questions -->
+                        <div class="faq-category" data-category="account">
+                            <h3>Compte et profil</h3>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment créer un compte ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Pour créer un compte, cliquez sur le bouton "Inscription" en haut de la page, remplissez le formulaire avec vos informations personnelles et validez votre email. C'est gratuit et ne prend que quelques minutes !</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment modifier mon profil ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Connectez-vous à votre compte, allez dans "Mon profil" et cliquez sur "Modifier". Vous pouvez mettre à jour toutes vos informations, ajouter des compétences, modifier votre photo et bien plus encore.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment supprimer mon compte ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Pour supprimer votre compte, allez dans les paramètres de votre profil et cliquez sur "Supprimer le compte". Attention, cette action est irréversible et supprimera toutes vos données.</p>
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
+                        
+                        <!-- Jobs Questions -->
+                        <div class="faq-category" data-category="jobs">
+                            <h3>Offres d'emploi</h3>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment rechercher des offres d'emploi ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Utilisez la barre de recherche en haut de la page ou allez dans "Offres d'emploi". Vous pouvez filtrer par localisation, type de contrat, salaire, secteur d'activité et bien d'autres critères.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment sauvegarder une offre d'emploi ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Sur chaque offre d'emploi, vous trouverez un bouton "Sauvegarder" (icône de signet). Cliquez dessus pour ajouter l'offre à vos favoris et la retrouver facilement plus tard.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment partager une offre d'emploi ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Sur chaque offre, cliquez sur le bouton "Partager" pour obtenir un lien que vous pouvez envoyer à vos amis ou partager sur les réseaux sociaux.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Applications Questions -->
+                        <div class="faq-category" data-category="applications">
+                            <h3>Candidatures</h3>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment postuler à une offre ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Sur chaque offre d'emploi, cliquez sur le bouton "Postuler". Vous pourrez alors ajouter une lettre de motivation personnalisée et répondre aux questions spécifiques de l'entreprise.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment suivre mes candidatures ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Allez dans "Mes candidatures" dans votre tableau de bord. Vous y verrez toutes vos candidatures avec leur statut actuel et pourrez suivre leur progression.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Puis-je retirer une candidature ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Oui, vous pouvez retirer une candidature tant qu'elle n'a pas été traitée par l'entreprise. Allez dans "Mes candidatures" et cliquez sur "Retirer" à côté de la candidature concernée.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Matching Questions -->
+                        <div class="faq-category" data-category="matching">
+                            <h3>Matching intelligent</h3>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment fonctionne le matching intelligent ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Notre algorithme analyse votre profil, vos compétences, votre expérience et vos préférences pour vous proposer les offres les plus pertinentes. Plus votre profil est complet, plus les recommandations sont précises.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment améliorer mon score de matching ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Pour améliorer votre score, complétez votre profil, ajoutez des compétences pertinentes, décrivez vos expériences en détail et utilisez des mots-clés liés à votre secteur d'activité.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Questions -->
+                        <div class="faq-category" data-category="chat">
+                            <h3>Messages</h3>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment envoyer un message à un recruteur ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Allez dans la section "Messages" de votre tableau de bord. Vous pouvez rechercher un recruteur ou commencer une nouvelle conversation. Les messages sont en temps réel et sécurisés.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Puis-je joindre des fichiers à mes messages ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Oui, vous pouvez joindre des fichiers (CV, portfolio, etc.) à vos messages. Cliquez sur l'icône de trombone dans la zone de saisie pour sélectionner vos fichiers.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tests Questions -->
+                        <div class="faq-category" data-category="tests">
+                            <h3>Tests en ligne</h3>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment passer un test en ligne ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Allez dans la section "Tests en ligne" de votre tableau de bord, choisissez un test qui vous intéresse et cliquez sur "Commencer". Vous avez un temps limité pour répondre aux questions.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Puis-je repasser un test ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Cela dépend du type de test. Certains tests peuvent être repassés après un délai, d'autres sont limités à une seule tentative. Consultez les règles spécifiques à chaque test.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Technical Support Questions -->
+                        <div class="faq-category" data-category="technical">
+                            <h3>Support technique</h3>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>J'ai oublié mon mot de passe, que faire ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Sur la page de connexion, cliquez sur "Mot de passe oublié ?" et entrez votre email. Vous recevrez un lien pour réinitialiser votre mot de passe.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Comment contacter le support technique ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Vous pouvez nous contacter via le formulaire de contact, par email à support@recruitpro.com ou par téléphone au +33 1 23 45 67 89. Nous répondons généralement dans les 24h.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>La plateforme est-elle compatible mobile ?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Oui, notre plateforme est entièrement responsive et optimisée pour mobile. Vous pouvez accéder à toutes les fonctionnalités depuis votre smartphone ou tablette.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        {% endfor %}
     </div>
+</section>
 
-    <!-- Contact CTA -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card bg-light">
-                <div class="card-body text-center p-5">
-                    <i class="fas fa-headset fa-3x text-primary mb-3"></i>
-                    <h3 class="fw-bold mb-3">Vous ne trouvez pas votre réponse ?</h3>
-                    <p class="text-muted mb-4">
-                        Notre équipe support est là pour vous aider
-                    </p>
-                    <a href="{% url 'core:contact' %}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-envelope me-2"></i>Nous contacter
-                    </a>
-                </div>
+<!-- Contact CTA -->
+<section class="contact-cta">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Vous ne trouvez pas votre réponse ?</h2>
+            <p>Notre équipe de support est là pour vous aider</p>
+            <div class="cta-actions">
+                <a href="{% url 'core:contact' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-envelope"></i>
+                    <span>Nous contacter</span>
+                </a>
+                <a href="mailto:support@recruitpro.com" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-at"></i>
+                    <span>Envoyer un email</span>
+                </a>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.getElementById('faq-search').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const faqItems = document.querySelectorAll('.faq-item');
-    
-    faqItems.forEach(item => {
-        const question = item.querySelector('.accordion-button').textContent.toLowerCase();
-        const answer = item.querySelector('.accordion-body').textContent.toLowerCase();
-        
-        if (question.includes(searchTerm) || answer.includes(searchTerm)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
+    // FAQ functionality
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', function() {
+            const faqItem = this.parentElement;
+            const answer = faqItem.querySelector('.faq-answer');
+            const icon = this.querySelector('i');
+            
+            // Close other FAQ items in the same category
+            const category = faqItem.closest('.faq-category');
+            category.querySelectorAll('.faq-item').forEach(item => {
+                if (item !== faqItem) {
+                    item.classList.remove('active');
+                    item.querySelector('.faq-answer').style.maxHeight = null;
+                    item.querySelector('.faq-question i').style.transform = 'rotate(0deg)';
+                }
+            });
+            
+            // Toggle current FAQ item
+            faqItem.classList.toggle('active');
+            if (faqItem.classList.contains('active')) {
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                answer.style.maxHeight = null;
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
     });
-});
+    
+    // Category filtering
+    document.querySelectorAll('.category-item').forEach(item => {
+        item.addEventListener('click', function() {
+            // Remove active class from all items
+            document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+            // Add active class to clicked item
+            this.classList.add('active');
+            
+            const category = this.dataset.category;
+            const categories = document.querySelectorAll('.faq-category');
+            
+            if (category === 'all') {
+                categories.forEach(cat => cat.style.display = 'block');
+            } else {
+                categories.forEach(cat => {
+                    if (cat.dataset.category === category) {
+                        cat.style.display = 'block';
+                    } else {
+                        cat.style.display = 'none';
+                    }
+                });
+            }
+        });
+    });
+    
+    // Search functionality
+    document.getElementById('faq-search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question h4').textContent.toLowerCase();
+            const answer = item.querySelector('.faq-answer p').textContent.toLowerCase();
+            
+            if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
 </script>
 {% endblock %}

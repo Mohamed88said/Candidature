@@ -1,0 +1,724 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Préférences de Matching - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/matching.css' %}">
+<style>
+.preferences-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.preference-section {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.section-title {
+    color: #495057;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.form-check-label {
+    font-weight: 500;
+}
+
+.help-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.save-button {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.save-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.preview-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.tag {
+    background: #007bff;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tag-remove {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+
+.tag-remove:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.add-tag-input {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 0.5rem;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.add-tag-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.slider-container {
+    margin: 1rem 0;
+}
+
+.slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #ddd;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    border: none;
+}
+
+.slider-value {
+    text-align: center;
+    font-weight: bold;
+    color: #007bff;
+    margin-top: 0.5rem;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    border: none;
+    border-radius: 10px;
+    border-left: 4px solid #17a2b8;
+}
+
+.tips-section {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid #ffc107;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.tip-icon {
+    background: #ffc107;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="preferences-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-3">
+                    <i class="fas fa-cog me-2"></i>
+                    Préférences de Matching
+                </h1>
+                <p class="mb-0">Personnalisez votre expérience de matching pour recevoir les offres les plus pertinentes</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="preview-card">
+                    <h5 class="mb-2">Score de matching minimum</h5>
+                    <div class="slider-value" id="minScoreValue">{{ preferences.min_match_score }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conseils -->
+    <div class="tips-section">
+        <h5 class="mb-3">
+            <i class="fas fa-lightbulb me-2"></i>
+            Conseils pour optimiser vos matches
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <strong>Localisation</strong>
+                        <p class="mb-0 small">Soyez précis sur vos préférences géographiques pour des matches plus pertinents.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <div>
+                        <strong>Salaire</strong>
+                        <p class="mb-0 small">Définissez une fourchette réaliste pour éviter les déceptions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div>
+                        <strong>Type de poste</strong>
+                        <p class="mb-0 small">Sélectionnez les types de contrats qui vous intéressent vraiment.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div>
+                        <strong>Alertes</strong>
+                        <p class="mb-0 small">Configurez la fréquence selon votre disponibilité pour consulter les offres.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" id="preferencesForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Localisation -->
+                <div class="preference-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                        Préférences de localisation
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Localisations préférées</label>
+                                <div class="tag-list" id="locationTags">
+                                    {% for location in preferences.preferred_locations %}
+                                    <span class="tag">
+                                        {{ location }}
+                                        <button type="button" class="tag-remove" onclick="removeTag('location', '{{ location }}')">×</button>
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                <div class="add-tag-input">
+                                    <input type="text" id="locationInput" placeholder="Ajouter une localisation..." 
+                                           class="form-control border-0" onkeypress="addTag(event, 'location')">
+                                </div>
+                                <input type="hidden" name="preferred_locations" id="locationInputHidden" 
+                                       value="{{ preferences.preferred_locations|join:',' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Temps de trajet maximum (minutes)</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="commuteTime" name="max_commute_time" 
+                                           min="15" max="180" value="{{ preferences.max_commute_time }}" 
+                                           oninput="updateSliderValue('commuteTime', this.value + ' min')">
+                                    <div class="slider-value" id="commuteTimeValue">{{ preferences.max_commute_time }} min</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="willing_to_relocate" 
+                                       id="willingToRelocate" {% if preferences.willing_to_relocate %}checked{% endif %}>
+                                <label class="form-check-label" for="willingToRelocate">
+                                    Accepte de déménager
+                                </label>
+                                <div class="help-text">Élargit les possibilités de matching géographique</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Préférence télétravail</label>
+                                <select name="remote_work_preference" class="form-select">
+                                    <option value="office_only" {% if preferences.remote_work_preference == 'office_only' %}selected{% endif %}>Bureau uniquement</option>
+                                    <option value="remote_only" {% if preferences.remote_work_preference == 'remote_only' %}selected{% endif %}>Télétravail uniquement</option>
+                                    <option value="hybrid" {% if preferences.remote_work_preference == 'hybrid' %}selected{% endif %}>Hybride</option>
+                                    <option value="flexible" {% if preferences.remote_work_preference == 'flexible' %}selected{% endif %}>Flexible</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salaire -->
+                <div class="preference-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-euro-sign text-success me-2"></i>
+                        Préférences salariales
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Salaire minimum (€)</label>
+                                <input type="number" name="min_salary" class="form-control" 
+                                       value="{{ preferences.min_salary }}" min="0" step="100">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Salaire maximum (€)</label>
+                                <input type="number" name="max_salary" class="form-control" 
+                                       value="{{ preferences.max_salary }}" min="0" step="100">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="salary_negotiable" 
+                                       id="salaryNegotiable" {% if preferences.salary_negotiable %}checked{% endif %}>
+                                <label class="form-check-label" for="salaryNegotiable">
+                                    Salaire négociable
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entreprise -->
+                <div class="preference-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-building text-info me-2"></i>
+                        Préférences d'entreprise
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tailles d'entreprise préférées</label>
+                                {% for choice in form.preferred_company_sizes.field.choices %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="preferred_company_sizes" 
+                                           value="{{ choice.0 }}" id="size_{{ choice.0 }}"
+                                           {% if choice.0 in preferences.preferred_company_sizes %}checked{% endif %}>
+                                    <label class="form-check-label" for="size_{{ choice.0 }}">
+                                        {{ choice.1 }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Secteurs d'activité préférés</label>
+                                <div class="tag-list" id="industryTags">
+                                    {% for industry in preferences.preferred_industries %}
+                                    <span class="tag">
+                                        {{ industry }}
+                                        <button type="button" class="tag-remove" onclick="removeTag('industry', '{{ industry }}')">×</button>
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                <div class="add-tag-input">
+                                    <input type="text" id="industryInput" placeholder="Ajouter un secteur..." 
+                                           class="form-control border-0" onkeypress="addTag(event, 'industry')">
+                                </div>
+                                <input type="hidden" name="preferred_industries" id="industryInputHidden" 
+                                       value="{{ preferences.preferred_industries|join:',' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Type de poste -->
+                <div class="preference-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-briefcase text-warning me-2"></i>
+                        Préférences de poste
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Types de contrat préférés</label>
+                                {% for choice in form.preferred_job_types.field.choices %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="preferred_job_types" 
+                                           value="{{ choice.0 }}" id="type_{{ choice.0 }}"
+                                           {% if choice.0 in preferences.preferred_job_types %}checked{% endif %}>
+                                    <label class="form-check-label" for="type_{{ choice.0 }}">
+                                        {{ choice.1 }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Niveaux d'expérience préférés</label>
+                                {% for choice in form.preferred_experience_levels.field.choices %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="preferred_experience_levels" 
+                                           value="{{ choice.0 }}" id="level_{{ choice.0 }}"
+                                           {% if choice.0 in preferences.preferred_experience_levels %}checked{% endif %}>
+                                    <label class="form-check-label" for="level_{{ choice.0 }}">
+                                        {{ choice.1 }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Objectifs de carrière</label>
+                        <textarea name="career_goals" class="form-control" rows="4" 
+                                  placeholder="Décrivez vos objectifs de carrière...">{{ preferences.career_goals }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Exclusions -->
+                <div class="preference-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-ban text-danger me-2"></i>
+                        Critères d'exclusion
+                    </h4>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Les éléments listés ici seront exclus de vos matches
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Entreprises à exclure</label>
+                                <div class="tag-list" id="excludedCompanyTags">
+                                    {% for company in preferences.excluded_companies %}
+                                    <span class="tag">
+                                        {{ company }}
+                                        <button type="button" class="tag-remove" onclick="removeTag('excludedCompany', '{{ company }}')">×</button>
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                <div class="add-tag-input">
+                                    <input type="text" id="excludedCompanyInput" placeholder="Ajouter une entreprise..." 
+                                           class="form-control border-0" onkeypress="addTag(event, 'excludedCompany')">
+                                </div>
+                                <input type="hidden" name="excluded_companies" id="excludedCompanyInputHidden" 
+                                       value="{{ preferences.excluded_companies|join:',' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Localisations à exclure</label>
+                                <div class="tag-list" id="excludedLocationTags">
+                                    {% for location in preferences.excluded_locations %}
+                                    <span class="tag">
+                                        {{ location }}
+                                        <button type="button" class="tag-remove" onclick="removeTag('excludedLocation', '{{ location }}')">×</button>
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                <div class="add-tag-input">
+                                    <input type="text" id="excludedLocationInput" placeholder="Ajouter une localisation..." 
+                                           class="form-control border-0" onkeypress="addTag(event, 'excludedLocation')">
+                                </div>
+                                <input type="hidden" name="excluded_locations" id="excludedLocationInputHidden" 
+                                       value="{{ preferences.excluded_locations|join:',' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Secteurs à exclure</label>
+                                <div class="tag-list" id="excludedIndustryTags">
+                                    {% for industry in preferences.excluded_industries %}
+                                    <span class="tag">
+                                        {{ industry }}
+                                        <button type="button" class="tag-remove" onclick="removeTag('excludedIndustry', '{{ industry }}')">×</button>
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                <div class="add-tag-input">
+                                    <input type="text" id="excludedIndustryInput" placeholder="Ajouter un secteur..." 
+                                           class="form-control border-0" onkeypress="addTag(event, 'excludedIndustry')">
+                                </div>
+                                <input type="hidden" name="excluded_industries" id="excludedIndustryInputHidden" 
+                                       value="{{ preferences.excluded_industries|join:',' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Configuration des alertes -->
+                <div class="preference-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-bell text-warning me-2"></i>
+                        Configuration des alertes
+                    </h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Fréquence des alertes</label>
+                        <select name="alert_frequency" class="form-select">
+                            <option value="immediate" {% if preferences.alert_frequency == 'immediate' %}selected{% endif %}>Immédiat</option>
+                            <option value="daily" {% if preferences.alert_frequency == 'daily' %}selected{% endif %}>Quotidien</option>
+                            <option value="weekly" {% if preferences.alert_frequency == 'weekly' %}selected{% endif %}>Hebdomadaire</option>
+                            <option value="monthly" {% if preferences.alert_frequency == 'monthly' %}selected{% endif %}>Mensuel</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Score de matching minimum</label>
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="minScore" name="min_match_score" 
+                                   min="0" max="100" value="{{ preferences.min_match_score }}" 
+                                   oninput="updateSliderValue('minScore', this.value + '%')">
+                            <div class="slider-value" id="minScoreValue">{{ preferences.min_match_score }}%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="only_high_matches" 
+                               id="onlyHighMatches" {% if preferences.only_high_matches %}checked{% endif %}>
+                        <label class="form-check-label" for="onlyHighMatches">
+                            Seulement les matches excellents
+                        </label>
+                        <div class="help-text">Recevez uniquement les matches avec un score supérieur à 80%</div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="preference-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-save text-success me-2"></i>
+                        Actions
+                    </h4>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn save-button">
+                            <i class="fas fa-save me-2"></i>Sauvegarder les préférences
+                        </button>
+                        
+                        <a href="{% url 'matching:generate_matches' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-sync-alt me-2"></i>Générer de nouveaux matches
+                        </a>
+                        
+                        <a href="{% url 'matching:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour au dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="preference-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-chart-pie text-info me-2"></i>
+                        Statistiques
+                    </h4>
+                    
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-value text-primary">{{ preferences.min_match_score }}%</div>
+                            <div class="stat-label">Score minimum</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-value text-success">{{ preferences.preferred_locations|length }}</div>
+                            <div class="stat-label">Localisations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Gestion des tags
+function addTag(event, type) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        const input = event.target;
+        const value = input.value.trim();
+        
+        if (value && !isTagExists(type, value)) {
+            addTagToContainer(type, value);
+            input.value = '';
+            updateHiddenInput(type);
+        }
+    }
+}
+
+function removeTag(type, value) {
+    const tagElement = document.querySelector(`#${type}Tags .tag:contains("${value}")`);
+    if (tagElement) {
+        tagElement.remove();
+        updateHiddenInput(type);
+    }
+}
+
+function addTagToContainer(type, value) {
+    const container = document.getElementById(`${type}Tags`);
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.innerHTML = `
+        ${value}
+        <button type="button" class="tag-remove" onclick="removeTag('${type}', '${value}')">×</button>
+    `;
+    container.appendChild(tag);
+}
+
+function isTagExists(type, value) {
+    const container = document.getElementById(`${type}Tags`);
+    const tags = container.querySelectorAll('.tag');
+    for (let tag of tags) {
+        if (tag.textContent.trim().replace('×', '').trim() === value) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function updateHiddenInput(type) {
+    const container = document.getElementById(`${type}Tags`);
+    const tags = container.querySelectorAll('.tag');
+    const values = Array.from(tags).map(tag => 
+        tag.textContent.trim().replace('×', '').trim()
+    );
+    document.getElementById(`${type}InputHidden`).value = values.join(',');
+}
+
+// Gestion des sliders
+function updateSliderValue(sliderId, value) {
+    document.getElementById(`${sliderId}Value`).textContent = value;
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les sliders
+    const commuteSlider = document.getElementById('commuteTime');
+    const minScoreSlider = document.getElementById('minScore');
+    
+    if (commuteSlider) {
+        commuteSlider.addEventListener('input', function() {
+            updateSliderValue('commuteTime', this.value + ' min');
+        });
+    }
+    
+    if (minScoreSlider) {
+        minScoreSlider.addEventListener('input', function() {
+            updateSliderValue('minScore', this.value + '%');
+        });
+    }
+    
+    // Validation du formulaire
+    document.getElementById('preferencesForm').addEventListener('submit', function(e) {
+        const minSalary = document.querySelector('input[name="min_salary"]').value;
+        const maxSalary = document.querySelector('input[name="max_salary"]').value;
+        
+        if (minSalary && maxSalary && parseInt(minSalary) > parseInt(maxSalary)) {
+            e.preventDefault();
+            alert('Le salaire minimum ne peut pas être supérieur au salaire maximum.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}
+

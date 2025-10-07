@@ -1,0 +1,790 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Aperçu du CV - {{ cv.title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-eye"></i>
+                    Aperçu du CV
+                </h1>
+                <p class="page-subtitle">{{ cv.title }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre d'outils d'aperçu -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="preview-toolbar">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="toolbar-left">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary" id="zoom-out">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="zoom-reset">
+                                <i class="fas fa-search"></i>
+                                100%
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="zoom-in">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                        </div>
+                        <div class="btn-group ms-3" role="group">
+                            <button type="button" class="btn btn-outline-secondary" id="fit-width">
+                                <i class="fas fa-arrows-alt-h"></i>
+                                Largeur
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="fit-page">
+                                <i class="fas fa-expand"></i>
+                                Page
+                            </button>
+                        </div>
+                    </div>
+                    <div class="toolbar-center">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary" id="print-cv">
+                                <i class="fas fa-print"></i>
+                                Imprimer
+                            </button>
+                            <button type="button" class="btn btn-outline-success" id="download-pdf">
+                                <i class="fas fa-file-pdf"></i>
+                                PDF
+                            </button>
+                            <button type="button" class="btn btn-outline-info" id="download-docx">
+                                <i class="fas fa-file-word"></i>
+                                Word
+                            </button>
+                        </div>
+                    </div>
+                    <div class="toolbar-right">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'cv_builder:edit_cv' cv.id %}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i>
+                                Modifier
+                            </a>
+                            <a href="{% url 'cv_builder:cv_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                Retour
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone d'aperçu -->
+    <div class="row">
+        <div class="col-12">
+            <div class="preview-container">
+                <div class="preview-wrapper" id="preview-wrapper">
+                    <div class="cv-preview" id="cv-preview">
+                        <!-- CV Preview Content -->
+                        <div class="cv-document">
+                            <!-- En-tête du CV -->
+                            <div class="cv-header">
+                                <div class="personal-info">
+                                    <h1 class="cv-name">{{ cv.personal_info.first_name }} {{ cv.personal_info.last_name }}</h1>
+                                    <div class="contact-info">
+                                        {% if cv.personal_info.email %}
+                                        <div class="contact-item">
+                                            <i class="fas fa-envelope"></i>
+                                            <span>{{ cv.personal_info.email }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if cv.personal_info.phone %}
+                                        <div class="contact-item">
+                                            <i class="fas fa-phone"></i>
+                                            <span>{{ cv.personal_info.phone }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if cv.personal_info.address %}
+                                        <div class="contact-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>{{ cv.personal_info.address }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if cv.personal_info.profile_picture %}
+                                <div class="profile-picture">
+                                    <img src="{{ cv.personal_info.profile_picture.url }}" alt="Photo de profil" class="profile-img">
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Objectif professionnel -->
+                            {% if cv.objective %}
+                            <div class="cv-section">
+                                <h2 class="section-title">
+                                    <i class="fas fa-bullseye"></i>
+                                    Objectif professionnel
+                                </h2>
+                                <div class="section-content">
+                                    <p>{{ cv.objective }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Expérience professionnelle -->
+                            {% if cv.experiences.exists %}
+                            <div class="cv-section">
+                                <h2 class="section-title">
+                                    <i class="fas fa-briefcase"></i>
+                                    Expérience professionnelle
+                                </h2>
+                                <div class="section-content">
+                                    {% for experience in cv.experiences.all %}
+                                    <div class="experience-item">
+                                        <div class="experience-header">
+                                            <h3 class="job-title">{{ experience.job_title }}</h3>
+                                            <div class="experience-meta">
+                                                <span class="company">{{ experience.company }}</span>
+                                                <span class="duration">
+                                                    {{ experience.start_date|date:"M Y" }} - 
+                                                    {% if experience.end_date %}
+                                                        {{ experience.end_date|date:"M Y" }}
+                                                    {% else %}
+                                                        Présent
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% if experience.description %}
+                                        <div class="experience-description">
+                                            <p>{{ experience.description|linebreaks }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Formation -->
+                            {% if cv.educations.exists %}
+                            <div class="cv-section">
+                                <h2 class="section-title">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Formation
+                                </h2>
+                                <div class="section-content">
+                                    {% for education in cv.educations.all %}
+                                    <div class="education-item">
+                                        <div class="education-header">
+                                            <h3 class="degree">{{ education.degree }}</h3>
+                                            <div class="education-meta">
+                                                <span class="institution">{{ education.institution }}</span>
+                                                <span class="duration">
+                                                    {{ education.start_date }} - 
+                                                    {% if education.end_date %}
+                                                        {{ education.end_date }}
+                                                    {% else %}
+                                                        En cours
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% if education.description %}
+                                        <div class="education-description">
+                                            <p>{{ education.description|linebreaks }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Compétences -->
+                            {% if cv.skills.exists %}
+                            <div class="cv-section">
+                                <h2 class="section-title">
+                                    <i class="fas fa-cogs"></i>
+                                    Compétences
+                                </h2>
+                                <div class="section-content">
+                                    <div class="skills-grid">
+                                        {% for skill in cv.skills.all %}
+                                        <div class="skill-item">
+                                            <span class="skill-name">{{ skill.name }}</span>
+                                            <div class="skill-level">
+                                                <div class="skill-bar">
+                                                    <div class="skill-progress" style="width: {% if skill.level == 'beginner' %}25%{% elif skill.level == 'intermediate' %}50%{% elif skill.level == 'advanced' %}75%{% else %}100%{% endif %}"></div>
+                                                </div>
+                                                <span class="skill-level-text">{{ skill.get_level_display }}</span>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Langues -->
+                            {% if cv.languages.exists %}
+                            <div class="cv-section">
+                                <h2 class="section-title">
+                                    <i class="fas fa-language"></i>
+                                    Langues
+                                </h2>
+                                <div class="section-content">
+                                    <div class="languages-list">
+                                        {% for language in cv.languages.all %}
+                                        <div class="language-item">
+                                            <span class="language-name">{{ language.name }}</span>
+                                            <span class="language-level">{{ language.get_level_display }}</span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Certifications -->
+                            {% if cv.certifications.exists %}
+                            <div class="cv-section">
+                                <h2 class="section-title">
+                                    <i class="fas fa-certificate"></i>
+                                    Certifications
+                                </h2>
+                                <div class="section-content">
+                                    {% for certification in cv.certifications.all %}
+                                    <div class="certification-item">
+                                        <div class="certification-header">
+                                            <h3 class="certification-name">{{ certification.name }}</h3>
+                                            <div class="certification-meta">
+                                                <span class="issuer">{{ certification.issuer }}</span>
+                                                <span class="date">{{ certification.date|date:"M Y" }}</span>
+                                            </div>
+                                        </div>
+                                        {% if certification.description %}
+                                        <div class="certification-description">
+                                            <p>{{ certification.description }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Projets -->
+                            {% if cv.projects.exists %}
+                            <div class="cv-section">
+                                <h2 class="section-title">
+                                    <i class="fas fa-project-diagram"></i>
+                                    Projets
+                                </h2>
+                                <div class="section-content">
+                                    {% for project in cv.projects.all %}
+                                    <div class="project-item">
+                                        <div class="project-header">
+                                            <h3 class="project-name">{{ project.name }}</h3>
+                                            <div class="project-meta">
+                                                <span class="project-date">{{ project.start_date|date:"M Y" }} - {{ project.end_date|date:"M Y"|default:"En cours" }}</span>
+                                            </div>
+                                        </div>
+                                        {% if project.description %}
+                                        <div class="project-description">
+                                            <p>{{ project.description|linebreaks }}</p>
+                                        </div>
+                                        {% endif %}
+                                        {% if project.technologies %}
+                                        <div class="project-technologies">
+                                            <strong>Technologies :</strong> {{ project.technologies }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Références -->
+                            {% if cv.references.exists %}
+                            <div class="cv-section">
+                                <h2 class="section-title">
+                                    <i class="fas fa-users"></i>
+                                    Références
+                                </h2>
+                                <div class="section-content">
+                                    <div class="references-grid">
+                                        {% for reference in cv.references.all %}
+                                        <div class="reference-item">
+                                            <h4 class="reference-name">{{ reference.name }}</h4>
+                                            <p class="reference-title">{{ reference.title }}</p>
+                                            <p class="reference-company">{{ reference.company }}</p>
+                                            {% if reference.phone %}
+                                            <p class="reference-phone">{{ reference.phone }}</p>
+                                            {% endif %}
+                                            {% if reference.email %}
+                                            <p class="reference-email">{{ reference.email }}</p>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.preview-toolbar {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+}
+
+.preview-container {
+    background: #f5f5f5;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.preview-wrapper {
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.cv-preview {
+    width: 210mm; /* A4 width */
+    min-height: 297mm; /* A4 height */
+    padding: 20mm;
+    background: white;
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+.cv-document {
+    max-width: 100%;
+}
+
+.cv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #007bff;
+}
+
+.personal-info {
+    flex: 1;
+}
+
+.cv-name {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6c757d;
+}
+
+.contact-item i {
+    width: 16px;
+    color: #007bff;
+}
+
+.profile-picture {
+    margin-left: 20px;
+}
+
+.profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #007bff;
+}
+
+.cv-section {
+    margin-bottom: 25px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title i {
+    color: #007bff;
+}
+
+.section-content {
+    margin-left: 20px;
+}
+
+.experience-item,
+.education-item,
+.certification-item,
+.project-item {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.experience-item:last-child,
+.education-item:last-child,
+.certification-item:last-child,
+.project-item:last-child {
+    border-bottom: none;
+}
+
+.experience-header,
+.education-header,
+.certification-header,
+.project-header {
+    margin-bottom: 10px;
+}
+
+.job-title,
+.degree,
+.certification-name,
+.project-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.experience-meta,
+.education-meta,
+.certification-meta,
+.project-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.company,
+.institution,
+.issuer {
+    font-weight: 500;
+    color: #007bff;
+}
+
+.duration,
+.date,
+.project-date {
+    font-style: italic;
+}
+
+.experience-description,
+.education-description,
+.certification-description,
+.project-description {
+    margin-top: 10px;
+    color: #555;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.skill-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.skill-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.skill-level {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.skill-bar {
+    flex: 1;
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.skill-progress {
+    height: 100%;
+    background-color: #007bff;
+    transition: width 0.3s ease;
+}
+
+.skill-level-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    min-width: 80px;
+}
+
+.languages-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.language-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.language-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.language-level {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.references-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.reference-item {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.reference-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.reference-title {
+    font-weight: 500;
+    color: #007bff;
+    margin-bottom: 5px;
+}
+
+.reference-company {
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.reference-phone,
+.reference-email {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 3px;
+}
+
+.project-technologies {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .preview-toolbar .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .toolbar-left,
+    .toolbar-center,
+    .toolbar-right {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .cv-preview {
+        width: 100%;
+        padding: 15px;
+    }
+    
+    .cv-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-picture {
+        margin-left: 0;
+        margin-top: 20px;
+    }
+    
+    .experience-meta,
+    .education-meta,
+    .certification-meta,
+    .project-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .skills-grid,
+    .languages-list,
+    .references-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print styles */
+@media print {
+    .preview-toolbar {
+        display: none;
+    }
+    
+    .preview-container {
+        background: white;
+        border: none;
+        padding: 0;
+    }
+    
+    .cv-preview {
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentZoom = 100;
+    const previewWrapper = document.getElementById('preview-wrapper');
+    const cvPreview = document.getElementById('cv-preview');
+    
+    // Gestion du zoom
+    document.getElementById('zoom-in').addEventListener('click', function() {
+        currentZoom = Math.min(currentZoom + 25, 200);
+        updateZoom();
+    });
+    
+    document.getElementById('zoom-out').addEventListener('click', function() {
+        currentZoom = Math.max(currentZoom - 25, 50);
+        updateZoom();
+    });
+    
+    document.getElementById('zoom-reset').addEventListener('click', function() {
+        currentZoom = 100;
+        updateZoom();
+    });
+    
+    function updateZoom() {
+        previewWrapper.style.transform = `scale(${currentZoom / 100})`;
+        document.getElementById('zoom-reset').innerHTML = `<i class="fas fa-search"></i> ${currentZoom}%`;
+    }
+    
+    // Ajustement de la largeur
+    document.getElementById('fit-width').addEventListener('click', function() {
+        const containerWidth = document.querySelector('.preview-container').offsetWidth;
+        const cvWidth = cvPreview.offsetWidth;
+        const scale = (containerWidth - 40) / cvWidth;
+        currentZoom = Math.round(scale * 100);
+        updateZoom();
+    });
+    
+    // Ajustement de la page
+    document.getElementById('fit-page').addEventListener('click', function() {
+        const containerHeight = document.querySelector('.preview-container').offsetHeight;
+        const cvHeight = cvPreview.offsetHeight;
+        const scale = (containerHeight - 40) / cvHeight;
+        currentZoom = Math.round(scale * 100);
+        updateZoom();
+    });
+    
+    // Impression
+    document.getElementById('print-cv').addEventListener('click', function() {
+        window.print();
+    });
+    
+    // Téléchargement PDF
+    document.getElementById('download-pdf').addEventListener('click', function() {
+        // Ici, vous pourriez implémenter la génération PDF
+        window.open('{% url "cv_builder:export_cv" cv.id "pdf" %}', '_blank');
+    });
+    
+    // Téléchargement Word
+    document.getElementById('download-docx').addEventListener('click', function() {
+        // Ici, vous pourriez implémenter la génération Word
+        window.open('{% url "cv_builder:export_cv" cv.id "docx" %}', '_blank');
+    });
+    
+    // Raccourcis clavier
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey) {
+            switch (e.key) {
+                case '=':
+                case '+':
+                    e.preventDefault();
+                    document.getElementById('zoom-in').click();
+                    break;
+                case '-':
+                    e.preventDefault();
+                    document.getElementById('zoom-out').click();
+                    break;
+                case '0':
+                    e.preventDefault();
+                    document.getElementById('zoom-reset').click();
+                    break;
+                case 'p':
+                    e.preventDefault();
+                    document.getElementById('print-cv').click();
+                    break;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

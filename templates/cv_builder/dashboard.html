@@ -1,0 +1,431 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}CV Builder - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>CV Builder</h1>
+            <p>Créez un CV professionnel et attrayant en quelques minutes</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- CV Stats -->
+            <div class="col-12">
+                <div class="cv-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_cvs }}</h3>
+                            <p>CV créés</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_views }}</h3>
+                            <p>Vues totales</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_downloads }}</h3>
+                            <p>Téléchargements</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-share"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_shares }}</h3>
+                            <p>Partages</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CV Templates -->
+            <div class="col-lg-4">
+                <div class="cv-templates">
+                    <div class="templates-header">
+                        <h3>Modèles de CV</h3>
+                        <button class="btn btn-sm btn-primary" id="create-cv-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>Nouveau CV</span>
+                        </button>
+                    </div>
+                    
+                    <div class="templates-list">
+                        {% for template in templates %}
+                        <div class="template-item" data-template-id="{{ template.id }}">
+                            <div class="template-preview">
+                                <img src="{{ template.preview_image.url }}" alt="{{ template.name }}">
+                            </div>
+                            <div class="template-info">
+                                <h4>{{ template.name }}</h4>
+                                <p>{{ template.description }}</p>
+                                <div class="template-meta">
+                                    <span class="template-category">{{ template.category }}</span>
+                                    <span class="template-popularity">
+                                        <i class="fas fa-star"></i>
+                                        {{ template.popularity }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="template-actions">
+                                <button class="btn btn-outline-primary btn-sm" onclick="previewTemplate({{ template.id }})">
+                                    <i class="fas fa-eye"></i>
+                                    <span>Aperçu</span>
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="useTemplate({{ template.id }})">
+                                    <i class="fas fa-check"></i>
+                                    <span>Utiliser</span>
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-templates">
+                            <div class="no-templates-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h3>Aucun modèle disponible</h3>
+                            <p>Les modèles de CV seront bientôt disponibles</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CV List -->
+            <div class="col-lg-8">
+                <div class="cv-content">
+                    <div class="cv-header">
+                        <div class="cv-count">
+                            <h3>{{ cvs|length }} CV{{ cvs|length|pluralize }} créé{{ cvs|length|pluralize }}</h3>
+                        </div>
+                        <div class="cv-sort">
+                            <select class="form-select" id="sort-select">
+                                <option value="newest">Plus récents</option>
+                                <option value="oldest">Plus anciens</option>
+                                <option value="name">Par nom</option>
+                                <option value="views">Par vues</option>
+                                <option value="downloads">Par téléchargements</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="cv-list">
+                        {% for cv in cvs %}
+                        <div class="cv-card" data-cv-id="{{ cv.id }}">
+                            <div class="cv-card-header">
+                                <div class="cv-title">
+                                    <h4>{{ cv.title }}</h4>
+                                    <p class="cv-template">{{ cv.template.name }}</p>
+                                </div>
+                                <div class="cv-status">
+                                    <span class="status-badge status-{{ cv.status }}">
+                                        {{ cv.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="cv-card-body">
+                                <div class="cv-preview">
+                                    <img src="{{ cv.preview_image.url }}" alt="{{ cv.title }}">
+                                </div>
+                                
+                                <div class="cv-details">
+                                    <div class="cv-detail">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>Créé {{ cv.created_at|timesince }} ago</span>
+                                    </div>
+                                    <div class="cv-detail">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Modifié {{ cv.updated_at|timesince }} ago</span>
+                                    </div>
+                                    <div class="cv-detail">
+                                        <i class="fas fa-eye"></i>
+                                        <span>{{ cv.views }} vues</span>
+                                    </div>
+                                    <div class="cv-detail">
+                                        <i class="fas fa-download"></i>
+                                        <span>{{ cv.downloads }} téléchargements</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="cv-sections">
+                                    <h5>Sections incluses</h5>
+                                    <div class="sections-list">
+                                        {% for section in cv.sections.all %}
+                                        <span class="section-tag">{{ section.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="cv-card-footer">
+                                <div class="cv-meta">
+                                    <span class="cv-date">
+                                        <i class="fas fa-clock"></i>
+                                        {{ cv.created_at|date:"d/m/Y" }}
+                                    </span>
+                                    {% if cv.is_public %}
+                                    <span class="cv-public">
+                                        <i class="fas fa-globe"></i>
+                                        Public
+                                    </span>
+                                    {% else %}
+                                    <span class="cv-private">
+                                        <i class="fas fa-lock"></i>
+                                        Privé
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="cv-actions">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="previewCV({{ cv.id }})">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Aperçu</span>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="editCV({{ cv.id }})">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Modifier</span>
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="duplicateCV({{ cv.id }})">
+                                        <i class="fas fa-copy"></i>
+                                        <span>Dupliquer</span>
+                                    </button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="downloadCV({{ cv.id }})">
+                                        <i class="fas fa-download"></i>
+                                        <span>Télécharger</span>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="shareCV({{ cv.id }})">
+                                        <i class="fas fa-share"></i>
+                                        <span>Partager</span>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteCV({{ cv.id }})">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Supprimer</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-cvs">
+                            <div class="no-cvs-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h3>Aucun CV créé</h3>
+                            <p>Commencez par créer votre premier CV professionnel</p>
+                            <button class="btn btn-primary" onclick="createCV()">
+                                <i class="fas fa-plus"></i>
+                                <span>Créer un CV</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if cvs.has_other_pages %}
+                    <nav class="pagination-nav">
+                        <ul class="pagination">
+                            {% if cvs.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ cvs.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in cvs.paginator.page_range %}
+                            {% if cvs.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > cvs.number|add:'-3' and num < cvs.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if cvs.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ cvs.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create CV Modal -->
+<div class="modal fade" id="createCVModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Créer un nouveau CV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" class="create-cv-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">Nom du CV</label>
+                        <input type="text" name="title" class="form-control" placeholder="Ex: CV Développeur Python" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Modèle</label>
+                        <select name="template" class="form-select" required>
+                            <option value="">Sélectionner un modèle</option>
+                            {% for template in templates %}
+                            <option value="{{ template.id }}">{{ template.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" placeholder="Description du CV..." rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="is_public">
+                            <label class="form-check-label">Rendre ce CV public</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="createCV()">Créer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aperçu du CV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="preview-content">
+                    <!-- Preview content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="editFromPreview()">Modifier</button>
+                <button type="button" class="btn btn-success" onclick="downloadFromPreview()">Télécharger</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Create CV
+    function createCV() {
+        const modal = new bootstrap.Modal(document.getElementById('createCVModal'));
+        modal.show();
+    }
+    
+    // Preview CV
+    function previewCV(cvId) {
+        // Implementation for previewing CV
+        console.log('Previewing CV:', cvId);
+        const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+        modal.show();
+    }
+    
+    // Edit CV
+    function editCV(cvId) {
+        // Implementation for editing CV
+        console.log('Editing CV:', cvId);
+    }
+    
+    // Duplicate CV
+    function duplicateCV(cvId) {
+        if (confirm('Êtes-vous sûr de vouloir dupliquer ce CV ?')) {
+            // Implementation for duplicating CV
+            console.log('Duplicating CV:', cvId);
+        }
+    }
+    
+    // Download CV
+    function downloadCV(cvId) {
+        // Implementation for downloading CV
+        console.log('Downloading CV:', cvId);
+    }
+    
+    // Share CV
+    function shareCV(cvId) {
+        // Implementation for sharing CV
+        console.log('Sharing CV:', cvId);
+    }
+    
+    // Delete CV
+    function deleteCV(cvId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce CV ?')) {
+            // Implementation for deleting CV
+            console.log('Deleting CV:', cvId);
+        }
+    }
+    
+    // Preview template
+    function previewTemplate(templateId) {
+        // Implementation for previewing template
+        console.log('Previewing template:', templateId);
+    }
+    
+    // Use template
+    function useTemplate(templateId) {
+        // Implementation for using template
+        console.log('Using template:', templateId);
+    }
+    
+    // Edit from preview
+    function editFromPreview() {
+        // Implementation for editing from preview
+        console.log('Editing from preview');
+    }
+    
+    // Download from preview
+    function downloadFromPreview() {
+        // Implementation for downloading from preview
+        console.log('Downloading from preview');
+    }
+    
+    // Sort functionality
+    document.getElementById('sort-select').addEventListener('change', function() {
+        const sortValue = this.value;
+        const url = new URL(window.location);
+        url.searchParams.set('sort', sortValue);
+        window.location.href = url.toString();
+    });
+</script>
+{% endblock %}

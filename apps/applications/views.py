@@ -8,12 +8,13 @@ from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from .models import (
     Application, ApplicationComment, Interview, 
-    ApplicationRating, ApplicationStatusHistory
+    ApplicationRating, ApplicationStatusHistory, VideoQuestion, VideoApplication
 )
 from .forms import (
     ApplicationForm, ApplicationStatusForm, ApplicationCommentForm,
     InterviewForm, InterviewFeedbackForm, ApplicationRatingForm,
-    ApplicationSearchForm
+    ApplicationSearchForm, VideoApplicationForm, VideoQuestionForm, 
+    VideoResponseForm, VideoApplicationSearchForm
 )
 from apps.jobs.models import Job
 from apps.accounts.models import CandidateProfile
@@ -426,3 +427,300 @@ def withdraw_application(request, pk):
     return render(request, 'applications/withdraw_application.html', {
         'application': application
     })
+
+
+# =============================================================================
+# VUES POUR LES CANDIDATURES VIDÉO
+# =============================================================================
+
+@login_required
+def apply_with_video(request, job_id):
+    """Postuler avec une vidéo de présentation"""
+    job = get_object_or_404(Job, id=job_id, status='published')
+    
+    # Vérifier que l'utilisateur est un candidat
+    if request.user.user_type != 'candidate':
+        messages.error(request, 'Seuls les candidats peuvent postuler.')
+        return redirect('jobs:job_detail', job_id=job_id)
+    
+    try:
+        candidate_profile = request.user.candidate_profile
+    except CandidateProfile.DoesNotExist:
+        messages.error(request, 'Veuillez compléter votre profil avant de postuler.')
+        return redirect('accounts:profile_edit')
+    
+    # Vérifier si le candidat a déjà postulé
+    if Application.objects.filter(candidate=candidate_profile, job=job).exists():
+        messages.warning(request, 'Vous avez déjà postulé à cette offre.')
+        return redirect('jobs:job_detail', job_id=job_id)
+    
+    if request.method == 'POST':
+        form = VideoApplicationForm(request.POST, request.FILES, job=job)
+        if form.is_valid():
+            # Créer d'abord l'application de base
+            application = Application.objects.create(
+                candidate=candidate_profile,
+                job=job,
+                cover_letter="Candidature avec vidéo de présentation",
+                presentation_video=form.cleaned_data['main_video'],
+                video_duration=form.cleaned_data['total_duration'],
+                status='pending'
+            )
+            
+            # Créer la candidature vidéo spécialisée
+            video_application = form.save(commit=False)
+            video_application.application = application
+            video_application.save()
+            
+            # Envoyer email de confirmation
+            send_application_received_email.delay(application.id)
+            
+            messages.success(request, 'Votre candidature vidéo a été envoyée avec succès !')
+            return redirect('applications:application_detail', pk=application.pk)
+    else:
+        form = VideoApplicationForm(job=job)
+    
+    # Récupérer les questions vidéo pour cette offre
+    video_questions = VideoQuestion.objects.filter(job=job, is_active=True).order_by('order')
+    
+    context = {
+        'form': form,
+        'job': job,
+        'video_questions': video_questions,
+    }
+    
+    return render(request, 'applications/apply_with_video.html', context)
+
+
+@login_required
+def video_questions_management(request, job_id):
+    """Gestion des questions vidéo pour une offre (admin/HR)"""
+    if not request.user.is_staff and request.user.user_type != 'hr':
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('home')
+    
+    job = get_object_or_404(Job, id=job_id)
+    questions = VideoQuestion.objects.filter(job=job).order_by('order')
+    
+    if request.method == 'POST':
+        form = VideoQuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.job = job
+            question.save()
+            messages.success(request, 'Question vidéo ajoutée avec succès.')
+            return redirect('applications:video_questions_management', job_id=job_id)
+    else:
+        form = VideoQuestionForm()
+    
+    context = {
+        'job': job,
+        'questions': questions,
+        'form': form,
+    }
+    
+    return render(request, 'applications/video_questions_management.html', context)
+
+
+@login_required
+def edit_video_question(request, question_id):
+    """Modifier une question vidéo"""
+    if not request.user.is_staff and request.user.user_type != 'hr':
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('home')
+    
+    question = get_object_or_404(VideoQuestion, id=question_id)
+    
+    if request.method == 'POST':
+        form = VideoQuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Question vidéo modifiée avec succès.')
+            return redirect('applications:video_questions_management', job_id=question.job.id)
+    else:
+        form = VideoQuestionForm(instance=question)
+    
+    context = {
+        'form': form,
+        'question': question,
+    }
+    
+    return render(request, 'applications/edit_video_question.html', context)
+
+
+@login_required
+def delete_video_question(request, question_id):
+    """Supprimer une question vidéo"""
+    if not request.user.is_staff and request.user.user_type != 'hr':
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('home')
+    
+    question = get_object_or_404(VideoQuestion, id=question_id)
+    job_id = question.job.id
+    
+    if request.method == 'POST':
+        question.delete()
+        messages.success(request, 'Question vidéo supprimée avec succès.')
+        return redirect('applications:video_questions_management', job_id=job_id)
+    
+    return render(request, 'applications/delete_video_question.html', {
+        'question': question
+    })
+
+
+@login_required
+def video_applications_list(request):
+    """Liste des candidatures vidéo (admin/HR)"""
+    if not request.user.is_staff and request.user.user_type != 'hr':
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('home')
+    
+    # Filtres
+    search_form = VideoApplicationSearchForm(request.GET)
+    video_applications = VideoApplication.objects.select_related(
+        'application__candidate__user', 'application__job'
+    ).order_by('-created_at')
+    
+    if search_form.is_valid():
+        if search_form.cleaned_data.get('keywords'):
+            keywords = search_form.cleaned_data['keywords']
+            video_applications = video_applications.filter(
+                Q(application__candidate__user__first_name__icontains=keywords) |
+                Q(application__candidate__user__last_name__icontains=keywords) |
+                Q(application__job__title__icontains=keywords) |
+                Q(application__job__company__icontains=keywords)
+            )
+        
+        if search_form.cleaned_data.get('job'):
+            video_applications = video_applications.filter(application__job=search_form.cleaned_data['job'])
+        
+        if search_form.cleaned_data.get('video_quality'):
+            video_applications = video_applications.filter(video_quality=search_form.cleaned_data['video_quality'])
+        
+        if search_form.cleaned_data.get('processing_status'):
+            video_applications = video_applications.filter(processing_status=search_form.cleaned_data['processing_status'])
+        
+        if search_form.cleaned_data.get('has_transcript'):
+            video_applications = video_applications.exclude(transcript='')
+        
+        if search_form.cleaned_data.get('date_from'):
+            video_applications = video_applications.filter(created_at__date__gte=search_form.cleaned_data['date_from'])
+        
+        if search_form.cleaned_data.get('date_to'):
+            video_applications = video_applications.filter(created_at__date__lte=search_form.cleaned_data['date_to'])
+    
+    # Pagination
+    paginator = Paginator(video_applications, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'search_form': search_form,
+        'total_count': video_applications.count(),
+    }
+    
+    return render(request, 'applications/video_applications_list.html', context)
+
+
+@login_required
+def video_application_detail(request, video_app_id):
+    """Détail d'une candidature vidéo"""
+    video_application = get_object_or_404(VideoApplication, id=video_app_id)
+    
+    # Vérifier les permissions
+    if (request.user.user_type == 'candidate' and 
+        video_application.application.candidate.user != request.user):
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('home')
+    
+    if (request.user.user_type in ['admin', 'hr'] and 
+        not request.user.is_staff and 
+        request.user.user_type != 'hr'):
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('home')
+    
+    context = {
+        'video_application': video_application,
+        'application': video_application.application,
+    }
+    
+    return render(request, 'applications/video_application_detail.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def process_video_application(request, video_app_id):
+    """Traiter une candidature vidéo (transcription, analyse)"""
+    if not request.user.is_staff and request.user.user_type != 'hr':
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('home')
+    
+    video_application = get_object_or_404(VideoApplication, id=video_app_id)
+    
+    # Simuler le traitement (dans un vrai projet, ceci serait fait par une tâche asynchrone)
+    video_application.processing_status = 'processing'
+    video_application.save()
+    
+    # Ici, vous pourriez lancer une tâche Celery pour :
+    # - Extraire l'audio de la vidéo
+    # - Faire la transcription avec un service comme Google Speech-to-Text
+    # - Analyser les mots-clés
+    # - Faire l'analyse de sentiment
+    
+    # Pour l'instant, on simule juste le traitement
+    import time
+    time.sleep(2)  # Simulation du traitement
+    
+    video_application.processing_status = 'completed'
+    video_application.is_processed = True
+    video_application.transcript = "Transcription simulée de la vidéo de candidature..."
+    video_application.keywords_extracted = ['motivation', 'expérience', 'compétences']
+    video_application.sentiment_analysis = {
+        'positive': 0.8,
+        'neutral': 0.2,
+        'negative': 0.0
+    }
+    video_application.save()
+    
+    messages.success(request, 'Candidature vidéo traitée avec succès.')
+    return redirect('applications:video_application_detail', video_app_id=video_app_id)
+
+
+@login_required
+def video_application_analytics(request):
+    """Analytics des candidatures vidéo (admin)"""
+    if not request.user.is_staff:
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('home')
+    
+    # Statistiques générales
+    total_video_applications = VideoApplication.objects.count()
+    processed_applications = VideoApplication.objects.filter(is_processed=True).count()
+    applications_with_transcript = VideoApplication.objects.exclude(transcript='').count()
+    
+    # Statistiques par qualité vidéo
+    quality_stats = VideoApplication.objects.values('video_quality').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Statistiques par statut de traitement
+    processing_stats = VideoApplication.objects.values('processing_status').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Durée moyenne des vidéos
+    avg_duration = VideoApplication.objects.aggregate(
+        avg_duration=Avg('total_duration')
+    )['avg_duration'] or 0
+    
+    context = {
+        'total_video_applications': total_video_applications,
+        'processed_applications': processed_applications,
+        'applications_with_transcript': applications_with_transcript,
+        'quality_stats': quality_stats,
+        'processing_stats': processing_stats,
+        'avg_duration': round(avg_duration, 1),
+    }
+    
+    return render(request, 'applications/video_application_analytics.html', context)

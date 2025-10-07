@@ -1,0 +1,539 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Favoris - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Favoris</h1>
+                    <p class="welcome-subtitle">Gérez vos éléments favoris</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="addToFavorites()">
+                        <i class="fas fa-plus"></i>
+                        <span>Ajouter aux favoris</span>
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="exportFavorites()">
+                        <i class="fas fa-download"></i>
+                        <span>Exporter</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Favorites Statistics -->
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_favorites }}</h3>
+                            <p>Total favoris</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ favorite_jobs }}</h3>
+                            <p>Emplois favoris</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ favorite_companies }}</h3>
+                            <p>Entreprises favorites</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ favorite_candidates }}</h3>
+                            <p>Candidats favoris</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Favorites Filters -->
+                <div class="filters-section">
+                    <div class="filters-header">
+                        <h3>Filtrer les favoris</h3>
+                    </div>
+                    <div class="filters-content">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">
+                                <i class="fas fa-list"></i>
+                                <span>Tous ({{ total_favorites }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="jobs">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Emplois ({{ favorite_jobs }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="companies">
+                                <i class="fas fa-building"></i>
+                                <span>Entreprises ({{ favorite_companies }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="candidates">
+                                <i class="fas fa-users"></i>
+                                <span>Candidats ({{ favorite_candidates }})</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Favorites List -->
+                <div class="favorites-section">
+                    <div class="section-header">
+                        <h3>Mes favoris</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshFavorites()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        {% if favorites %}
+                        <div class="favorites-list">
+                            {% for favorite in favorites %}
+                            <div class="favorite-item" data-favorite-id="{{ favorite.id }}">
+                                <div class="favorite-checkbox">
+                                    <input type="checkbox" onchange="selectFavorite({{ favorite.id }})">
+                                </div>
+                                <div class="favorite-content">
+                                    <div class="favorite-header">
+                                        <div class="favorite-info">
+                                            <div class="favorite-icon">
+                                                {% if favorite.content_type.model == 'job' %}
+                                                <i class="fas fa-briefcase"></i>
+                                                {% elif favorite.content_type.model == 'company' %}
+                                                <i class="fas fa-building"></i>
+                                                {% elif favorite.content_type.model == 'candidate' %}
+                                                <i class="fas fa-user"></i>
+                                                {% else %}
+                                                <i class="fas fa-heart"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="favorite-details">
+                                                <h4>{{ favorite.content_object.title|default:favorite.content_object.name|default:favorite.content_object.get_full_name }}</h4>
+                                                <p>{{ favorite.content_type.model|title }}</p>
+                                                <div class="favorite-meta">
+                                                    <span class="favorite-date">
+                                                        <i class="fas fa-calendar"></i>
+                                                        {{ favorite.created_at|date:"d/m/Y" }}
+                                                    </span>
+                                                    {% if favorite.content_type.model == 'job' %}
+                                                    <span class="favorite-location">
+                                                        <i class="fas fa-map-marker-alt"></i>
+                                                        {{ favorite.content_object.location }}
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="favorite-actions">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewFavorite({{ favorite.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="shareFavorite({{ favorite.id }})">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="removeFavorite({{ favorite.id }})">
+                                                <i class="fas fa-heart-broken"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="favorite-description">
+                                        {% if favorite.content_type.model == 'job' %}
+                                        <p>{{ favorite.content_object.description|truncatewords:30 }}</p>
+                                        {% elif favorite.content_type.model == 'company' %}
+                                        <p>{{ favorite.content_object.description|truncatewords:30 }}</p>
+                                        {% elif favorite.content_type.model == 'candidate' %}
+                                        <p>{{ favorite.content_object.bio|truncatewords:30 }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="favorite-tags">
+                                        {% for tag in favorite.tags.all %}
+                                        <span class="favorite-tag">{{ tag.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                        <div class="pagination-wrapper">
+                            <nav aria-label="Pagination des favoris">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                        
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-heart"></i>
+                            <h4>Aucun favori</h4>
+                            <p>Commencez par ajouter des éléments à vos favoris</p>
+                            <button class="btn btn-primary" onclick="addToFavorites()">
+                                <i class="fas fa-plus"></i>
+                                <span>Ajouter aux favoris</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Add to Favorites -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Ajouter aux favoris</h3>
+                    </div>
+                    <div class="widget-content">
+                        <form class="quick-favorite-form" id="quick-favorite-form">
+                            <div class="form-group">
+                                <label class="form-label">Type d'élément</label>
+                                <select name="content_type" class="form-select" required>
+                                    <option value="">Sélectionnez un type</option>
+                                    <option value="job">Emploi</option>
+                                    <option value="company">Entreprise</option>
+                                    <option value="candidate">Candidat</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Élément</label>
+                                <select name="content_object" class="form-select" required>
+                                    <option value="">Sélectionnez un élément</option>
+                                    <!-- Options will be populated based on content_type -->
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Tags</label>
+                                <input type="text" name="tags" class="form-control" placeholder="Tags séparés par des virgules">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Notes</label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="Notes personnelles"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-heart"></i>
+                                <span>Ajouter aux favoris</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Favorite Categories -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Catégories de favoris</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="favorite-categories">
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Emplois</h5>
+                                    <p>{{ favorite_jobs }} favoris</p>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Entreprises</h5>
+                                    <p>{{ favorite_companies }} favoris</p>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Candidats</h5>
+                                    <p>{{ favorite_candidates }} favoris</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Favorites -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Favoris récents</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="recent-favorites">
+                            {% for favorite in recent_favorites %}
+                            <div class="recent-item">
+                                <div class="recent-icon">
+                                    {% if favorite.content_type.model == 'job' %}
+                                    <i class="fas fa-briefcase"></i>
+                                    {% elif favorite.content_type.model == 'company' %}
+                                    <i class="fas fa-building"></i>
+                                    {% elif favorite.content_type.model == 'candidate' %}
+                                    <i class="fas fa-user"></i>
+                                    {% else %}
+                                    <i class="fas fa-heart"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="recent-info">
+                                    <h5>{{ favorite.content_object.title|default:favorite.content_object.name|default:favorite.content_object.get_full_name }}</h5>
+                                    <p>{{ favorite.created_at|timesince }} ago</p>
+                                </div>
+                                <div class="recent-actions">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewFavorite({{ favorite.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-recent">
+                                <i class="fas fa-heart"></i>
+                                <p>Aucun favori récent</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Favorite Statistics -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Statistiques des favoris</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="favorite-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ total_favorites }}</h4>
+                                    <p>Total favoris</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ favorites_this_month }}</h4>
+                                    <p>Ce mois</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ favorite_tags }}</h4>
+                                    <p>Tags utilisés</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter tabs functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Filter favorites based on selected tab
+            const filter = this.dataset.filter;
+            filterFavorites(filter);
+        });
+    });
+
+    // Filter favorites
+    function filterFavorites(filter) {
+        const favorites = document.querySelectorAll('.favorite-item');
+        
+        favorites.forEach(favorite => {
+            switch(filter) {
+                case 'all':
+                    favorite.style.display = 'flex';
+                    break;
+                case 'jobs':
+                    // This would typically filter by job type
+                    favorite.style.display = 'flex';
+                    break;
+                case 'companies':
+                    // This would typically filter by company type
+                    favorite.style.display = 'flex';
+                    break;
+                case 'candidates':
+                    // This would typically filter by candidate type
+                    favorite.style.display = 'flex';
+                    break;
+            }
+        });
+    }
+
+    // Select favorite
+    function selectFavorite(favoriteId) {
+        // This would typically select the favorite for bulk actions
+        console.log('Favorite selected:', favoriteId);
+    }
+
+    // Add to favorites
+    function addToFavorites() {
+        // This would typically open a modal to add to favorites
+        alert('Ajout aux favoris...');
+    }
+
+    // View favorite
+    function viewFavorite(favoriteId) {
+        // This would typically open a modal to view the favorite
+        alert('Affichage du favori: ' + favoriteId);
+    }
+
+    // Share favorite
+    function shareFavorite(favoriteId) {
+        // This would typically open a modal to share the favorite
+        alert('Partage du favori: ' + favoriteId);
+    }
+
+    // Remove favorite
+    function removeFavorite(favoriteId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce favori ?')) {
+            // This would typically make an AJAX request to remove the favorite
+            const favorite = document.querySelector(`[data-favorite-id="${favoriteId}"]`);
+            favorite.remove();
+            alert('Favori supprimé !');
+        }
+    }
+
+    // Export favorites
+    function exportFavorites() {
+        // This would typically export all favorites
+        alert('Export des favoris...');
+    }
+
+    // Refresh favorites
+    function refreshFavorites() {
+        // This would typically refresh the favorites list
+        location.reload();
+    }
+
+    // Content type change handler
+    document.querySelector('select[name="content_type"]').addEventListener('change', function() {
+        const contentType = this.value;
+        const contentObjectSelect = document.querySelector('select[name="content_object"]');
+        
+        // Clear existing options
+        contentObjectSelect.innerHTML = '<option value="">Sélectionnez un élément</option>';
+        
+        if (contentType) {
+            // This would typically populate options based on content type
+            // For now, we'll just show a placeholder
+            const option = document.createElement('option');
+            option.value = '1';
+            option.textContent = 'Élément 1';
+            contentObjectSelect.appendChild(option);
+        }
+    });
+
+    // Quick favorite form submission
+    document.getElementById('quick-favorite-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // This would typically add the favorite
+        alert('Favori ajouté avec succès !');
+        this.reset();
+    });
+
+    // Auto-refresh favorites
+    setInterval(function() {
+        // This would typically check for favorite updates
+        console.log('Checking for favorite updates...');
+    }, 60000); // Check every minute
+</script>
+{% endblock %}

@@ -1,180 +1,333 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}Contact - Plateforme de Recrutement{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <!-- Header -->
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <h1 class="fw-bold mb-3">Contactez-nous</h1>
-            <p class="lead text-muted">
-                Une question ? Un problème ? Notre équipe est là pour vous aider
-            </p>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Contact Form -->
-        <div class="col-lg-8 mb-5">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-envelope me-2"></i>Envoyez-nous un message
-                    </h4>
-                </div>
-                <div class="card-body p-4">
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-paper-plane me-2"></i>Envoyer le message
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contact Info -->
-        <div class="col-lg-4">
-            <!-- Contact Details -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Informations de contact
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if site_settings %}
-                    <div class="mb-3">
-                        <h6><i class="fas fa-envelope text-primary me-2"></i>Email</h6>
-                        <p class="mb-0">{{ site_settings.contact_email }}</p>
-                    </div>
-                    
-                    {% if site_settings.contact_phone %}
-                    <div class="mb-3">
-                        <h6><i class="fas fa-phone text-success me-2"></i>Téléphone</h6>
-                        <p class="mb-0">{{ site_settings.contact_phone }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    {% if site_settings.address %}
-                    <div class="mb-3">
-                        <h6><i class="fas fa-map-marker-alt text-danger me-2"></i>Adresse</h6>
-                        <p class="mb-0">{{ site_settings.address|linebreaks }}</p>
-                    </div>
-                    {% endif %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- FAQ Link -->
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <i class="fas fa-question-circle fa-3x text-info mb-3"></i>
-                    <h5>Questions fréquentes</h5>
-                    <p class="text-muted">Consultez notre FAQ pour des réponses rapides</p>
-                    <a href="{% url 'core:faq' %}" class="btn btn-outline-info">
-                        <i class="fas fa-external-link-alt me-2"></i>Voir la FAQ
-                    </a>
-                </div>
-            </div>
-
-            <!-- Support Hours -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-clock me-2"></i>Heures de support
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Lundi - Vendredi</span>
-                        <strong>9h00 - 17h00</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Samedi</span>
-                        <strong>10h00 - 15h00</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Dimanche</span>
-                        <strong>Fermé</strong>
-                    </div>
-                    <hr>
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Temps de réponse moyen : 2-4 heures
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contact Types -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h3 class="text-center mb-4">Comment pouvons-nous vous aider ?</h3>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
-                    <h5>Support candidats</h5>
-                    <p class="text-muted">
-                        Aide pour la création de profil, candidatures, et suivi
-                    </p>
-                    <a href="{% url 'core:contact' %}?subject=account" class="btn btn-outline-primary">
-                        Nous contacter
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <i class="fas fa-building fa-3x text-success mb-3"></i>
-                    <h5>Support entreprises</h5>
-                    <p class="text-muted">
-                        Assistance pour la publication d'offres et gestion des candidatures
-                    </p>
-                    <a href="{% url 'core:contact' %}?subject=job" class="btn btn-outline-success">
-                        Nous contacter
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <i class="fas fa-cog fa-3x text-warning mb-3"></i>
-                    <h5>Support technique</h5>
-                    <p class="text-muted">
-                        Problèmes techniques, bugs, et suggestions d'amélioration
-                    </p>
-                    <a href="{% url 'core:contact' %}?subject=technical" class="btn btn-outline-warning">
-                        Nous contacter
-                    </a>
-                </div>
-            </div>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Contactez-nous</h1>
+            <p>Nous sommes là pour vous aider et répondre à vos questions</p>
         </div>
     </div>
 </div>
+
+<!-- Contact Section -->
+<section class="contact-section">
+    <div class="container">
+        <div class="row">
+            <!-- Contact Form -->
+            <div class="col-lg-8">
+                <div class="contact-form">
+                    <div class="form-header">
+                        <h2>Envoyez-nous un message</h2>
+                        <p>Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais</p>
+                    </div>
+                    
+                    <form method="post" class="contact-form-content">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user"></i>
+                                    <span>Prénom</span>
+                                </label>
+                                {{ form.first_name|add_class:"form-control" }}
+                                {% if form.first_name.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.first_name.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user"></i>
+                                    <span>Nom</span>
+                                </label>
+                                {{ form.last_name|add_class:"form-control" }}
+                                {% if form.last_name.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.last_name.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="fas fa-envelope"></i>
+                                <span>Email</span>
+                            </label>
+                            {{ form.email|add_class:"form-control" }}
+                            {% if form.email.errors %}
+                            <div class="form-errors">
+                                {% for error in form.email.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.subject.id_for_label }}" class="form-label">
+                                <i class="fas fa-tag"></i>
+                                <span>Sujet</span>
+                            </label>
+                            {{ form.subject|add_class:"form-control" }}
+                            {% if form.subject.errors %}
+                            <div class="form-errors">
+                                {% for error in form.subject.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.message.id_for_label }}" class="form-label">
+                                <i class="fas fa-comment"></i>
+                                <span>Message</span>
+                            </label>
+                            {{ form.message|add_class:"form-control" }}
+                            {% if form.message.errors %}
+                            <div class="form-errors">
+                                {% for error in form.message.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="privacy" name="privacy" required>
+                                <label class="form-check-label" for="privacy">
+                                    J'accepte la <a href="{% url 'core:privacy' %}" target="_blank">politique de confidentialité</a>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Envoyer le message</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="col-lg-4">
+                <div class="contact-info">
+                    <div class="info-header">
+                        <h3>Informations de contact</h3>
+                        <p>N'hésitez pas à nous contacter par téléphone, email ou en personne</p>
+                    </div>
+                    
+                    <div class="info-items">
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Adresse</h4>
+                                <p>123 Rue de la Paix<br>75001 Paris, France</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Téléphone</h4>
+                                <p>+33 1 23 45 67 89</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Email</h4>
+                                <p>contact@recruitpro.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Horaires</h4>
+                                <p>Lun - Ven: 9h00 - 18h00<br>Sam: 9h00 - 12h00</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="social-links">
+                        <h4>Suivez-nous</h4>
+                        <div class="social-buttons">
+                            <a href="#" class="btn btn-social btn-facebook">
+                                <i class="fab fa-facebook"></i>
+                                <span>Facebook</span>
+                            </a>
+                            <a href="#" class="btn btn-social btn-twitter">
+                                <i class="fab fa-twitter"></i>
+                                <span>Twitter</span>
+                            </a>
+                            <a href="#" class="btn btn-social btn-linkedin">
+                                <i class="fab fa-linkedin"></i>
+                                <span>LinkedIn</span>
+                            </a>
+                            <a href="#" class="btn btn-social btn-instagram">
+                                <i class="fab fa-instagram"></i>
+                                <span>Instagram</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Questions fréquentes</h2>
+            <p>Retrouvez les réponses aux questions les plus courantes</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>Comment fonctionne le matching intelligent ?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Notre algorithme analyse votre profil, vos compétences, votre expérience et vos préférences pour vous proposer les offres d'emploi les plus pertinentes. Il prend en compte de nombreux facteurs pour assurer une correspondance optimale.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>Mes données sont-elles sécurisées ?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Oui, nous prenons la sécurité de vos données très au sérieux. Nous utilisons des protocoles de chiffrement avancés et respectons le RGPD. Vos informations personnelles ne sont jamais partagées sans votre consentement explicite.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>Comment puis-je améliorer mon profil ?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Pour optimiser votre profil, assurez-vous de remplir tous les champs, ajoutez des compétences pertinentes, décrivez vos expériences en détail et utilisez des mots-clés liés à votre secteur d'activité. Un profil complet augmente vos chances d'être remarqué.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>Puis-je postuler à plusieurs offres simultanément ?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Absolument ! Vous pouvez postuler à autant d'offres que vous le souhaitez. Chaque candidature est indépendante et vous pouvez suivre le statut de chacune d'entre elles dans votre tableau de bord.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>Comment fonctionne le système de parrainage ?</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Le système de parrainage vous permet d'inviter vos amis et de gagner des récompenses. Chaque personne qui s'inscrit avec votre code de parrainage vous rapporte des points et des avantages. Plus vous parrainez, plus vous gagnez !</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Notre localisation</h2>
+            <p>Venez nous rendre visite dans nos bureaux parisiens</p>
+        </div>
+        
+        <div class="map-container">
+            <div id="map" class="map"></div>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.card {
-    border-radius: 15px;
-}
-.card-header {
-    border-radius: 15px 15px 0 0 !important;
-}
-</style>
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Initialize map
+    function initMap() {
+        const map = L.map('map').setView([48.8566, 2.3522], 13); // Paris coordinates
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add marker
+        L.marker([48.8566, 2.3522]).addTo(map)
+            .bindPopup('RecruitPro<br>123 Rue de la Paix<br>75001 Paris')
+            .openPopup();
+    }
+    
+    // FAQ functionality
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', function() {
+            const faqItem = this.parentElement;
+            const answer = faqItem.querySelector('.faq-answer');
+            const icon = this.querySelector('i');
+            
+            // Close other FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                if (item !== faqItem) {
+                    item.classList.remove('active');
+                    item.querySelector('.faq-answer').style.maxHeight = null;
+                    item.querySelector('.faq-question i').style.transform = 'rotate(0deg)';
+                }
+            });
+            
+            // Toggle current FAQ item
+            faqItem.classList.toggle('active');
+            if (faqItem.classList.contains('active')) {
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                answer.style.maxHeight = null;
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+    });
+    
+    // Initialize map when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initMap();
+    });
+</script>
 {% endblock %}

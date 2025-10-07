@@ -1,0 +1,526 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Tâches - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Tâches</h1>
+                    <p class="welcome-subtitle">Gérez vos tâches et projets</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="createTask()">
+                        <i class="fas fa-plus"></i>
+                        <span>Créer une tâche</span>
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="createProject()">
+                        <i class="fas fa-folder-plus"></i>
+                        <span>Créer un projet</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Tasks Statistics -->
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_tasks }}</h3>
+                            <p>Total tâches</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ completed_tasks }}</h3>
+                            <p>Tâches terminées</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ pending_tasks }}</h3>
+                            <p>En attente</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ overdue_tasks }}</h3>
+                            <p>En retard</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Task Filters -->
+                <div class="filters-section">
+                    <div class="filters-header">
+                        <h3>Filtrer les tâches</h3>
+                    </div>
+                    <div class="filters-content">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">
+                                <i class="fas fa-list"></i>
+                                <span>Toutes ({{ total_tasks }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="pending">
+                                <i class="fas fa-clock"></i>
+                                <span>En attente ({{ pending_tasks }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="in_progress">
+                                <i class="fas fa-play"></i>
+                                <span>En cours ({{ in_progress_tasks }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="completed">
+                                <i class="fas fa-check"></i>
+                                <span>Terminées ({{ completed_tasks }})</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasks List -->
+                <div class="tasks-section">
+                    <div class="section-header">
+                        <h3>Mes tâches</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshTasks()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        {% if tasks %}
+                        <div class="tasks-list">
+                            {% for task in tasks %}
+                            <div class="task-item" data-task-id="{{ task.id }}">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" onchange="toggleTask({{ task.id }})" {% if task.status == 'completed' %}checked{% endif %}>
+                                </div>
+                                <div class="task-content">
+                                    <div class="task-header">
+                                        <div class="task-info">
+                                            <div class="task-icon">
+                                                {% if task.priority == 'high' %}
+                                                <i class="fas fa-exclamation-triangle text-danger"></i>
+                                                {% elif task.priority == 'medium' %}
+                                                <i class="fas fa-exclamation-circle text-warning"></i>
+                                                {% else %}
+                                                <i class="fas fa-info-circle text-info"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="task-details">
+                                                <h4>{{ task.title }}</h4>
+                                                <p>{{ task.description }}</p>
+                                                <div class="task-meta">
+                                                    <span class="task-priority">
+                                                        <i class="fas fa-flag"></i>
+                                                        {{ task.get_priority_display }}
+                                                    </span>
+                                                    <span class="task-status">
+                                                        <i class="fas fa-circle"></i>
+                                                        {{ task.get_status_display }}
+                                                    </span>
+                                                    <span class="task-due-date">
+                                                        <i class="fas fa-calendar"></i>
+                                                        {{ task.due_date|date:"d/m/Y" }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="task-actions">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewTask({{ task.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="editTask({{ task.id }})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="deleteTask({{ task.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="task-progress">
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: {{ task.progress }}%"></div>
+                                        </div>
+                                        <span class="progress-text">{{ task.progress }}% terminé</span>
+                                    </div>
+                                    <div class="task-tags">
+                                        {% for tag in task.tags.all %}
+                                        <span class="task-tag">{{ tag.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                        <div class="pagination-wrapper">
+                            <nav aria-label="Pagination des tâches">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                        
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-tasks"></i>
+                            <h4>Aucune tâche</h4>
+                            <p>Commencez par créer votre première tâche</p>
+                            <button class="btn btn-primary" onclick="createTask()">
+                                <i class="fas fa-plus"></i>
+                                <span>Créer une tâche</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Task Creator -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Créer une tâche</h3>
+                    </div>
+                    <div class="widget-content">
+                        <form class="quick-task-form" id="quick-task-form">
+                            <div class="form-group">
+                                <label class="form-label">Titre de la tâche</label>
+                                <input type="text" name="title" class="form-control" placeholder="Titre de la tâche" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="3" placeholder="Description de la tâche"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Priorité</label>
+                                <select name="priority" class="form-select" required>
+                                    <option value="">Sélectionnez une priorité</option>
+                                    <option value="low">Faible</option>
+                                    <option value="medium">Moyenne</option>
+                                    <option value="high">Élevée</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Date d'échéance</label>
+                                <input type="date" name="due_date" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Projet</label>
+                                <select name="project" class="form-select">
+                                    <option value="">Sélectionnez un projet</option>
+                                    <!-- Options will be populated based on user's projects -->
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Tags</label>
+                                <input type="text" name="tags" class="form-control" placeholder="Tags séparés par des virgules">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-plus"></i>
+                                <span>Créer la tâche</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Task Categories -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Catégories de tâches</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="task-categories">
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>En attente</h5>
+                                    <p>{{ pending_tasks }} tâches</p>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>En cours</h5>
+                                    <p>{{ in_progress_tasks }} tâches</p>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Terminées</h5>
+                                    <p>{{ completed_tasks }} tâches</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Tasks -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Tâches récentes</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="recent-tasks">
+                            {% for task in recent_tasks %}
+                            <div class="recent-item">
+                                <div class="recent-icon">
+                                    {% if task.priority == 'high' %}
+                                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                                    {% elif task.priority == 'medium' %}
+                                    <i class="fas fa-exclamation-circle text-warning"></i>
+                                    {% else %}
+                                    <i class="fas fa-info-circle text-info"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="recent-info">
+                                    <h5>{{ task.title }}</h5>
+                                    <p>{{ task.created_at|timesince }} ago</p>
+                                </div>
+                                <div class="recent-actions">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewTask({{ task.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-recent">
+                                <i class="fas fa-tasks"></i>
+                                <p>Aucune tâche récente</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task Statistics -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Statistiques des tâches</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="task-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ total_tasks }}</h4>
+                                    <p>Total tâches</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ completed_tasks }}</h4>
+                                    <p>Terminées</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ pending_tasks }}</h4>
+                                    <p>En attente</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter tabs functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Filter tasks based on selected tab
+            const filter = this.dataset.filter;
+            filterTasks(filter);
+        });
+    });
+
+    // Filter tasks
+    function filterTasks(filter) {
+        const tasks = document.querySelectorAll('.task-item');
+        
+        tasks.forEach(task => {
+            switch(filter) {
+                case 'all':
+                    task.style.display = 'flex';
+                    break;
+                case 'pending':
+                    // This would typically filter by pending status
+                    task.style.display = 'flex';
+                    break;
+                case 'in_progress':
+                    // This would typically filter by in progress status
+                    task.style.display = 'flex';
+                    break;
+                case 'completed':
+                    // This would typically filter by completed status
+                    task.style.display = 'flex';
+                    break;
+            }
+        });
+    }
+
+    // Toggle task
+    function toggleTask(taskId) {
+        // This would typically toggle the task status
+        console.log('Task toggled:', taskId);
+    }
+
+    // Create task
+    function createTask() {
+        // This would typically open a modal to create a task
+        alert('Création de tâche...');
+    }
+
+    // Create project
+    function createProject() {
+        // This would typically open a modal to create a project
+        alert('Création de projet...');
+    }
+
+    // View task
+    function viewTask(taskId) {
+        // This would typically open a modal to view the task
+        alert('Affichage de la tâche: ' + taskId);
+    }
+
+    // Edit task
+    function editTask(taskId) {
+        // This would typically open a modal to edit the task
+        alert('Édition de la tâche: ' + taskId);
+    }
+
+    // Delete task
+    function deleteTask(taskId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
+            // This would typically make an AJAX request to delete the task
+            const task = document.querySelector(`[data-task-id="${taskId}"]`);
+            task.remove();
+            alert('Tâche supprimée !');
+        }
+    }
+
+    // Refresh tasks
+    function refreshTasks() {
+        // This would typically refresh the tasks list
+        location.reload();
+    }
+
+    // Quick task form submission
+    document.getElementById('quick-task-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // This would typically create the task
+        alert('Tâche créée avec succès !');
+        this.reset();
+    });
+
+    // Auto-refresh tasks
+    setInterval(function() {
+        // This would typically check for task updates
+        console.log('Checking for task updates...');
+    }, 60000); // Check every minute
+</script>
+{% endblock %}

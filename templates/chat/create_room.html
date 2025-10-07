@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - Nouvelle conversation{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-create-room">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-plus"></i> Nouvelle conversation</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label for="{{ form.recruiter.id_for_label }}">Recruteur</label>
+                                {{ form.recruiter }}
+                                {% if form.recruiter.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.recruiter.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.room_type.id_for_label }}">Type de conversation</label>
+                                {{ form.room_type }}
+                                {% if form.room_type.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.room_type.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.job.id_for_label }}">Offre d'emploi (optionnel)</label>
+                                {{ form.job }}
+                                {% if form.job.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.job.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.title.id_for_label }}">Titre de la conversation (optionnel)</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.title.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-actions">
+                                <a href="{% url 'chat:dashboard' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-comments"></i> Créer la conversation
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

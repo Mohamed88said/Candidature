@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - Bloquer un utilisateur{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-block-user">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-ban"></i> Bloquer un utilisateur</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                {% if user_to_block.candidate_profile.profile_picture %}
+                                    <img src="{{ user_to_block.candidate_profile.profile_picture.url }}" 
+                                         alt="{{ user_to_block.full_name }}">
+                                {% else %}
+                                    <div class="avatar-placeholder">
+                                        {{ user_to_block.first_name|first }}{{ user_to_block.last_name|first }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <h5>{{ user_to_block.full_name }}</h5>
+                        </div>
+                        
+                        <div class="block-warning">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Attention :</strong> Bloquer cet utilisateur empêchera toute communication entre vous deux.
+                            </div>
+                        </div>
+                        
+                        <div class="block-consequences">
+                            <h6>Conséquences du blocage :</h6>
+                            <ul>
+                                <li>Vous ne pourrez plus recevoir de messages de cet utilisateur</li>
+                                <li>Vous ne pourrez plus envoyer de messages à cet utilisateur</li>
+                                <li>Les conversations existantes seront archivées</li>
+                                <li>Vous ne verrez plus cet utilisateur dans les suggestions</li>
+                            </ul>
+                        </div>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="form-actions">
+                                <a href="{% url 'chat:dashboard' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-ban"></i> Bloquer
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

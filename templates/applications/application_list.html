@@ -1,245 +1,273 @@
-﻿{% extends 'base.html' %}
+﻿{% extends 'base_dashboard.html' %}
+{% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}Mes Candidatures{% endblock %}
+{% block title %}Mes candidatures - Plateforme de Recrutement{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="fw-bold mb-2">Mes Candidatures</h1>
-            <p class="text-muted">Suivez l'évolution de vos candidatures</p>
-        </div>
-        <div class="col-md-4 text-md-end">
-            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
-                <i class="fas fa-search me-2"></i>Chercher des offres
-            </a>
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Mes candidatures</h1>
+            <p>Suivez l'état de vos candidatures et restez informé des mises à jour</p>
         </div>
     </div>
+</div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.total }}</h4>
-                    <small>Total</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.pending }}</h4>
-                    <small>En attente</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.reviewing }}</h4>
-                    <small>En examen</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.shortlisted }}</h4>
-                    <small>Présélectionné</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.rejected }}</h4>
-                    <small>Rejetées</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2 col-6 mb-3">
-            <div class="card bg-dark text-white">
-                <div class="card-body text-center">
-                    <h4 class="fw-bold">{{ stats.interviews|default:0 }}</h4>
-                    <small>Entretiens</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Filtrer par statut</label>
-                    <select name="status" class="form-select">
-                        <option value="">Tous les statuts</option>
-                        {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter me-2"></i>Filtrer
-                    </button>
-                    <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-2"></i>Effacer
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Applications List -->
-    {% for application in page_obj %}
-    <div class="card application-card mb-3 border-start border-4 
-         {% if application.status == 'pending' %}border-warning
-         {% elif application.status == 'reviewing' %}border-info
-         {% elif application.status == 'shortlisted' %}border-success
-         {% elif application.status == 'rejected' %}border-danger
-         {% else %}border-secondary{% endif %}">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h5 class="card-title mb-2">
-                        <a href="{% url 'jobs:job_detail' application.job.slug %}" class="text-decoration-none">
-                            {{ application.job.title }}
-                        </a>
-                    </h5>
-                    <p class="text-muted mb-2">
-                        <i class="fas fa-building me-2"></i>{{ application.job.company }}
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-map-marker-alt me-2"></i>{{ application.job.location }}
-                    </p>
-                    <p class="card-text mb-2">
-                        <small class="text-muted">
-                            Candidature envoyée le {{ application.applied_at|date:"d F Y à H:i" }}
-                            <span class="mx-2">•</span>
-                            Il y a {{ application.days_since_applied }} jour{{ application.days_since_applied|pluralize }}
-                        </small>
-                    </p>
-                    
-                    <!-- Status Badge -->
-                    <span class="badge 
-                        {% if application.status == 'pending' %}bg-warning
-                        {% elif application.status == 'reviewing' %}bg-info
-                        {% elif application.status == 'shortlisted' %}bg-success
-                        {% elif application.status == 'interview_scheduled' %}bg-primary
-                        {% elif application.status == 'accepted' %}bg-success
-                        {% elif application.status == 'rejected' %}bg-danger
-                        {% else %}bg-secondary{% endif %}">
-                        {{ application.get_status_display }}
-                    </span>
-                    
-                    {% if application.priority != 'medium' %}
-                        <span class="badge 
-                            {% if application.priority == 'high' %}bg-danger
-                            {% elif application.priority == 'urgent' %}bg-danger
-                            {% else %}bg-secondary{% endif %} ms-2">
-                            {{ application.get_priority_display }}
-                        </span>
-                    {% endif %}
-                </div>
-                
-                <div class="col-md-4 text-md-end">
-                    {% if application.expected_salary %}
-                        <p class="text-primary fw-bold mb-2">
-                            {{ application.expected_salary }} GNF </p>
-                    {% endif %}
-                    
-                    <div class="d-flex flex-column gap-2">
-                        <a href="{% url 'applications:application_detail' application.pk %}" 
-                           class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-eye me-2"></i>Voir détails
-                        </a>
-                        
-                        {% if application.status not in 'accepted,rejected' %}
-                            <a href="{% url 'applications:withdraw_application' application.pk %}" 
-                               class="btn btn-outline-danger btn-sm"
-                               onclick="return confirm('Êtes-vous sûr de vouloir retirer cette candidature ?')">
-                                <i class="fas fa-times me-2"></i>Retirer
-                            </a>
-                        {% endif %}
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <div class="filters-sidebar">
+                    <div class="filters-header">
+                        <h3>Filtres</h3>
+                        <button class="btn btn-sm btn-outline-primary" id="clear-filters">
+                            <i class="fas fa-times"></i>
+                            <span>Effacer</span>
+                        </button>
                     </div>
+                    
+                    <form method="get" class="filters-form">
+                        <div class="filter-group">
+                            <label class="filter-label">Statut</label>
+                            <select name="status" class="form-select">
+                                <option value="">Tous les statuts</option>
+                                <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>En attente</option>
+                                <option value="reviewed" {% if request.GET.status == 'reviewed' %}selected{% endif %}>En cours d'évaluation</option>
+                                <option value="interview" {% if request.GET.status == 'interview' %}selected{% endif %}>Entretien</option>
+                                <option value="accepted" {% if request.GET.status == 'accepted' %}selected{% endif %}>Accepté</option>
+                                <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Refusé</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Date de candidature</label>
+                            <select name="date_range" class="form-select">
+                                <option value="">Toutes les dates</option>
+                                <option value="today" {% if request.GET.date_range == 'today' %}selected{% endif %}>Aujourd'hui</option>
+                                <option value="week" {% if request.GET.date_range == 'week' %}selected{% endif %}>Cette semaine</option>
+                                <option value="month" {% if request.GET.date_range == 'month' %}selected{% endif %}>Ce mois</option>
+                                <option value="year" {% if request.GET.date_range == 'year' %}selected{% endif %}>Cette année</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Type de candidature</label>
+                            <select name="application_type" class="form-select">
+                                <option value="">Tous les types</option>
+                                <option value="standard" {% if request.GET.application_type == 'standard' %}selected{% endif %}>Standard</option>
+                                <option value="video" {% if request.GET.application_type == 'video' %}selected{% endif %}>Vidéo</option>
+                                <option value="quick" {% if request.GET.application_type == 'quick' %}selected{% endif %}>Rapide</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Entreprise</label>
+                            <input type="text" name="company" class="form-control" placeholder="Nom de l'entreprise..." value="{{ request.GET.company }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Localisation</label>
+                            <input type="text" name="location" class="form-control" placeholder="Ville, région..." value="{{ request.GET.location }}">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-filter">
+                            <i class="fas fa-search"></i>
+                            <span>Appliquer les filtres</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Applications List -->
+            <div class="col-lg-9">
+                <div class="applications-content">
+                    <div class="applications-header">
+                        <div class="applications-count">
+                            <h3>{{ applications|length }} candidature{{ applications|length|pluralize }} trouvée{{ applications|length|pluralize }}</h3>
+                        </div>
+                        <div class="applications-sort">
+                            <select class="form-select" id="sort-select">
+                                <option value="newest">Plus récentes</option>
+                                <option value="oldest">Plus anciennes</option>
+                                <option value="status">Par statut</option>
+                                <option value="company">Par entreprise</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="applications-list">
+                        {% for application in applications %}
+                        <div class="application-card" data-application-id="{{ application.id }}">
+                            <div class="application-card-header">
+                                <div class="application-title">
+                                    <h4><a href="{% url 'applications:application_detail' application.id %}">{{ application.job.title }}</a></h4>
+                                    <p class="application-company">{{ application.job.company.name }}</p>
+                                </div>
+                                <div class="application-status">
+                                    <span class="status-badge status-{{ application.status }}">
+                                        {{ application.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="application-card-body">
+                                <div class="application-details">
+                                    <div class="application-detail">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>Candidaté le {{ application.created_at|date:"d/m/Y" }}</span>
+                                    </div>
+                                    <div class="application-detail">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>{{ application.job.location }}</span>
+                                    </div>
+                                    <div class="application-detail">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span>{{ application.job.get_job_type_display }}</span>
+                                    </div>
+                                    {% if application.application_type == 'video' %}
+                                    <div class="application-detail">
+                                        <i class="fas fa-video"></i>
+                                        <span>Candidature vidéo</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if application.cover_letter %}
+                                <div class="application-cover-letter">
+                                    <h5>Lettre de motivation</h5>
+                                    <p>{{ application.cover_letter|truncatewords:30 }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                {% if application.custom_answers %}
+                                <div class="application-answers">
+                                    <h5>Réponses personnalisées</h5>
+                                    <div class="answers-list">
+                                        {% for answer in application.custom_answers %}
+                                        <div class="answer-item">
+                                            <strong>{{ answer.question }}</strong>
+                                            <p>{{ answer.answer|truncatewords:20 }}</p>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="application-card-footer">
+                                <div class="application-meta">
+                                    <span class="application-date">
+                                        <i class="fas fa-clock"></i>
+                                        {{ application.created_at|timesince }} ago
+                                    </span>
+                                    {% if application.last_updated %}
+                                    <span class="application-updated">
+                                        <i class="fas fa-edit"></i>
+                                        Mis à jour {{ application.last_updated|timesince }} ago
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="application-actions">
+                                    <a href="{% url 'applications:application_detail' application.id %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Voir</span>
+                                    </a>
+                                    {% if application.status == 'pending' %}
+                                    <button class="btn btn-outline-warning btn-sm" onclick="withdrawApplication({{ application.id }})">
+                                        <i class="fas fa-times"></i>
+                                        <span>Retirer</span>
+                                    </button>
+                                    {% endif %}
+                                    {% if application.status == 'interview' %}
+                                    <a href="{% url 'applications:interview_detail' application.id %}" class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span>Entretien</span>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-applications">
+                            <div class="no-applications-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h3>Aucune candidature trouvée</h3>
+                            <p>Vous n'avez pas encore de candidatures ou elles ne correspondent pas à vos filtres</p>
+                            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                                <span>Parcourir les offres</span>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if applications.has_other_pages %}
+                    <nav class="pagination-nav">
+                        <ul class="pagination">
+                            {% if applications.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ applications.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in applications.paginator.page_range %}
+                            {% if applications.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > applications.number|add:'-3' and num < applications.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if applications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ applications.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    {% empty %}
-    <div class="text-center py-5">
-        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-        <h4 class="text-muted">Aucune candidature</h4>
-        <p class="text-muted">Vous n'avez pas encore postulé à des offres d'emploi</p>
-        <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
-            <i class="fas fa-search me-2"></i>Parcourir les offres
-        </a>
-    </div>
-    {% endfor %}
-
-    <!-- Pagination -->
-    {% if page_obj.has_other_pages %}
-    <nav aria-label="Navigation des pages">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1{% if current_status %}&status={{ current_status }}{% endif %}">
-                        <i class="fas fa-angle-double-left"></i>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
-                        <i class="fas fa-angle-left"></i>
-                    </a>
-                </li>
-            {% endif %}
-
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
-                    </li>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if current_status %}&status={{ current_status }}{% endif %}">{{ num }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
-                        <i class="fas fa-angle-right"></i>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_status %}&status={{ current_status }}{% endif %}">
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
-                </li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.application-card {
-    transition: all 0.3s ease;
-}
-
-.application-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-</style>
+{% block extra_js %}
+<script>
+    // Withdraw application functionality
+    function withdrawApplication(applicationId) {
+        if (confirm('Êtes-vous sûr de vouloir retirer cette candidature ?')) {
+            // Implementation for withdrawing application
+            console.log('Withdrawing application:', applicationId);
+        }
+    }
+    
+    // Sort functionality
+    document.getElementById('sort-select').addEventListener('change', function() {
+        const sortValue = this.value;
+        const url = new URL(window.location);
+        url.searchParams.set('sort', sortValue);
+        window.location.href = url.toString();
+    });
+    
+    // Clear filters
+    document.getElementById('clear-filters').addEventListener('click', function() {
+        const form = document.querySelector('.filters-form');
+        form.reset();
+        form.submit();
+    });
+</script>
 {% endblock %}
-

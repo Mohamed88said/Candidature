@@ -1,0 +1,385 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Carte des emplois - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Carte des emplois</h1>
+            <p>Explorez les opportunités d'emploi par localisation géographique</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Map Stats -->
+            <div class="col-12">
+                <div class="map-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_locations }}</h3>
+                            <p>Localisations</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_jobs }}</h3>
+                            <p>Offres d'emploi</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_companies }}</h3>
+                            <p>Entreprises</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_candidates }}</h3>
+                            <p>Candidats</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Map Filters -->
+            <div class="col-lg-3">
+                <div class="map-filters">
+                    <div class="filters-header">
+                        <h3>Filtres</h3>
+                        <button class="btn btn-sm btn-outline-primary" id="clear-filters">
+                            <i class="fas fa-times"></i>
+                            <span>Effacer</span>
+                        </button>
+                    </div>
+                    
+                    <form method="get" class="filters-form">
+                        <div class="filter-group">
+                            <label class="filter-label">Type de contenu</label>
+                            <select name="content_type" class="form-select">
+                                <option value="jobs">Offres d'emploi</option>
+                                <option value="companies">Entreprises</option>
+                                <option value="candidates">Candidats</option>
+                                <option value="all">Tout</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Localisation</label>
+                            <input type="text" name="location" class="form-control" placeholder="Ville, région..." value="{{ request.GET.location }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Rayon de recherche</label>
+                            <input type="range" name="radius" class="form-range" min="1" max="100" value="{{ request.GET.radius|default:25 }}" id="radius-range">
+                            <div class="range-value">
+                                <span id="radius-value">{{ request.GET.radius|default:25 }} km</span>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Type de contrat</label>
+                            <select name="job_type" class="form-select">
+                                <option value="">Tous les types</option>
+                                <option value="full_time" {% if request.GET.job_type == 'full_time' %}selected{% endif %}>CDI</option>
+                                <option value="part_time" {% if request.GET.job_type == 'part_time' %}selected{% endif %}>CDD</option>
+                                <option value="contract" {% if request.GET.job_type == 'contract' %}selected{% endif %}>Contrat</option>
+                                <option value="internship" {% if request.GET.job_type == 'internship' %}selected{% endif %}>Stage</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Niveau d'expérience</label>
+                            <select name="experience_level" class="form-select">
+                                <option value="">Tous les niveaux</option>
+                                <option value="entry" {% if request.GET.experience_level == 'entry' %}selected{% endif %}>Débutant</option>
+                                <option value="mid" {% if request.GET.experience_level == 'mid' %}selected{% endif %}>Intermédiaire</option>
+                                <option value="senior" {% if request.GET.experience_level == 'senior' %}selected{% endif %}>Senior</option>
+                                <option value="executive" {% if request.GET.experience_level == 'executive' %}selected{% endif %}>Direction</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Salaire minimum</label>
+                            <input type="number" name="min_salary" class="form-control" placeholder="€" value="{{ request.GET.min_salary }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Salaire maximum</label>
+                            <input type="number" name="max_salary" class="form-control" placeholder="€" value="{{ request.GET.max_salary }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Secteur d'activité</label>
+                            <select name="category" class="form-select">
+                                <option value="">Tous les secteurs</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Télétravail</label>
+                            <select name="remote_work" class="form-select">
+                                <option value="">Tous</option>
+                                <option value="yes" {% if request.GET.remote_work == 'yes' %}selected{% endif %}>Oui</option>
+                                <option value="no" {% if request.GET.remote_work == 'no' %}selected{% endif %}>Non</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-filter">
+                            <i class="fas fa-search"></i>
+                            <span>Appliquer les filtres</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Map Container -->
+            <div class="col-lg-9">
+                <div class="map-container">
+                    <div class="map-header">
+                        <div class="map-controls">
+                            <button class="btn btn-outline-primary btn-sm" onclick="centerMap()">
+                                <i class="fas fa-crosshairs"></i>
+                                <span>Centrer</span>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="toggleFullscreen()">
+                                <i class="fas fa-expand"></i>
+                                <span>Plein écran</span>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportMap()">
+                                <i class="fas fa-download"></i>
+                                <span>Exporter</span>
+                            </button>
+                        </div>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #007bff;"></div>
+                                <span>Offres d'emploi</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #28a745;"></div>
+                                <span>Entreprises</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #ffc107;"></div>
+                                <span>Candidats</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="map-wrapper">
+                        <div id="map" class="map"></div>
+                    </div>
+                    
+                    <div class="map-info">
+                        <div class="info-panel">
+                            <h4>Informations</h4>
+                            <div class="info-content">
+                                <p>Cliquez sur un marqueur pour voir les détails</p>
+                                <p>Utilisez la molette pour zoomer</p>
+                                <p>Glissez pour naviguer sur la carte</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Map Popup -->
+<div class="map-popup" id="map-popup">
+    <div class="popup-header">
+        <h4 id="popup-title">Titre</h4>
+        <button class="btn-close" onclick="closePopup()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="popup-content">
+        <div id="popup-body">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+    <div class="popup-footer">
+        <button class="btn btn-primary btn-sm" onclick="viewDetails()">
+            <i class="fas fa-eye"></i>
+            <span>Voir détails</span>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Initialize map
+    let map;
+    let markers = [];
+    
+    function initMap() {
+        // Create map
+        map = L.map('map').setView([46.603354, 1.888334], 6); // Center on France
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add markers
+        addMarkers();
+        
+        // Add click event
+        map.on('click', function(e) {
+            closePopup();
+        });
+    }
+    
+    function addMarkers() {
+        // Clear existing markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+        
+        // Add job markers
+        {% for job in jobs %}
+        const jobMarker = L.marker([{{ job.latitude }}, {{ job.longitude }}], {
+            icon: L.divIcon({
+                className: 'custom-marker job-marker',
+                html: '<i class="fas fa-briefcase"></i>',
+                iconSize: [30, 30]
+            })
+        });
+        
+        jobMarker.bindPopup(`
+            <div class="marker-popup">
+                <h4>{{ job.title }}</h4>
+                <p>{{ job.company.name }}</p>
+                <p>{{ job.location }}</p>
+                <p>{{ job.get_job_type_display }}</p>
+                <a href="{% url 'jobs:job_detail' job.id %}" class="btn btn-primary btn-sm">Voir l'offre</a>
+            </div>
+        `);
+        
+        jobMarker.addTo(map);
+        markers.push(jobMarker);
+        {% endfor %}
+        
+        // Add company markers
+        {% for company in companies %}
+        const companyMarker = L.marker([{{ company.latitude }}, {{ company.longitude }}], {
+            icon: L.divIcon({
+                className: 'custom-marker company-marker',
+                html: '<i class="fas fa-building"></i>',
+                iconSize: [30, 30]
+            })
+        });
+        
+        companyMarker.bindPopup(`
+            <div class="marker-popup">
+                <h4>{{ company.name }}</h4>
+                <p>{{ company.address }}</p>
+                <p>{{ company.industry }}</p>
+                <a href="{% url 'company_reviews:company_detail' company.id %}" class="btn btn-primary btn-sm">Voir l'entreprise</a>
+            </div>
+        `);
+        
+        companyMarker.addTo(map);
+        markers.push(companyMarker);
+        {% endfor %}
+        
+        // Add candidate markers
+        {% for candidate in candidates %}
+        const candidateMarker = L.marker([{{ candidate.latitude }}, {{ candidate.longitude }}], {
+            icon: L.divIcon({
+                className: 'custom-marker candidate-marker',
+                html: '<i class="fas fa-user"></i>',
+                iconSize: [30, 30]
+            })
+        });
+        
+        candidateMarker.bindPopup(`
+            <div class="marker-popup">
+                <h4>{{ candidate.user.get_full_name }}</h4>
+                <p>{{ candidate.profession }}</p>
+                <p>{{ candidate.location }}</p>
+                <a href="{% url 'accounts:profile' candidate.user.id %}" class="btn btn-primary btn-sm">Voir le profil</a>
+            </div>
+        `);
+        
+        candidateMarker.addTo(map);
+        markers.push(candidateMarker);
+        {% endfor %}
+    }
+    
+    // Map controls
+    function centerMap() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                map.setView([position.coords.latitude, position.coords.longitude], 10);
+            });
+        }
+    }
+    
+    function toggleFullscreen() {
+        const mapContainer = document.querySelector('.map-container');
+        if (mapContainer.requestFullscreen) {
+            mapContainer.requestFullscreen();
+        }
+    }
+    
+    function exportMap() {
+        // Implementation for exporting map
+        console.log('Exporting map');
+    }
+    
+    function closePopup() {
+        document.getElementById('map-popup').style.display = 'none';
+    }
+    
+    function viewDetails() {
+        // Implementation for viewing details
+        console.log('Viewing details');
+    }
+    
+    // Radius range
+    const radiusRange = document.getElementById('radius-range');
+    const radiusValue = document.getElementById('radius-value');
+    
+    radiusRange.addEventListener('input', function() {
+        radiusValue.textContent = this.value + ' km';
+    });
+    
+    // Clear filters
+    document.getElementById('clear-filters').addEventListener('click', function() {
+        const form = document.querySelector('.filters-form');
+        form.reset();
+        form.submit();
+    });
+    
+    // Initialize map when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initMap();
+    });
+</script>
+{% endblock %}

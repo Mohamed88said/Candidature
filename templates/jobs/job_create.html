@@ -1,66 +1,286 @@
-{% extends 'base.html' %}
+{% extends 'base_dashboard.html' %}
+{% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}Créer une offre d'emploi{% endblock %}
+{% block title %}Publier une offre d'emploi - Plateforme de Recrutement{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-10 mx-auto">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-plus-circle me-2"></i>Créer une nouvelle offre d'emploi
-                    </h3>
-                </div>
-                <div class="card-body p-4">
-                    <form method="post">
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Publier une offre d'emploi</h1>
+            <p>Créez une offre d'emploi attractive pour attirer les meilleurs candidats</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="job-create-form">
+                    <form method="post" enctype="multipart/form-data" class="create-form">
                         {% csrf_token %}
-                        {{ form|crispy }}
                         
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Retour au dashboard
-                            </a>
-                            <div>
-                                <button type="submit" name="status" value="draft" class="btn btn-outline-primary me-2">
-                                    <i class="fas fa-save me-2"></i>Enregistrer en brouillon
-                                </button>
-                                <button type="submit" name="status" value="published" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane me-2"></i>Publier l'offre
+                        <!-- Basic Information -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Informations de base</h3>
+                                <p>Les informations essentielles de votre offre</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span>Titre du poste *</span>
+                                </label>
+                                {{ form.title|add_class:"form-control" }}
+                                {% if form.title.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.title.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    <i class="fas fa-align-left"></i>
+                                    <span>Description du poste *</span>
+                                </label>
+                                {{ form.description|add_class:"form-control" }}
+                                {% if form.description.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.description.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="{{ form.job_type.id_for_label }}" class="form-label">
+                                        <i class="fas fa-file-contract"></i>
+                                        <span>Type de contrat *</span>
+                                    </label>
+                                    {{ form.job_type|add_class:"form-select" }}
+                                    {% if form.job_type.errors %}
+                                    <div class="form-errors">
+                                        {% for error in form.job_type.errors %}
+                                        <span class="error-message">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="{{ form.experience_level.id_for_label }}" class="form-label">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Niveau d'expérience *</span>
+                                    </label>
+                                    {{ form.experience_level|add_class:"form-select" }}
+                                    {% if form.experience_level.errors %}
+                                    <div class="form-errors">
+                                        {% for error in form.experience_level.errors %}
+                                        <span class="error-message">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location and Salary -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Localisation et rémunération</h3>
+                                <p>Où se trouve le poste et quelle est la rémunération</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.location.id_for_label }}" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Localisation *</span>
+                                </label>
+                                {{ form.location|add_class:"form-control" }}
+                                {% if form.location.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.location.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="{{ form.salary_min.id_for_label }}" class="form-label">
+                                        <i class="fas fa-euro-sign"></i>
+                                        <span>Salaire minimum</span>
+                                    </label>
+                                    {{ form.salary_min|add_class:"form-control" }}
+                                    {% if form.salary_min.errors %}
+                                    <div class="form-errors">
+                                        {% for error in form.salary_min.errors %}
+                                        <span class="error-message">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="{{ form.salary_max.id_for_label }}" class="form-label">
+                                        <i class="fas fa-euro-sign"></i>
+                                        <span>Salaire maximum</span>
+                                    </label>
+                                    {{ form.salary_max|add_class:"form-control" }}
+                                    {% if form.salary_max.errors %}
+                                    <div class="form-errors">
+                                        {% for error in form.salary_max.errors %}
+                                        <span class="error-message">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check">
+                                    {{ form.remote_work|add_class:"form-check-input" }}
+                                    <label class="form-check-label" for="{{ form.remote_work.id_for_label }}">
+                                        <i class="fas fa-home"></i>
+                                        <span>Télétravail possible</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills and Requirements -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Compétences et exigences</h3>
+                                <p>Les compétences nécessaires pour ce poste</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.required_skills.id_for_label }}" class="form-label">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Compétences requises</span>
+                                </label>
+                                {{ form.required_skills|add_class:"form-select" }}
+                                {% if form.required_skills.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.required_skills.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.preferred_skills.id_for_label }}" class="form-label">
+                                    <i class="fas fa-star"></i>
+                                    <span>Compétences préférées</span>
+                                </label>
+                                {{ form.preferred_skills|add_class:"form-select" }}
+                                {% if form.preferred_skills.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.preferred_skills.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Informations supplémentaires</h3>
+                                <p>Détails supplémentaires pour attirer les candidats</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.benefits.id_for_label }}" class="form-label">
+                                    <i class="fas fa-gift"></i>
+                                    <span>Avantages</span>
+                                </label>
+                                {{ form.benefits|add_class:"form-control" }}
+                                {% if form.benefits.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.benefits.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">
+                                    <i class="fas fa-tags"></i>
+                                    <span>Catégorie</span>
+                                </label>
+                                {{ form.category|add_class:"form-select" }}
+                                {% if form.category.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.category.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.deadline.id_for_label }}" class="form-label">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>Date limite de candidature</span>
+                                </label>
+                                {{ form.deadline|add_class:"form-control" }}
+                                {% if form.deadline.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.deadline.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Application Questions -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Questions de candidature</h3>
+                                <p>Ajoutez des questions personnalisées pour les candidats</p>
+                            </div>
+                            
+                            <div class="questions-container">
+                                <div class="questions-list" id="questions-list">
+                                    <!-- Questions will be added here dynamically -->
+                                </div>
+                                
+                                <button type="button" class="btn btn-outline-primary" onclick="addQuestion()">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Ajouter une question</span>
                                 </button>
                             </div>
                         </div>
-                    </form>
-                </div>
-            </div>
 
-            <!-- Help Card -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-lightbulb me-2"></i>Conseils pour une offre attractive
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-check-circle text-success me-2"></i>Titre</h6>
-                            <ul class="small text-muted">
-                                <li>Soyez précis et descriptif</li>
-                                <li>Incluez le niveau d'expérience</li>
-                                <li>Évitez les abréviations</li>
-                            </ul>
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Publier l'offre</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="saveDraft()">
+                                <i class="fas fa-save"></i>
+                                <span>Sauvegarder comme brouillon</span>
+                            </button>
+                            <a href="{% url 'jobs:job_list' %}" class="btn btn-outline-danger btn-lg">
+                                <i class="fas fa-times"></i>
+                                <span>Annuler</span>
+                            </a>
                         </div>
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-check-circle text-success me-2"></i>Description</h6>
-                            <ul class="small text-muted">
-                                <li>Décrivez clairement le poste</li>
-                                <li>Mentionnez l'équipe et l'environnement</li>
-                                <li>Soyez authentique</li>
-                            </ul>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -68,13 +288,86 @@
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.card {
-    border-radius: 15px;
-}
-.card-header {
-    border-radius: 15px 15px 0 0 !important;
-}
-</style>
+{% block extra_js %}
+<script>
+    let questionCount = 0;
+    
+    // Add question
+    function addQuestion() {
+        questionCount++;
+        const questionsList = document.getElementById('questions-list');
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-item';
+        questionDiv.innerHTML = `
+            <div class="question-header">
+                <h4>Question ${questionCount}</h4>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeQuestion(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="question-content">
+                <div class="form-group">
+                    <label class="form-label">Question</label>
+                    <input type="text" name="question_${questionCount}" class="form-control" placeholder="Votre question...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type de réponse</label>
+                    <select name="question_type_${questionCount}" class="form-select">
+                        <option value="text">Texte libre</option>
+                        <option value="textarea">Texte long</option>
+                        <option value="choice">Choix multiple</option>
+                        <option value="yes_no">Oui/Non</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" name="question_required_${questionCount}" class="form-check-input">
+                        <label class="form-check-label">Question obligatoire</label>
+                    </div>
+                </div>
+            </div>
+        `;
+        questionsList.appendChild(questionDiv);
+    }
+    
+    // Remove question
+    function removeQuestion(button) {
+        button.closest('.question-item').remove();
+    }
+    
+    // Save draft
+    function saveDraft() {
+        const form = document.querySelector('.create-form');
+        const draftInput = document.createElement('input');
+        draftInput.type = 'hidden';
+        draftInput.name = 'draft';
+        draftInput.value = 'true';
+        form.appendChild(draftInput);
+        form.submit();
+    }
+    
+    // Form validation
+    document.querySelector('.create-form').addEventListener('submit', function(e) {
+        const title = document.querySelector('input[name="title"]').value.trim();
+        const description = document.querySelector('textarea[name="description"]').value.trim();
+        const location = document.querySelector('input[name="location"]').value.trim();
+        
+        if (!title || !description || !location) {
+            e.preventDefault();
+            alert('Veuillez remplir tous les champs obligatoires.');
+        }
+    });
+    
+    // Auto-save draft
+    let autoSaveTimeout;
+    document.querySelectorAll('input, textarea, select').forEach(input => {
+        input.addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                // Implementation for auto-saving draft
+                console.log('Auto-saving draft...');
+            }, 5000);
+        });
+    });
+</script>
 {% endblock %}

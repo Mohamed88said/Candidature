@@ -1,0 +1,77 @@
+{% extends 'base_error.html' %}
+{% load static %}
+
+{% block title %}Accès refusé - Plateforme de Recrutement{% endblock %}
+
+{% block error_icon %}
+<i class="fas fa-lock"></i>
+{% endblock %}
+
+{% block error_title %}403 - Accès refusé{% endblock %}
+
+{% block error_subtitle %}Vous n'avez pas les permissions nécessaires pour accéder à cette page.{% endblock %}
+
+{% block error_content %}
+<div class="error-actions">
+    {% if user.is_authenticated %}
+    <a href="{% url 'accounts:dashboard' %}" class="btn btn-primary">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Mon tableau de bord</span>
+    </a>
+    {% else %}
+    <a href="{% url 'accounts:login' %}" class="btn btn-primary">
+        <i class="fas fa-sign-in-alt"></i>
+        <span>Se connecter</span>
+    </a>
+    {% endif %}
+    <a href="{% url 'core:home' %}" class="btn btn-outline-primary">
+        <i class="fas fa-home"></i>
+        <span>Retour à l'accueil</span>
+    </a>
+</div>
+
+<div class="error-info">
+    <div class="info-item">
+        <i class="fas fa-info-circle"></i>
+        <div class="info-content">
+            <h4>Pourquoi cette erreur ?</h4>
+            <p>Cette page nécessite des permissions spéciales ou une authentification.</p>
+        </div>
+    </div>
+    <div class="info-item">
+        <i class="fas fa-user-check"></i>
+        <div class="info-content">
+            <h4>Vérifiez votre compte</h4>
+            <p>Assurez-vous d'être connecté avec le bon compte.</p>
+        </div>
+    </div>
+    <div class="info-item">
+        <i class="fas fa-envelope"></i>
+        <div class="info-content">
+            <h4>Besoin d'aide ?</h4>
+            <p>Contactez-nous si vous pensez qu'il s'agit d'une erreur.</p>
+        </div>
+    </div>
+</div>
+
+<div class="error-suggestions">
+    <h4>Que pouvez-vous faire ?</h4>
+    <ul>
+        {% if user.is_authenticated %}
+        <li><a href="{% url 'accounts:profile' %}">Vérifier votre profil</a></li>
+        <li><a href="{% url 'accounts:settings' %}">Vérifier vos paramètres</a></li>
+        {% else %}
+        <li><a href="{% url 'accounts:login' %}">Se connecter</a></li>
+        <li><a href="{% url 'accounts:register' %}">Créer un compte</a></li>
+        {% endif %}
+        <li><a href="{% url 'core:contact' %}">Nous contacter</a></li>
+        <li><a href="{% url 'core:faq' %}">Consulter la FAQ</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block error_footer %}
+<div class="error-footer-content">
+    <p>Si vous pensez qu'il s'agit d'une erreur, n'hésitez pas à <a href="{% url 'core:contact' %}">nous contacter</a>.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,419 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord analytique - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Tableau de bord analytique</h1>
+                    <p class="welcome-subtitle">Analysez les performances et les tendances</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="exportAnalytics()">
+                        <i class="fas fa-download"></i>
+                        <span>Exporter les données</span>
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="refreshAnalytics()">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Actualiser</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Key Metrics -->
+        <div class="metrics-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>{{ total_views }}</h3>
+                            <p>Vues totales</p>
+                            <span class="metric-change positive">+{{ views_growth }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>{{ new_users }}</h3>
+                            <p>Nouveaux utilisateurs</p>
+                            <span class="metric-change positive">+{{ users_growth }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>{{ new_jobs }}</h3>
+                            <p>Nouvelles offres</p>
+                            <span class="metric-change positive">+{{ jobs_growth }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>{{ new_applications }}</h3>
+                            <p>Nouvelles candidatures</p>
+                            <span class="metric-change positive">+{{ applications_growth }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Charts Section -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>Évolution des métriques</h3>
+                        <div class="chart-controls">
+                            <select class="form-select" id="chart-period">
+                                <option value="7">7 derniers jours</option>
+                                <option value="30" selected>30 derniers jours</option>
+                                <option value="90">90 derniers jours</option>
+                                <option value="365">1 an</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="charts-container">
+                            <div class="chart-item">
+                                <h4>Évolution des utilisateurs</h4>
+                                <canvas id="users-chart"></canvas>
+                            </div>
+                            <div class="chart-item">
+                                <h4>Évolution des offres d'emploi</h4>
+                                <canvas id="jobs-chart"></canvas>
+                            </div>
+                            <div class="chart-item">
+                                <h4>Évolution des candidatures</h4>
+                                <canvas id="applications-chart"></canvas>
+                            </div>
+                            <div class="chart-item">
+                                <h4>Évolution des vues</h4>
+                                <canvas id="views-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>Top performers</h3>
+                    </div>
+                    <div class="section-content">
+                        <div class="performers-grid">
+                            <div class="performer-item">
+                                <h4>Top entreprises</h4>
+                                <div class="performer-list">
+                                    {% for company in top_companies %}
+                                    <div class="performer-entry">
+                                        <div class="performer-info">
+                                            <h5>{{ company.name }}</h5>
+                                            <p>{{ company.jobs.count }} offres</p>
+                                        </div>
+                                        <div class="performer-metric">
+                                            <span class="metric-value">{{ company.views }}</span>
+                                            <span class="metric-label">vues</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="performer-item">
+                                <h4>Top offres d'emploi</h4>
+                                <div class="performer-list">
+                                    {% for job in top_jobs %}
+                                    <div class="performer-entry">
+                                        <div class="performer-info">
+                                            <h5>{{ job.title }}</h5>
+                                            <p>{{ job.company.name }}</p>
+                                        </div>
+                                        <div class="performer-metric">
+                                            <span class="metric-value">{{ job.views }}</span>
+                                            <span class="metric-label">vues</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- User Demographics -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Démographie des utilisateurs</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="demographics-chart">
+                            <canvas id="demographics-chart"></canvas>
+                        </div>
+                        <div class="demographics-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Candidats</span>
+                                <span class="stat-value">{{ candidate_percentage }}%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Entreprises</span>
+                                <span class="stat-value">{{ company_percentage }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Geographic Distribution -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Répartition géographique</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="geographic-stats">
+                            {% for location in top_locations %}
+                            <div class="location-item">
+                                <div class="location-info">
+                                    <h5>{{ location.name }}</h5>
+                                    <p>{{ location.jobs.count }} offres</p>
+                                </div>
+                                <div class="location-metric">
+                                    <span class="metric-value">{{ location.users.count }}</span>
+                                    <span class="metric-label">utilisateurs</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversion Funnel -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Entonnoir de conversion</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="funnel-stats">
+                            <div class="funnel-step">
+                                <div class="step-label">Vues d'offres</div>
+                                <div class="step-value">{{ total_views }}</div>
+                                <div class="step-percentage">100%</div>
+                            </div>
+                            <div class="funnel-step">
+                                <div class="step-label">Candidatures</div>
+                                <div class="step-value">{{ total_applications }}</div>
+                                <div class="step-percentage">{{ application_rate }}%</div>
+                            </div>
+                            <div class="funnel-step">
+                                <div class="step-label">Acceptées</div>
+                                <div class="step-value">{{ accepted_applications }}</div>
+                                <div class="step-percentage">{{ acceptance_rate }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Activity -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Activité en temps réel</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="realtime-stats">
+                            <div class="realtime-item">
+                                <div class="realtime-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="realtime-info">
+                                    <h5>Vues actives</h5>
+                                    <p>{{ active_views }} en ce moment</p>
+                                </div>
+                            </div>
+                            <div class="realtime-item">
+                                <div class="realtime-icon">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="realtime-info">
+                                    <h5>Nouveaux utilisateurs</h5>
+                                    <p>{{ new_users_today }} aujourd'hui</p>
+                                </div>
+                            </div>
+                            <div class="realtime-item">
+                                <div class="realtime-icon">
+                                    <i class="fas fa-paper-plane"></i>
+                                </div>
+                                <div class="realtime-info">
+                                    <h5>Candidatures</h5>
+                                    <p>{{ new_applications_today }} aujourd'hui</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart.js configuration
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    };
+
+    // Users chart
+    const usersCtx = document.getElementById('users-chart').getContext('2d');
+    new Chart(usersCtx, {
+        type: 'line',
+        data: {
+            labels: {{ users_chart_labels|safe }},
+            datasets: [{
+                label: 'Utilisateurs',
+                data: {{ users_chart_data|safe }},
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Jobs chart
+    const jobsCtx = document.getElementById('jobs-chart').getContext('2d');
+    new Chart(jobsCtx, {
+        type: 'line',
+        data: {
+            labels: {{ jobs_chart_labels|safe }},
+            datasets: [{
+                label: 'Offres d\'emploi',
+                data: {{ jobs_chart_data|safe }},
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Applications chart
+    const applicationsCtx = document.getElementById('applications-chart').getContext('2d');
+    new Chart(applicationsCtx, {
+        type: 'line',
+        data: {
+            labels: {{ applications_chart_labels|safe }},
+            datasets: [{
+                label: 'Candidatures',
+                data: {{ applications_chart_data|safe }},
+                borderColor: '#ffc107',
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Views chart
+    const viewsCtx = document.getElementById('views-chart').getContext('2d');
+    new Chart(viewsCtx, {
+        type: 'line',
+        data: {
+            labels: {{ views_chart_labels|safe }},
+            datasets: [{
+                label: 'Vues',
+                data: {{ views_chart_data|safe }},
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: chartOptions
+    });
+
+    // Demographics chart
+    const demographicsCtx = document.getElementById('demographics-chart').getContext('2d');
+    new Chart(demographicsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Candidats', 'Entreprises'],
+            datasets: [{
+                data: [{{ candidate_percentage }}, {{ company_percentage }}],
+                backgroundColor: ['#007bff', '#28a745']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Export analytics
+    function exportAnalytics() {
+        // This would typically generate and download an analytics report
+        alert('Export des données analytiques en cours...');
+    }
+
+    // Refresh analytics
+    function refreshAnalytics() {
+        // This would typically refresh the analytics data
+        location.reload();
+    }
+
+    // Chart period change
+    document.getElementById('chart-period').addEventListener('change', function() {
+        // This would typically update the charts with new data
+        console.log('Chart period changed to:', this.value);
+    });
+
+    // Auto-refresh analytics data
+    setInterval(function() {
+        // This would typically refresh real-time analytics
+        console.log('Refreshing analytics data...');
+    }, 60000); // Refresh every minute
+</script>
+{% endblock %}

@@ -1,0 +1,338 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Notifications - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Notifications</h1>
+            <p>Gérez vos notifications et restez informé des dernières actualités</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Notification Stats -->
+            <div class="col-12">
+                <div class="notification-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_notifications }}</h3>
+                            <p>Notifications reçues</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-envelope-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ read_notifications }}</h3>
+                            <p>Notifications lues</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ unread_notifications }}</h3>
+                            <p>Non lues</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ click_rate }}%</h3>
+                            <p>Taux de clic</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notification Preferences -->
+            <div class="col-lg-4">
+                <div class="notification-preferences">
+                    <div class="preferences-header">
+                        <h3>Préférences</h3>
+                    </div>
+                    
+                    <form method="post" class="preferences-form">
+                        {% csrf_token %}
+                        <div class="preference-group">
+                            <h4>Types de notifications</h4>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="job_alerts" {% if preferences.job_alerts %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span>Alertes emploi</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="application_updates" {% if preferences.application_updates %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-file-alt"></i>
+                                        <span>Mises à jour candidatures</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="messages" {% if preferences.messages %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-comments"></i>
+                                        <span>Messages</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="matching" {% if preferences.matching %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-magic"></i>
+                                        <span>Matching intelligent</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="company_reviews" {% if preferences.company_reviews %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-star"></i>
+                                        <span>Avis entreprises</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="gamification" {% if preferences.gamification %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-trophy"></i>
+                                        <span>Gamification</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-group">
+                            <h4>Canaux de notification</h4>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="email_notifications" {% if preferences.email_notifications %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-envelope"></i>
+                                        <span>Email</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="push_notifications" {% if preferences.push_notifications %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-mobile-alt"></i>
+                                        <span>Push</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="preference-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="sms_notifications" {% if preferences.sms_notifications %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        <i class="fas fa-sms"></i>
+                                        <span>SMS</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-group">
+                            <h4>Fréquence</h4>
+                            <div class="form-group">
+                                <select name="frequency" class="form-select">
+                                    <option value="immediate" {% if preferences.frequency == 'immediate' %}selected{% endif %}>Immédiatement</option>
+                                    <option value="daily" {% if preferences.frequency == 'daily' %}selected{% endif %}>Quotidien</option>
+                                    <option value="weekly" {% if preferences.frequency == 'weekly' %}selected{% endif %}>Hebdomadaire</option>
+                                    <option value="monthly" {% if preferences.frequency == 'monthly' %}selected{% endif %}>Mensuel</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-group">
+                            <h4>Heure de réception</h4>
+                            <div class="form-group">
+                                <input type="time" name="preferred_time" class="form-control" value="{{ preferences.preferred_time|default:'09:00' }}">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span>Sauvegarder</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Notifications List -->
+            <div class="col-lg-8">
+                <div class="notifications-content">
+                    <div class="notifications-header">
+                        <div class="notifications-count">
+                            <h3>{{ notifications|length }} notification{{ notifications|length|pluralize }}</h3>
+                        </div>
+                        <div class="notifications-actions">
+                            <button class="btn btn-outline-primary btn-sm" onclick="markAllAsRead()">
+                                <i class="fas fa-check-double"></i>
+                                <span>Tout marquer comme lu</span>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="clearAll()">
+                                <i class="fas fa-trash"></i>
+                                <span>Tout supprimer</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="notifications-list">
+                        {% for notification in notifications %}
+                        <div class="notification-item {% if not notification.is_read %}unread{% endif %}" data-notification-id="{{ notification.id }}">
+                            <div class="notification-icon">
+                                <i class="fas fa-{{ notification.icon }}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>{{ notification.title }}</h4>
+                                    <span class="notification-time">{{ notification.created_at|timesince }} ago</span>
+                                </div>
+                                <div class="notification-body">
+                                    <p>{{ notification.message }}</p>
+                                </div>
+                                {% if notification.action_url %}
+                                <div class="notification-actions">
+                                    <a href="{{ notification.action_url }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-external-link-alt"></i>
+                                        <span>{{ notification.action_text|default:"Voir" }}</span>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="notification-actions">
+                                {% if not notification.is_read %}
+                                <button class="btn btn-outline-primary btn-sm" onclick="markAsRead({{ notification.id }})">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteNotification({{ notification.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-notifications">
+                            <div class="no-notifications-icon">
+                                <i class="fas fa-bell-slash"></i>
+                            </div>
+                            <h3>Aucune notification</h3>
+                            <p>Vous n'avez pas encore de notifications</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if notifications.has_other_pages %}
+                    <nav class="pagination-nav">
+                        <ul class="pagination">
+                            {% if notifications.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ notifications.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in notifications.paginator.page_range %}
+                            {% if notifications.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > notifications.number|add:'-3' and num < notifications.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if notifications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ notifications.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Mark as read
+    function markAsRead(notificationId) {
+        // Implementation for marking notification as read
+        console.log('Marking notification as read:', notificationId);
+        const notification = document.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (notification) {
+            notification.classList.remove('unread');
+        }
+    }
+    
+    // Delete notification
+    function deleteNotification(notificationId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
+            // Implementation for deleting notification
+            console.log('Deleting notification:', notificationId);
+            const notification = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            if (notification) {
+                notification.remove();
+            }
+        }
+    }
+    
+    // Mark all as read
+    function markAllAsRead() {
+        if (confirm('Êtes-vous sûr de vouloir marquer toutes les notifications comme lues ?')) {
+            // Implementation for marking all notifications as read
+            console.log('Marking all notifications as read');
+            document.querySelectorAll('.notification-item.unread').forEach(item => {
+                item.classList.remove('unread');
+            });
+        }
+    }
+    
+    // Clear all
+    function clearAll() {
+        if (confirm('Êtes-vous sûr de vouloir supprimer toutes les notifications ?')) {
+            // Implementation for clearing all notifications
+            console.log('Clearing all notifications');
+            document.querySelectorAll('.notification-item').forEach(item => {
+                item.remove();
+            });
+        }
+    }
+</script>
+{% endblock %}

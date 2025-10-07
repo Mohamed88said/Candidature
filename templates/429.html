@@ -1,0 +1,87 @@
+{% extends 'base_error.html' %}
+{% load static %}
+
+{% block title %}Trop de requêtes - Plateforme de Recrutement{% endblock %}
+
+{% block error_icon %}
+<i class="fas fa-tachometer-alt"></i>
+{% endblock %}
+
+{% block error_title %}429 - Trop de requêtes{% endblock %}
+
+{% block error_subtitle %}Vous avez dépassé la limite de requêtes autorisées. Veuillez patienter avant de réessayer.{% endblock %}
+
+{% block error_content %}
+<div class="error-actions">
+    <a href="{% url 'core:home' %}" class="btn btn-primary">
+        <i class="fas fa-home"></i>
+        <span>Retour à l'accueil</span>
+    </a>
+    <button class="btn btn-outline-primary" onclick="window.location.reload()" disabled id="retry-btn">
+        <i class="fas fa-refresh"></i>
+        <span>Réessayer dans <span id="countdown">60</span>s</span>
+    </button>
+</div>
+
+<div class="error-info">
+    <div class="info-item">
+        <i class="fas fa-info-circle"></i>
+        <div class="info-content">
+            <h4>Pourquoi cette erreur ?</h4>
+            <p>Vous avez effectué trop de requêtes en peu de temps.</p>
+        </div>
+    </div>
+    <div class="info-item">
+        <i class="fas fa-clock"></i>
+        <div class="info-content">
+            <h4>Délai d'attente</h4>
+            <p>Veuillez patienter 1 minute avant de réessayer.</p>
+        </div>
+    </div>
+    <div class="info-item">
+        <i class="fas fa-shield-alt"></i>
+        <div class="info-content">
+            <h4>Protection</h4>
+            <p>Cette limite protège nos serveurs et améliore les performances.</p>
+        </div>
+    </div>
+</div>
+
+<div class="error-suggestions">
+    <h4>Que pouvez-vous faire ?</h4>
+    <ul>
+        <li><a href="{% url 'core:home' %}">Retourner à la page d'accueil</a></li>
+        <li><a href="{% url 'core:contact' %}">Nous contacter si vous avez besoin d'une limite plus élevée</a></li>
+        <li><a href="{% url 'core:faq' %}">Consulter la FAQ sur les limites de taux</a></li>
+        <li><a href="{% url 'core:api' %}">Consulter la documentation API</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block error_footer %}
+<div class="error-footer-content">
+    <p>Si vous avez besoin d'une limite plus élevée, contactez notre <a href="{% url 'core:contact' %}">équipe de support</a>.</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Countdown timer
+    let countdown = 60;
+    const countdownElement = document.getElementById('countdown');
+    const retryBtn = document.getElementById('retry-btn');
+    
+    function updateCountdown() {
+        countdownElement.textContent = countdown;
+        if (countdown <= 0) {
+            retryBtn.disabled = false;
+            retryBtn.innerHTML = '<i class="fas fa-refresh"></i><span>Réessayer</span>';
+            return;
+        }
+        countdown--;
+        setTimeout(updateCountdown, 1000);
+    }
+    
+    updateCountdown();
+</script>
+{% endblock %}

@@ -1,0 +1,573 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ match.job.title }} - Détail du Match - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/matching.css' %}">
+<style>
+.match-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.match-score-large {
+    font-size: 4rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.score-excellent { color: #28a745; }
+.score-very-good { color: #17a2b8; }
+.score-good { color: #ffc107; }
+.score-correct { color: #fd7e14; }
+.score-faible { color: #dc3545; }
+
+.score-breakdown {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.score-item:last-child {
+    border-bottom: none;
+}
+
+.score-bar {
+    width: 100px;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s ease;
+}
+
+.fill-experience { background: linear-gradient(90deg, #28a745, #20c997); }
+.fill-skills { background: linear-gradient(90deg, #007bff, #6f42c1); }
+.fill-location { background: linear-gradient(90deg, #17a2b8, #20c997); }
+.fill-salary { background: linear-gradient(90deg, #ffc107, #fd7e14); }
+.fill-education { background: linear-gradient(90deg, #6f42c1, #e83e8c); }
+.fill-culture { background: linear-gradient(90deg, #fd7e14, #dc3545); }
+
+.analysis-section {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.strength-item {
+    background: #d4edda;
+    color: #155724;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+    border-left: 4px solid #28a745;
+}
+
+.concern-item {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+    border-left: 4px solid #dc3545;
+}
+
+.skill-match {
+    background: #d1ecf1;
+    color: #0c5460;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin: 0.25rem;
+    display: inline-block;
+    font-size: 0.9rem;
+}
+
+.skill-missing {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin: 0.25rem;
+    display: inline-block;
+    font-size: 0.9rem;
+}
+
+.action-buttons {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    padding: 1rem;
+    margin: 2rem -1.5rem -1.5rem;
+    border-radius: 0 0 15px 15px;
+}
+
+.interest-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    margin: 0.25rem;
+}
+
+.btn-interested {
+    background: #28a745;
+    color: white;
+}
+
+.btn-very-interested {
+    background: #007bff;
+    color: white;
+}
+
+.btn-not-interested {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-applied {
+    background: #17a2b8;
+    color: white;
+}
+
+.similar-match {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.similar-match:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.company-info {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.company-logo-large {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 15px;
+    border: 3px solid #e9ecef;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header du match -->
+    <div class="match-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-3">{{ match.job.title }}</h1>
+                <h3 class="h4 mb-3">{{ match.job.company }}</h3>
+                <p class="mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>{{ match.job.location }}
+                    <span class="ms-3">
+                        <i class="fas fa-clock me-2"></i>{{ match.job.get_job_type_display }}
+                    </span>
+                </p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="match-score-large score-{{ match.match_level }}">
+                    {{ match.overall_score }}%
+                </div>
+                <h4 class="mb-0">{{ match.match_level_display }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Contenu principal -->
+        <div class="col-lg-8">
+            <!-- Score détaillé -->
+            <div class="score-breakdown">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-bar text-primary me-2"></i>
+                    Analyse détaillée du matching
+                </h5>
+                
+                <div class="score-item">
+                    <div>
+                        <strong>Expérience professionnelle</strong>
+                        <small class="text-muted d-block">Adéquation avec le niveau requis</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3 fw-bold">{{ match.experience_score }}%</span>
+                        <div class="score-bar">
+                            <div class="score-fill fill-experience" style="width: {{ match.experience_score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-item">
+                    <div>
+                        <strong>Compétences techniques</strong>
+                        <small class="text-muted d-block">Correspondance des compétences requises</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3 fw-bold">{{ match.skills_score }}%</span>
+                        <div class="score-bar">
+                            <div class="score-fill fill-skills" style="width: {{ match.skills_score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-item">
+                    <div>
+                        <strong>Localisation</strong>
+                        <small class="text-muted d-block">Proximité géographique</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3 fw-bold">{{ match.location_score }}%</span>
+                        <div class="score-bar">
+                            <div class="score-fill fill-location" style="width: {{ match.location_score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-item">
+                    <div>
+                        <strong>Attentes salariales</strong>
+                        <small class="text-muted d-block">Cohérence avec la fourchette proposée</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3 fw-bold">{{ match.salary_score }}%</span>
+                        <div class="score-bar">
+                            <div class="score-fill fill-salary" style="width: {{ match.salary_score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-item">
+                    <div>
+                        <strong>Formation</strong>
+                        <small class="text-muted d-block">Niveau d'éducation requis</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3 fw-bold">{{ match.education_score }}%</span>
+                        <div class="score-bar">
+                            <div class="score-fill fill-education" style="width: {{ match.education_score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-item">
+                    <div>
+                        <strong>Culture d'entreprise</strong>
+                        <small class="text-muted d-block">Adéquation avec vos préférences</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3 fw-bold">{{ match.culture_score }}%</span>
+                        <div class="score-bar">
+                            <div class="score-fill fill-culture" style="width: {{ match.culture_score }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analyse des compétences -->
+            {% if match.matching_skills or match.missing_skills %}
+            <div class="analysis-section">
+                <h5 class="mb-3">
+                    <i class="fas fa-cogs text-success me-2"></i>
+                    Analyse des compétences
+                </h5>
+                
+                {% if match.matching_skills %}
+                <div class="mb-3">
+                    <h6 class="text-success">✅ Compétences correspondantes</h6>
+                    {% for skill in match.matching_skills %}
+                    <span class="skill-match">
+                        {{ skill.skill }}
+                        {% if skill.candidate_level %}
+                        <small>({{ skill.candidate_level }})</small>
+                        {% endif %}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if match.missing_skills %}
+                <div class="mb-3">
+                    <h6 class="text-danger">❌ Compétences à développer</h6>
+                    {% for skill in match.missing_skills %}
+                    <span class="skill-missing">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Forces et préoccupations -->
+            {% if match.strengths or match.concerns %}
+            <div class="analysis-section">
+                <h5 class="mb-3">
+                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                    Analyse qualitative
+                </h5>
+                
+                {% if match.strengths %}
+                <div class="mb-3">
+                    <h6 class="text-success">💪 Points forts</h6>
+                    {% for strength in match.strengths %}
+                    <div class="strength-item">
+                        <i class="fas fa-check-circle me-2"></i>{{ strength }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if match.concerns %}
+                <div class="mb-3">
+                    <h6 class="text-danger">⚠️ Points d'attention</h6>
+                    {% for concern in match.concerns %}
+                    <div class="concern-item">
+                        <i class="fas fa-exclamation-triangle me-2"></i>{{ concern }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Recommandations -->
+            {% if match.recommendations %}
+            <div class="analysis-section">
+                <h5 class="mb-3">
+                    <i class="fas fa-star text-primary me-2"></i>
+                    Recommandations
+                </h5>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {{ match.recommendations }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Informations sur l'entreprise -->
+            <div class="company-info">
+                <h5 class="mb-3">
+                    <i class="fas fa-building text-info me-2"></i>
+                    À propos de {{ match.job.company }}
+                </h5>
+                
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        {% if match.job.company_logo %}
+                        <img src="{{ match.job.company_logo.url }}" alt="{{ match.job.company }}" 
+                             class="company-logo-large mb-3">
+                        {% else %}
+                        <div class="company-logo-large bg-light d-flex align-items-center justify-content-center mb-3">
+                            <i class="fas fa-building fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-9">
+                        {% if match.job.company_description %}
+                        <p class="mb-3">{{ match.job.company_description|truncatewords:50 }}</p>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p class="mb-2">
+                                    <strong>Taille:</strong> {{ match.job.get_company_size_display }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Type de contrat:</strong> {{ match.job.get_job_type_display }}
+                                </p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="mb-2">
+                                    <strong>Niveau requis:</strong> {{ match.job.get_experience_level_display }}
+                                </p>
+                                {% if match.job.salary_min or match.job.salary_max %}
+                                <p class="mb-2">
+                                    <strong>Salaire:</strong> {{ match.job.salary_range }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if match.job.company_website %}
+                        <a href="{{ match.job.company_website }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1"></i>Site web de l'entreprise
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-buttons">
+                <div class="d-flex flex-wrap justify-content-center">
+                    <a href="{% url 'jobs:job_detail' match.job.slug %}" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-external-link-alt me-2"></i>Voir l'offre complète
+                    </a>
+                    
+                    {% if not match.candidate_interest or match.candidate_interest != 'applied' %}
+                    <form method="post" action="{% url 'matching:update_match_interest' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="interest" value="applied">
+                        <button type="submit" class="btn btn-success btn-lg me-2">
+                            <i class="fas fa-paper-plane me-2"></i>Postuler maintenant
+                        </button>
+                    </form>
+                    {% endif %}
+                    
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success" 
+                                onclick="updateInterest('very_interested')">
+                            <i class="fas fa-heart me-1"></i>Très intéressé
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" 
+                                onclick="updateInterest('interested')">
+                            <i class="fas fa-thumbs-up me-1"></i>Intéressé
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" 
+                                onclick="updateInterest('not_interested')">
+                            <i class="fas fa-thumbs-down me-1"></i>Pas intéressé
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Matches similaires -->
+            {% if similar_matches %}
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-users text-info me-2"></i>
+                        Matches similaires
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for similar_match in similar_matches %}
+                    <div class="similar-match">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="mb-0">{{ similar_match.job.title }}</h6>
+                            <span class="badge bg-primary">{{ similar_match.overall_score }}%</span>
+                        </div>
+                        <p class="text-muted small mb-2">{{ similar_match.job.company }}</p>
+                        <p class="text-muted small mb-2">{{ similar_match.job.location }}</p>
+                        <a href="{% url 'matching:match_detail' similar_match.id %}" 
+                           class="btn btn-sm btn-outline-primary">Voir détails</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Navigation -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="mb-3">Navigation</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'matching:job_matches' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i>Tous mes matches
+                        </a>
+                        <a href="{% url 'matching:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Dashboard matching
+                        </a>
+                        <a href="{% url 'matching:preferences' %}" class="btn btn-outline-info">
+                            <i class="fas fa-cog me-2"></i>Préférences
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateInterest(interest) {
+    fetch('{% url "matching:ajax_match_interest" match.id %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            interest: interest
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mettre à jour l'interface
+            location.reload();
+        } else {
+            alert('Erreur: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des barres de score
+    const scoreBars = document.querySelectorAll('.score-fill');
+    scoreBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+    
+    // Animation du score principal
+    const mainScore = document.querySelector('.match-score-large');
+    const finalScore = parseInt(mainScore.textContent);
+    let currentScore = 0;
+    const increment = finalScore / 50;
+    
+    const timer = setInterval(() => {
+        currentScore += increment;
+        if (currentScore >= finalScore) {
+            currentScore = finalScore;
+            clearInterval(timer);
+        }
+        mainScore.textContent = Math.round(currentScore) + '%';
+    }, 30);
+});
+</script>
+{% endblock %}
+

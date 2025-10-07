@@ -1,0 +1,512 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Messages - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Messages</h1>
+                    <p class="welcome-subtitle">Gérez vos conversations et communications</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="composeMessage()">
+                        <i class="fas fa-plus"></i>
+                        <span>Nouveau message</span>
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double"></i>
+                        <span>Tout marquer comme lu</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Messages Statistics -->
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_messages }}</h3>
+                            <p>Total messages</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-envelope-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ unread_messages }}</h3>
+                            <p>Non lus</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ sent_messages }}</h3>
+                            <p>Envoyés</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ received_messages }}</h3>
+                            <p>Reçus</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Message Filters -->
+                <div class="filters-section">
+                    <div class="filters-header">
+                        <h3>Filtrer les messages</h3>
+                    </div>
+                    <div class="filters-content">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">
+                                <i class="fas fa-list"></i>
+                                <span>Tous ({{ total_messages }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="unread">
+                                <i class="fas fa-envelope-open"></i>
+                                <span>Non lus ({{ unread_messages }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="sent">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Envoyés ({{ sent_messages }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="received">
+                                <i class="fas fa-inbox"></i>
+                                <span>Reçus ({{ received_messages }})</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages List -->
+                <div class="messages-section">
+                    <div class="section-header">
+                        <h3>Mes messages</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshMessages()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        {% if messages %}
+                        <div class="messages-list">
+                            {% for message in messages %}
+                            <div class="message-item" data-message-id="{{ message.id }}">
+                                <div class="message-checkbox">
+                                    <input type="checkbox" onchange="selectMessage({{ message.id }})">
+                                </div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <div class="message-info">
+                                            <div class="message-icon">
+                                                {% if message.is_read %}
+                                                <i class="fas fa-envelope-open"></i>
+                                                {% else %}
+                                                <i class="fas fa-envelope"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="message-details">
+                                                <h4>{{ message.subject }}</h4>
+                                                <p>{{ message.content|truncatewords:20 }}</p>
+                                                <div class="message-meta">
+                                                    <span class="message-sender">
+                                                        <i class="fas fa-user"></i>
+                                                        {{ message.sender.get_full_name|default:message.sender.username }}
+                                                    </span>
+                                                    <span class="message-recipient">
+                                                        <i class="fas fa-user-friends"></i>
+                                                        {{ message.recipient.get_full_name|default:message.recipient.username }}
+                                                    </span>
+                                                    <span class="message-date">
+                                                        <i class="fas fa-calendar"></i>
+                                                        {{ message.created_at|date:"d/m/Y H:i" }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="message-actions">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewMessage({{ message.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="replyMessage({{ message.id }})">
+                                                <i class="fas fa-reply"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="deleteMessage({{ message.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="message-tags">
+                                        {% for tag in message.tags.all %}
+                                        <span class="message-tag">{{ tag.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                        <div class="pagination-wrapper">
+                            <nav aria-label="Pagination des messages">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                        
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-envelope"></i>
+                            <h4>Aucun message</h4>
+                            <p>Commencez par envoyer votre premier message</p>
+                            <button class="btn btn-primary" onclick="composeMessage()">
+                                <i class="fas fa-plus"></i>
+                                <span>Nouveau message</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Message Composer -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Nouveau message</h3>
+                    </div>
+                    <div class="widget-content">
+                        <form class="quick-message-form" id="quick-message-form">
+                            <div class="form-group">
+                                <label class="form-label">Destinataire</label>
+                                <select name="recipient" class="form-select" required>
+                                    <option value="">Sélectionnez un destinataire</option>
+                                    <!-- Options will be populated based on user's contacts -->
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Sujet</label>
+                                <input type="text" name="subject" class="form-control" placeholder="Sujet du message" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Message</label>
+                                <textarea name="content" class="form-control" rows="4" placeholder="Contenu du message" required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Tags</label>
+                                <input type="text" name="tags" class="form-control" placeholder="Tags séparés par des virgules">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Priorité</label>
+                                <select name="priority" class="form-select">
+                                    <option value="normal">Normale</option>
+                                    <option value="high">Élevée</option>
+                                    <option value="urgent">Urgente</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Envoyer le message</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Message Categories -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Catégories de messages</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="message-categories">
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-envelope-open"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Non lus</h5>
+                                    <p>{{ unread_messages }} messages</p>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-paper-plane"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Envoyés</h5>
+                                    <p>{{ sent_messages }} messages</p>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-inbox"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Reçus</h5>
+                                    <p>{{ received_messages }} messages</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Messages -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Messages récents</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="recent-messages">
+                            {% for message in recent_messages %}
+                            <div class="recent-item">
+                                <div class="recent-icon">
+                                    {% if message.is_read %}
+                                    <i class="fas fa-envelope-open"></i>
+                                    {% else %}
+                                    <i class="fas fa-envelope"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="recent-info">
+                                    <h5>{{ message.subject }}</h5>
+                                    <p>{{ message.created_at|timesince }} ago</p>
+                                </div>
+                                <div class="recent-actions">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewMessage({{ message.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-recent">
+                                <i class="fas fa-envelope"></i>
+                                <p>Aucun message récent</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Statistics -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Statistiques des messages</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="message-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ total_messages }}</h4>
+                                    <p>Total messages</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-envelope-open"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ unread_messages }}</h4>
+                                    <p>Non lus</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-paper-plane"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ sent_messages }}</h4>
+                                    <p>Envoyés</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter tabs functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Filter messages based on selected tab
+            const filter = this.dataset.filter;
+            filterMessages(filter);
+        });
+    });
+
+    // Filter messages
+    function filterMessages(filter) {
+        const messages = document.querySelectorAll('.message-item');
+        
+        messages.forEach(message => {
+            switch(filter) {
+                case 'all':
+                    message.style.display = 'flex';
+                    break;
+                case 'unread':
+                    // This would typically filter by unread status
+                    message.style.display = 'flex';
+                    break;
+                case 'sent':
+                    // This would typically filter by sent status
+                    message.style.display = 'flex';
+                    break;
+                case 'received':
+                    // This would typically filter by received status
+                    message.style.display = 'flex';
+                    break;
+            }
+        });
+    }
+
+    // Select message
+    function selectMessage(messageId) {
+        // This would typically select the message for bulk actions
+        console.log('Message selected:', messageId);
+    }
+
+    // Compose message
+    function composeMessage() {
+        // This would typically open a modal to compose a message
+        alert('Composition de message...');
+    }
+
+    // Mark all as read
+    function markAllAsRead() {
+        if (confirm('Êtes-vous sûr de vouloir marquer tous les messages comme lus ?')) {
+            // This would typically mark all messages as read
+            alert('Tous les messages ont été marqués comme lus !');
+        }
+    }
+
+    // View message
+    function viewMessage(messageId) {
+        // This would typically open a modal to view the message
+        alert('Affichage du message: ' + messageId);
+    }
+
+    // Reply message
+    function replyMessage(messageId) {
+        // This would typically open a modal to reply to the message
+        alert('Réponse au message: ' + messageId);
+    }
+
+    // Delete message
+    function deleteMessage(messageId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) {
+            // This would typically make an AJAX request to delete the message
+            const message = document.querySelector(`[data-message-id="${messageId}"]`);
+            message.remove();
+            alert('Message supprimé !');
+        }
+    }
+
+    // Refresh messages
+    function refreshMessages() {
+        // This would typically refresh the messages list
+        location.reload();
+    }
+
+    // Quick message form submission
+    document.getElementById('quick-message-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // This would typically send the message
+        alert('Message envoyé avec succès !');
+        this.reset();
+    });
+
+    // Auto-refresh messages
+    setInterval(function() {
+        // This would typically check for new messages
+        console.log('Checking for new messages...');
+    }, 30000); // Check every 30 seconds
+</script>
+{% endblock %}
