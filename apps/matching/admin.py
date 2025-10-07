@@ -250,3 +250,4 @@ admin.site.site_header = "Administration - Système de Matching"
 admin.site.site_title = "Matching Admin"
 admin.site.index_title = "Gestion du Système de Matching Intelligent"
 
+

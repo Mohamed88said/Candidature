@@ -23,3 +23,4 @@ urlpatterns = [
     path('analytics/', views.alert_analytics, name='analytics'),
 ]
 
+

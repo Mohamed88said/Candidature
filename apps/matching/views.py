@@ -357,3 +357,4 @@ def recruiter_matches(request, job_id):
         messages.error(request, f"Erreur: {e}")
         return redirect('jobs:job_detail', job_id=job_id)
 
+

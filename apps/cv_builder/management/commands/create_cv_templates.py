@@ -248,3 +248,4 @@ class Command(BaseCommand):
         
         self.stdout.write(f"📊 {created_count} nouveaux modèles créés")
         return CVTemplate.objects.count()
+

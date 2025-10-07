@@ -32,3 +32,4 @@ urlpatterns = [
     path('analytics/', views.chat_analytics, name='analytics'),
 ]
 
+

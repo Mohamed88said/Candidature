@@ -6,3 +6,4 @@ class MatchingConfig(AppConfig):
     name = 'apps.matching'
     verbose_name = 'Système de Matching Intelligent'
 
+

@@ -26,3 +26,4 @@ urlpatterns = [
     path('recruiter/job/<int:job_id>/matches/', views.recruiter_matches, name='recruiter_matches'),
 ]
 
+

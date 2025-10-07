@@ -27,3 +27,4 @@ urlpatterns = [
     path('api/track-click/<int:invitation_id>/', views.track_invitation_click, name='track_invitation_click'),
     path('api/track-open/<int:invitation_id>/', views.track_invitation_open, name='track_invitation_open'),
 ]
+

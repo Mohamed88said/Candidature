@@ -483,3 +483,4 @@ class DeviceService:
     def get_user_devices(self, user: User) -> List[Device]:
         """Récupère les appareils d'un utilisateur"""
         return list(Device.objects.filter(user=user, is_active=True))
+

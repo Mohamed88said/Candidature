@@ -520,3 +520,4 @@ class ReviewSearchForm(forms.Form):
             'type': 'date'
         })
     )
+

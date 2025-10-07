@@ -30,3 +30,4 @@ urlpatterns = [
     path('api/duplicate/<int:cv_id>/', views.duplicate_cv, name='duplicate_cv'),
     path('api/change-template/<int:cv_id>/', views.change_cv_template, name='change_cv_template'),
 ]
+

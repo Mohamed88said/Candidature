@@ -37,3 +37,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n🛑 Serveur arrêté")
         httpd.shutdown()
+

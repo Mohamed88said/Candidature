@@ -803,3 +803,4 @@ $(document).ready(function() {
     // Gestion des popovers
     $('[data-toggle="popover"]').popover();
 });
+

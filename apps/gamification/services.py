@@ -533,3 +533,4 @@ class RewardService:
             
             logger.info(f"Récompense réclamée: {user.username} a réclamé {reward.name}")
             return True
+

@@ -31,3 +31,4 @@ urlpatterns = [
     path('api/stats/', views.user_stats_api, name='user_stats_api'),
     path('api/trigger-action/', views.trigger_action_api, name='trigger_action_api'),
 ]
+

@@ -277,3 +277,4 @@ class ChatInviteForm(forms.Form):
             Submit('submit', 'Inviter', css_class='btn btn-primary')
         )
 
+

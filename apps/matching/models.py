@@ -255,3 +255,4 @@ class IndustrySimilarity(models.Model):
     def __str__(self):
         return f"{self.industry1} ↔ {self.industry2} ({self.similarity_score:.2f})"
 
+

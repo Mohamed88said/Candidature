@@ -566,3 +566,4 @@ def chat_analytics(request):
         messages.error(request, f"Erreur lors du chargement des analytics: {e}")
         return redirect('chat:dashboard')
 
+

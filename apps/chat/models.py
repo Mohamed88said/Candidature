@@ -328,3 +328,4 @@ class ChatReport(models.Model):
     def __str__(self):
         return f"Signalement de {self.reported_user.full_name} par {self.reporter.full_name}"
 
+

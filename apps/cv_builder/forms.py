@@ -650,3 +650,4 @@ class CVTemplateForm(forms.ModelForm):
                 'class': 'form-check-input'
             })
         }
+

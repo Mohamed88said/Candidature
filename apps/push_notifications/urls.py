@@ -39,3 +39,4 @@ urlpatterns = [
     path('api/mark-read/', views.mark_notification_read_api, name='mark_notification_read_api'),
     path('api/preferences/', views.update_preferences_api, name='update_preferences_api'),
 ]
+

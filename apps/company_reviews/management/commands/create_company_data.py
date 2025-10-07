@@ -417,3 +417,4 @@ class Command(BaseCommand):
                     new_count += 1
         
         self.stdout.write(f"📊 {new_count} nouveaux suivis créés")
+

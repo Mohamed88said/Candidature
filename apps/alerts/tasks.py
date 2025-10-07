@@ -319,3 +319,4 @@ def optimize_alert_preferences():
         logger.error(f"Erreur lors de l'optimisation des préférences: {e}")
         return 0
 
+

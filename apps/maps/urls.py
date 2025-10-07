@@ -24,3 +24,4 @@ urlpatterns = [
     # Analytics (admin)
     path('analytics/', views.map_analytics, name='analytics'),
 ]
+

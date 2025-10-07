@@ -74,3 +74,4 @@ def update_alerts_on_job_modification(sender, instance, created, **kwargs):
         except Exception as e:
             logger.error(f"Erreur lors de la mise à jour des alertes pour l'offre {instance.id}: {e}")
 
+

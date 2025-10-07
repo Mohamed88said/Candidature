@@ -445,3 +445,4 @@ class ReferralAnalyticsForm(forms.Form):
             raise ValidationError('La date de fin doit être postérieure à la date de début.')
         
         return cleaned_data
+

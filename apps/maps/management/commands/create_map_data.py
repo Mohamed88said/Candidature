@@ -237,3 +237,4 @@ class Command(BaseCommand):
         
         self.stdout.write(f"📊 {created_count} liaisons emploi-localisation créées")
         return JobLocation.objects.count()
+

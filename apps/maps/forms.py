@@ -478,3 +478,4 @@ class MapSettingsForm(forms.Form):
             'class': 'form-control'
         })
     )
+

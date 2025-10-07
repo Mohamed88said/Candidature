@@ -464,3 +464,4 @@ class AlertAnalyticsService:
             logger.error(f"Erreur lors de la génération des analytics pour {date}: {e}")
             return None
 
+
