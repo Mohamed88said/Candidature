@@ -7,3 +7,4 @@ class ChatConfig(AppConfig):
     verbose_name = 'Système de Chat'
 
 
+

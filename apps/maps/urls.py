@@ -25,3 +25,4 @@ urlpatterns = [
     path('analytics/', views.map_analytics, name='analytics'),
 ]
 
+

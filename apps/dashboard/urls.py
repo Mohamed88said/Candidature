@@ -15,6 +15,9 @@ urlpatterns = [
     path('candidates/', views.candidates_management, name='candidates'),
     path('candidate/<int:candidate_id>/', views.candidate_profile_view, name='candidate_profile'),
     
+    # Gestion des applications
+    path('applications/', views.admin_applications, name='admin_applications'),
+    
     # Export de données
     path('export/', views.export_data, name='export_data'),
     

@@ -76,3 +76,4 @@ class Command(BaseCommand):
         self.stdout.write(f"📊 Programme de recommandation créé")
         return ReferralProgram.objects.count()
 
+

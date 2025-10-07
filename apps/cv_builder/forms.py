@@ -651,3 +651,4 @@ class CVTemplateForm(forms.ModelForm):
             })
         }
 
+

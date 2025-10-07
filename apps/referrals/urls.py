@@ -28,3 +28,4 @@ urlpatterns = [
     path('api/track-open/<int:invitation_id>/', views.track_invitation_open, name='track_invitation_open'),
 ]
 
+

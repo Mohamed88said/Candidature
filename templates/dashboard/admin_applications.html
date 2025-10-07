@@ -1,0 +1,181 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Gestion des Applications - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Gestion des Applications</h1>
+                    <p class="welcome-subtitle">Gérez toutes les candidatures</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="exportApplications()">
+                        <i class="fas fa-download"></i>
+                        <span>Exporter</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Filtres -->
+        <div class="filters-section">
+            <div class="filters-header">
+                <h3>Filtrer les applications</h3>
+            </div>
+            <div class="filters-content">
+                <form method="get" class="filter-form">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Statut</label>
+                                <select name="status" class="form-select">
+                                    <option value="">Tous les statuts</option>
+                                    {% for value, label in status_choices %}
+                                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Recherche</label>
+                                <input type="text" name="search" class="form-control" placeholder="Nom, prénom ou titre du poste" value="{{ search_query }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-search"></i>
+                                    <span>Filtrer</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Liste des applications -->
+        <div class="applications-section">
+            <div class="section-header">
+                <h3>Applications ({{ page_obj.paginator.count }})</h3>
+            </div>
+            <div class="section-content">
+                {% if page_obj %}
+                <div class="applications-list">
+                    {% for application in page_obj %}
+                    <div class="application-item">
+                        <div class="application-content">
+                            <div class="application-header">
+                                <div class="application-info">
+                                    <h4>{{ application.candidate.user.get_full_name }}</h4>
+                                    <p>{{ application.job.title }}</p>
+                                    <div class="application-meta">
+                                        <span class="application-date">
+                                            <i class="fas fa-calendar"></i>
+                                            {{ application.applied_at|date:"d/m/Y H:i" }}
+                                        </span>
+                                        <span class="application-status status-{{ application.status }}">
+                                            <i class="fas fa-circle"></i>
+                                            {{ application.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="application-actions">
+                                    <a href="{% url 'applications:application_detail' application.id %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Voir</span>
+                                    </a>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="updateStatus({{ application.id }})">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Modifier</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination-wrapper">
+                    <nav aria-label="Pagination des applications">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <h4>Aucune application</h4>
+                    <p>Aucune candidature ne correspond à vos critères</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function exportApplications() {
+        // This would typically export applications
+        alert('Export des applications...');
+    }
+
+    function updateStatus(applicationId) {
+        // This would typically open a modal to update status
+        alert('Mise à jour du statut pour l\'application: ' + applicationId);
+    }
+</script>
+{% endblock %}

@@ -40,3 +40,4 @@ urlpatterns = [
     path('api/preferences/', views.update_preferences_api, name='update_preferences_api'),
 ]
 
+

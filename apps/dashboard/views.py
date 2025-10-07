@@ -18,6 +18,46 @@ from .utils import generate_excel_report, get_dashboard_stats
 
 
 @login_required
+def admin_applications(request):
+    """Gestion des applications pour admin"""
+    if request.user.user_type not in ['admin', 'hr']:
+        messages.error(request, "Accès non autorisé.")
+        return redirect('core:home')
+    
+    # Filtres
+    status_filter = request.GET.get('status', '')
+    search_query = request.GET.get('search', '')
+    
+    applications = Application.objects.select_related(
+        'candidate__user', 'job'
+    ).order_by('-applied_at')
+    
+    if status_filter:
+        applications = applications.filter(status=status_filter)
+    
+    if search_query:
+        applications = applications.filter(
+            Q(candidate__user__first_name__icontains=search_query) |
+            Q(candidate__user__last_name__icontains=search_query) |
+            Q(job__title__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(applications, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'status_filter': status_filter,
+        'search_query': search_query,
+        'status_choices': Application.STATUS_CHOICES,
+    }
+    
+    return render(request, 'dashboard/admin_applications.html', context)
+
+
+@login_required
 def admin_dashboard(request):
     """Dashboard principal pour admin/hr"""
     if request.user.user_type not in ['admin', 'hr']:

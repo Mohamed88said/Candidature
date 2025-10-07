@@ -36,3 +36,4 @@ urlpatterns = [
     path('api/review/<int:review_id>/respond/', views.respond_to_review, name='respond_to_review'),
 ]
 
+

@@ -32,3 +32,4 @@ urlpatterns = [
     path('api/trigger-action/', views.trigger_action_api, name='trigger_action_api'),
 ]
 
+

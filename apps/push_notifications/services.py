@@ -484,3 +484,4 @@ class DeviceService:
         """Récupère les appareils d'un utilisateur"""
         return list(Device.objects.filter(user=user, is_active=True))
 
+

@@ -24,7 +24,7 @@
                             <span>Mes candidatures</span>
                         </a>
                         {% elif user.user_type == 'company' %}
-                        <a href="{% url 'jobs:job_create' %}" class="btn btn-primary">
+                        <a href="{% url 'jobs:create_job' %}" class="btn btn-primary">
                             <i class="fas fa-plus"></i>
                             <span>Publier une offre</span>
                         </a>
@@ -359,4 +359,5 @@
     }, 60000); // Refresh every minute
 </script>
 {% endblock %}
+
 
