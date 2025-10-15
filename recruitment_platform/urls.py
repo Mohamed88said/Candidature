@@ -13,6 +13,16 @@ urlpatterns = [
     path('jobs/', include('apps.jobs.urls')),
     path('applications/', include('apps.applications.urls')),
     path('dashboard/', include('apps.dashboard.urls')),
+    path('matching/', include('apps.matching.urls')),
+    path('chat/', include('apps.chat.urls')),
+    path('tests/', include('apps.tests.urls')),
+    path('alerts/', include('apps.alerts.urls')),
+    path('maps/', include('apps.maps.urls')),
+    path('cv-builder/', include('apps.cv_builder.urls')),
+    path('referrals/', include('apps.referrals.urls')),
+    path('company-reviews/', include('apps.company_reviews.urls')),
+    path('notifications/', include('apps.push_notifications.urls')),
+    path('gamification/', include('apps.gamification.urls')),
 ]
 
 # Serve media files in development

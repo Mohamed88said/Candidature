@@ -1,0 +1,505 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Candidature Vidéo - {{ job.title }} - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/video-application.css' %}">
+<style>
+.video-upload-area {
+    border: 3px dashed #007bff;
+    border-radius: 15px;
+    padding: 3rem;
+    text-align: center;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.video-upload-area:hover {
+    border-color: #0056b3;
+    background: #e3f2fd;
+}
+
+.video-upload-area.dragover {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.video-preview {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.recording-controls {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.record-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    background: #dc3545;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.record-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.record-button.recording {
+    background: #28a745;
+    animation: pulse 1.5s infinite;
+}
+
+.timer-display {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 1rem 0;
+    font-family: 'Courier New', monospace;
+}
+
+.question-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-left: 4px solid #007bff;
+}
+
+.question-number {
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+.tips-section {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-left: 4px solid #ffc107;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.tip-icon {
+    background: #ffc107;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.upload-progress {
+    display: none;
+    margin-top: 1rem;
+}
+
+.upload-progress.show {
+    display: block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-video text-primary me-2"></i>
+                        Candidature Vidéo
+                    </h1>
+                    <p class="text-muted">{{ job.title }} chez {{ job.company }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'jobs:job_detail' job.slug %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à l'offre
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conseils -->
+    <div class="tips-section">
+        <h5 class="mb-3">
+            <i class="fas fa-lightbulb me-2"></i>
+            Conseils pour une excellente vidéo de candidature
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div>
+                        <strong>Qualité vidéo</strong>
+                        <p class="mb-0 small">Assurez-vous d'avoir un bon éclairage et un son clair</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <strong>Durée</strong>
+                        <p class="mb-0 small">Gardez votre vidéo entre 2 et 5 minutes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <strong>Présentation</strong>
+                        <p class="mb-0 small">Habillez-vous professionnellement et regardez la caméra</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div>
+                        <strong>Authenticité</strong>
+                        <p class="mb-0 small">Soyez vous-même et montrez votre passion</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Formulaire de candidature vidéo -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>
+                        Envoyer votre vidéo de candidature
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="videoApplicationForm">
+                        {% csrf_token %}
+                        
+                        <!-- Zone d'upload de vidéo -->
+                        <div class="video-upload-area" id="videoUploadArea">
+                            <i class="fas fa-video fa-3x text-primary mb-3"></i>
+                            <h5>Glissez-déposez votre vidéo ici</h5>
+                            <p class="text-muted">ou cliquez pour sélectionner un fichier</p>
+                            <p class="small text-muted">Formats acceptés: MP4, MOV, AVI, WEBM (max 100MB)</p>
+                            
+                            {{ form.main_video }}
+                            
+                            <div class="upload-progress" id="uploadProgress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                                <small class="text-muted">Upload en cours...</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Aperçu de la vidéo -->
+                        <div id="videoPreview" class="mt-3" style="display: none;">
+                            <video id="previewVideo" class="video-preview" controls>
+                                Votre navigateur ne supporte pas la lecture vidéo.
+                            </video>
+                        </div>
+                        
+                        <!-- Informations sur la vidéo -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Durée de la vidéo (secondes)</label>
+                                    {{ form.total_duration }}
+                                    <div class="form-text">Durée réelle de votre vidéo</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Qualité de la vidéo</label>
+                                    {{ form.video_quality }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bouton d'envoi -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitButton" disabled>
+                                <i class="fas fa-paper-plane me-2"></i>Envoyer ma candidature vidéo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Questions vidéo optionnelles -->
+            {% if video_questions %}
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle text-info me-2"></i>
+                        Questions vidéo optionnelles
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Vous pouvez également répondre à ces questions pour enrichir votre candidature.
+                    </p>
+                    
+                    {% for question in video_questions %}
+                    <div class="question-card">
+                        <div class="d-flex align-items-start">
+                            <div class="question-number">{{ forloop.counter }}</div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">{{ question.get_question_type_display }}</h6>
+                                <p class="mb-2">{{ question.question_text }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Temps limite: {{ question.time_limit }} secondes
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-info btn-sm" onclick="showVideoQuestions()">
+                            <i class="fas fa-video me-1"></i>Répondre aux questions
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Informations sur l'offre -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        À propos de cette offre
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6>{{ job.title }}</h6>
+                    <p class="text-muted mb-2">{{ job.company }}</p>
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+                    </p>
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-clock me-1"></i>{{ job.get_job_type_display }}
+                    </p>
+                    {% if job.salary_min or job.salary_max %}
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-euro-sign me-1"></i>{{ job.salary_range }}
+                    </p>
+                    {% endif %}
+                    
+                    <a href="{% url 'jobs:job_detail' job.slug %}" class="btn btn-outline-primary btn-sm">
+                        Voir l'offre complète
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('videoUploadArea');
+    const fileInput = document.querySelector('input[type="file"]');
+    const videoPreview = document.getElementById('videoPreview');
+    const previewVideo = document.getElementById('previewVideo');
+    const submitButton = document.getElementById('submitButton');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressFill = document.getElementById('progressFill');
+    
+    // Gestion du drag & drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files[0]);
+        }
+    });
+    
+    // Clic sur la zone d'upload
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // Sélection de fichier
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+    
+    function handleFileSelect(file) {
+        // Vérifier le type de fichier
+        if (!file.type.startsWith('video/')) {
+            alert('Veuillez sélectionner un fichier vidéo.');
+            return;
+        }
+        
+        // Vérifier la taille (100MB max)
+        if (file.size > 100 * 1024 * 1024) {
+            alert('Le fichier est trop volumineux. Taille maximum: 100MB');
+            return;
+        }
+        
+        // Afficher l'aperçu
+        const url = URL.createObjectURL(file);
+        previewVideo.src = url;
+        videoPreview.style.display = 'block';
+        
+        // Activer le bouton d'envoi
+        submitButton.disabled = false;
+        
+        // Mettre à jour la durée automatiquement
+        previewVideo.addEventListener('loadedmetadata', function() {
+            const duration = Math.round(previewVideo.duration);
+            document.querySelector('input[name="total_duration"]').value = duration;
+        });
+        
+        // Simuler l'upload progress
+        simulateUploadProgress();
+    }
+    
+    function simulateUploadProgress() {
+        uploadProgress.classList.add('show');
+        let progress = 0;
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                setTimeout(() => {
+                    uploadProgress.classList.remove('show');
+                }, 1000);
+            }
+            progressFill.style.width = progress + '%';
+        }, 200);
+    }
+    
+    // Validation du formulaire
+    document.getElementById('videoApplicationForm').addEventListener('submit', function(e) {
+        const fileInput = document.querySelector('input[type="file"]');
+        const durationInput = document.querySelector('input[name="total_duration"]');
+        
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Veuillez sélectionner une vidéo.');
+            return;
+        }
+        
+        const duration = parseInt(durationInput.value);
+        if (duration < 30) {
+            e.preventDefault();
+            alert('La vidéo doit durer au moins 30 secondes.');
+            return;
+        }
+        
+        if (duration > 600) {
+            e.preventDefault();
+            alert('La vidéo ne peut pas dépasser 10 minutes.');
+            return;
+        }
+        
+        // Afficher un indicateur de chargement
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...';
+        submitButton.disabled = true;
+    });
+});
+
+function showVideoQuestions() {
+    // Fonction pour afficher les questions vidéo (à implémenter)
+    alert('Fonctionnalité des questions vidéo à implémenter');
+}
+</script>
+{% endblock %}
+
+
+

@@ -1,0 +1,279 @@
+{% extends 'base_modern.html' %}
+{% load static %}
+
+{% block title %}Mes Réussites - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/gamification.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="achievements-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-trophy"></i> Mes Réussites</h1>
+                <p>Découvrez tous les défis et accomplissements disponibles</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ completed_achievements }}</span>
+                    <span class="stat-label">Terminées</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_achievements }}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ completion_rate|floatformat:0 }}%</span>
+                    <span class="stat-label">Complétion</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="completion-progress">
+            <div class="progress-container">
+                <div class="progress-bar" style="width: {{ completion_rate }}%"></div>
+            </div>
+            <div class="progress-text">
+                <span>{{ completed_achievements }} sur {{ total_achievements }} réussites terminées</span>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label>Rechercher</label>
+                    <input type="text" class="form-control" id="search-achievements" placeholder="Nom de la réussite...">
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select class="form-select" id="type-filter">
+                        <option value="">Tous les types</option>
+                        <option value="profile_completion">Complétion de profil</option>
+                        <option value="job_application">Candidature</option>
+                        <option value="cv_creation">Création de CV</option>
+                        <option value="skill_verification">Vérification de compétences</option>
+                        <option value="referral">Parrainage</option>
+                        <option value="streak">Série</option>
+                        <option value="social">Social</option>
+                        <option value="custom">Personnalisé</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Statut</label>
+                    <select class="form-select" id="status-filter">
+                        <option value="">Tous</option>
+                        <option value="completed">Terminées</option>
+                        <option value="in-progress">En cours</option>
+                        <option value="not-started">Non commencées</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements Grid -->
+        <div class="achievements-container">
+            {% for achievement_type, achievements in achievements_by_type.items %}
+            <div class="achievement-category">
+                <div class="category-header">
+                    <h3>{{ achievement_type }}</h3>
+                    <span class="category-count">{{ achievements|length }} réussites</span>
+                </div>
+                <div class="achievements-grid">
+                    {% for achievement in achievements %}
+                    {% with user_achievement=user_achievements_dict|default_if_none:""|get_item:achievement.id %}
+                    <div class="achievement-card {% if user_achievement.is_completed %}completed{% elif user_achievement %}in-progress{% else %}not-started{% endif %}" 
+                         data-type="{{ achievement.achievement_type }}" 
+                         data-name="{{ achievement.name|lower }}">
+                        <div class="achievement-icon-container">
+                            <div class="achievement-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            {% if user_achievement.is_completed %}
+                            <div class="completed-indicator">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="achievement-content">
+                            <h4>{{ achievement.name }}</h4>
+                            <p>{{ achievement.description }}</p>
+                            <div class="achievement-meta">
+                                <span class="achievement-points">+{{ achievement.points }} points</span>
+                                {% if user_achievement and not user_achievement.is_completed %}
+                                <span class="achievement-progress">{{ user_achievement.progress }}% terminé</span>
+                                {% endif %}
+                            </div>
+                            {% if user_achievement and not user_achievement.is_completed %}
+                            <div class="achievement-progress-bar">
+                                <div class="progress-bar" style="width: {{ user_achievement.progress }}%"></div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="achievement-actions">
+                            <a href="{% url 'gamification:achievement_detail' achievement.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye"></i> Détails
+                            </a>
+                        </div>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>Aucune réussite trouvée</h3>
+            <p>Essayez de modifier vos critères de recherche</p>
+        </div>
+    </div>
+</div>
+
+<!-- Achievement Detail Modal -->
+<div class="modal fade" id="achievementDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Détails de la réussite</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="achievement-detail-content">
+                    <div class="achievement-detail-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="achievement-detail-info">
+                        <h4 id="modal-achievement-name">Nom de la réussite</h4>
+                        <p id="modal-achievement-description">Description de la réussite</p>
+                        <div class="achievement-detail-meta">
+                            <span class="achievement-points">+<span id="modal-achievement-points">0</span> points</span>
+                            <span class="achievement-type" id="modal-achievement-type">Type</span>
+                        </div>
+                        <div class="achievement-progress-section" id="achievement-progress-section" style="display: none;">
+                            <div class="progress-label">Progression</div>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="modal-progress-bar"></div>
+                            </div>
+                            <div class="progress-text" id="modal-progress-text">0% terminé</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-achievements');
+    const typeFilter = document.getElementById('type-filter');
+    const statusFilter = document.getElementById('status-filter');
+    const achievementCards = document.querySelectorAll('.achievement-card');
+    const emptyState = document.getElementById('empty-state');
+    const achievementCategories = document.querySelectorAll('.achievement-category');
+
+    function filterAchievements() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedType = typeFilter.value;
+        const selectedStatus = statusFilter.value;
+        
+        let visibleCount = 0;
+        let visibleCategories = 0;
+
+        achievementCategories.forEach(category => {
+            const achievements = category.querySelectorAll('.achievement-card');
+            let categoryVisibleCount = 0;
+
+            achievements.forEach(achievement => {
+                const name = achievement.dataset.name;
+                const type = achievement.dataset.type;
+                const isCompleted = achievement.classList.contains('completed');
+                const isInProgress = achievement.classList.contains('in-progress');
+                const isNotStarted = achievement.classList.contains('not-started');
+
+                let show = true;
+
+                // Filtre par nom
+                if (searchTerm && !name.includes(searchTerm)) {
+                    show = false;
+                }
+
+                // Filtre par type
+                if (selectedType && type !== selectedType) {
+                    show = false;
+                }
+
+                // Filtre par statut
+                if (selectedStatus === 'completed' && !isCompleted) {
+                    show = false;
+                } else if (selectedStatus === 'in-progress' && !isInProgress) {
+                    show = false;
+                } else if (selectedStatus === 'not-started' && !isNotStarted) {
+                    show = false;
+                }
+
+                if (show) {
+                    achievement.style.display = 'block';
+                    categoryVisibleCount++;
+                    visibleCount++;
+                } else {
+                    achievement.style.display = 'none';
+                }
+            });
+
+            // Afficher/masquer la catégorie
+            if (categoryVisibleCount > 0) {
+                category.style.display = 'block';
+                visibleCategories++;
+            } else {
+                category.style.display = 'none';
+            }
+        });
+
+        // Afficher l'état vide si aucune réussite visible
+        if (visibleCount === 0) {
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+        }
+    }
+
+    // Événements de filtrage
+    searchInput.addEventListener('input', filterAchievements);
+    typeFilter.addEventListener('change', filterAchievements);
+    statusFilter.addEventListener('change', filterAchievements);
+
+    // Animation des cartes au chargement
+    achievementCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+
+    // Effet hover sur les cartes
+    achievementCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px) scale(1.02)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}
+
+

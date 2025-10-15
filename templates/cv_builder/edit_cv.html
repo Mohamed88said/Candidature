@@ -1,0 +1,881 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Modifier le CV - {{ cv.title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-md-4">
+            <div class="cv-editor-sidebar">
+                <div class="sidebar-header">
+                    <h5>
+                        <i class="fas fa-edit"></i>
+                        Éditeur de CV
+                    </h5>
+                    <div class="cv-info">
+                        <h6>{{ cv.title }}</h6>
+                        <small class="text-muted">{{ cv.template.name }}</small>
+                    </div>
+                </div>
+                
+                <div class="sidebar-content">
+                    <!-- Navigation des sections -->
+                    <div class="section-nav">
+                        <h6 class="section-nav-title">Sections</h6>
+                        <ul class="nav nav-pills flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#personal-info" data-section="personal-info">
+                                    <i class="fas fa-user"></i>
+                                    Informations personnelles
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#objective" data-section="objective">
+                                    <i class="fas fa-bullseye"></i>
+                                    Objectif
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#experience" data-section="experience">
+                                    <i class="fas fa-briefcase"></i>
+                                    Expérience
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#education" data-section="education">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Formation
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#skills" data-section="skills">
+                                    <i class="fas fa-cogs"></i>
+                                    Compétences
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#languages" data-section="languages">
+                                    <i class="fas fa-language"></i>
+                                    Langues
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#certifications" data-section="certifications">
+                                    <i class="fas fa-certificate"></i>
+                                    Certifications
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#projects" data-section="projects">
+                                    <i class="fas fa-project-diagram"></i>
+                                    Projets
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#references" data-section="references">
+                                    <i class="fas fa-users"></i>
+                                    Références
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Actions rapides -->
+                    <div class="quick-actions">
+                        <h6 class="section-nav-title">Actions</h6>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="preview-cv">
+                                <i class="fas fa-eye"></i>
+                                Aperçu
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-sm" id="save-cv">
+                                <i class="fas fa-save"></i>
+                                Sauvegarder
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="export-cv">
+                                <i class="fas fa-download"></i>
+                                Exporter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Paramètres d'affichage -->
+                    <div class="display-settings">
+                        <h6 class="section-nav-title">Affichage</h6>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Zoom</label>
+                            <input type="range" class="form-range" id="zoom-slider" min="50" max="150" value="100">
+                            <small class="text-muted" id="zoom-value">100%</small>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Thème</label>
+                            <select class="form-select form-select-sm" id="theme-selector">
+                                <option value="light">Clair</option>
+                                <option value="dark">Sombre</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenu principal -->
+        <div class="col-lg-9 col-md-8">
+            <div class="cv-editor-main">
+                <!-- Barre d'outils -->
+                <div class="editor-toolbar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="toolbar-left">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="undo-btn" disabled>
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="redo-btn" disabled>
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="toolbar-center">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="bold-btn">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="italic-btn">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="underline-btn">
+                                    <i class="fas fa-underline"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="toolbar-right">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="auto-save-btn">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Auto-sauvegarde
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Zone d'édition -->
+                <div class="cv-editor-content">
+                    <form method="post" id="cv-edit-form">
+                        {% csrf_token %}
+                        
+                        <!-- Informations personnelles -->
+                        <div class="cv-section" id="personal-info-section">
+                            <div class="section-header">
+                                <h4>
+                                    <i class="fas fa-user"></i>
+                                    Informations personnelles
+                                </h4>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#personal-info-collapse">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div class="collapse show" id="personal-info-collapse">
+                                <div class="section-content">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Prénom</label>
+                                                <input type="text" class="form-control" name="first_name" value="{{ cv.personal_info.first_name }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Nom</label>
+                                                <input type="text" class="form-control" name="last_name" value="{{ cv.personal_info.last_name }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" name="email" value="{{ cv.personal_info.email }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Téléphone</label>
+                                                <input type="tel" class="form-control" name="phone" value="{{ cv.personal_info.phone }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Adresse</label>
+                                        <textarea class="form-control" name="address" rows="2">{{ cv.personal_info.address }}</textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Date de naissance</label>
+                                                <input type="date" class="form-control" name="birth_date" value="{{ cv.personal_info.birth_date|date:'Y-m-d' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Nationalité</label>
+                                                <input type="text" class="form-control" name="nationality" value="{{ cv.personal_info.nationality }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Objectif -->
+                        <div class="cv-section" id="objective-section">
+                            <div class="section-header">
+                                <h4>
+                                    <i class="fas fa-bullseye"></i>
+                                    Objectif professionnel
+                                </h4>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#objective-collapse">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div class="collapse show" id="objective-collapse">
+                                <div class="section-content">
+                                    <div class="form-group mb-3">
+                                        <textarea class="form-control" name="objective" rows="4" placeholder="Décrivez vos objectifs professionnels...">{{ cv.objective }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Expérience -->
+                        <div class="cv-section" id="experience-section">
+                            <div class="section-header">
+                                <h4>
+                                    <i class="fas fa-briefcase"></i>
+                                    Expérience professionnelle
+                                </h4>
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#experience-collapse">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm" id="add-experience">
+                                        <i class="fas fa-plus"></i>
+                                        Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="collapse show" id="experience-collapse">
+                                <div class="section-content">
+                                    <div id="experiences-list">
+                                        {% for experience in cv.experiences.all %}
+                                        <div class="experience-item" data-id="{{ experience.id }}">
+                                            <div class="item-header">
+                                                <h6>{{ experience.job_title }} - {{ experience.company }}</h6>
+                                                <div class="item-actions">
+                                                    <button type="button" class="btn btn-outline-primary btn-sm edit-experience" data-id="{{ experience.id }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-experience" data-id="{{ experience.id }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="item-details">
+                                                <p class="text-muted">{{ experience.start_date|date:"M Y" }} - {{ experience.end_date|date:"M Y"|default:"Présent" }}</p>
+                                                <p>{{ experience.description|truncatewords:20 }}</p>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="empty-state">
+                                            <i class="fas fa-briefcase fa-2x text-muted mb-3"></i>
+                                            <p class="text-muted">Aucune expérience ajoutée</p>
+                                            <button type="button" class="btn btn-outline-primary" id="add-first-experience">
+                                                <i class="fas fa-plus"></i>
+                                                Ajouter une expérience
+                                            </button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Formation -->
+                        <div class="cv-section" id="education-section">
+                            <div class="section-header">
+                                <h4>
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Formation
+                                </h4>
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#education-collapse">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm" id="add-education">
+                                        <i class="fas fa-plus"></i>
+                                        Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="collapse show" id="education-collapse">
+                                <div class="section-content">
+                                    <div id="educations-list">
+                                        {% for education in cv.educations.all %}
+                                        <div class="education-item" data-id="{{ education.id }}">
+                                            <div class="item-header">
+                                                <h6>{{ education.degree }} - {{ education.institution }}</h6>
+                                                <div class="item-actions">
+                                                    <button type="button" class="btn btn-outline-primary btn-sm edit-education" data-id="{{ education.id }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-education" data-id="{{ education.id }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="item-details">
+                                                <p class="text-muted">{{ education.start_date|date:"Y" }} - {{ education.end_date|date:"Y"|default:"En cours" }}</p>
+                                                <p>{{ education.description|truncatewords:20 }}</p>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="empty-state">
+                                            <i class="fas fa-graduation-cap fa-2x text-muted mb-3"></i>
+                                            <p class="text-muted">Aucune formation ajoutée</p>
+                                            <button type="button" class="btn btn-outline-primary" id="add-first-education">
+                                                <i class="fas fa-plus"></i>
+                                                Ajouter une formation
+                                            </button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Compétences -->
+                        <div class="cv-section" id="skills-section">
+                            <div class="section-header">
+                                <h4>
+                                    <i class="fas fa-cogs"></i>
+                                    Compétences
+                                </h4>
+                                <div class="section-actions">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#skills-collapse">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm" id="add-skill">
+                                        <i class="fas fa-plus"></i>
+                                        Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="collapse show" id="skills-collapse">
+                                <div class="section-content">
+                                    <div id="skills-list">
+                                        {% for skill in cv.skills.all %}
+                                        <div class="skill-item" data-id="{{ skill.id }}">
+                                            <div class="skill-info">
+                                                <span class="skill-name">{{ skill.name }}</span>
+                                                <span class="skill-level">{{ skill.get_level_display }}</span>
+                                            </div>
+                                            <div class="skill-actions">
+                                                <button type="button" class="btn btn-outline-primary btn-sm edit-skill" data-id="{{ skill.id }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm delete-skill" data-id="{{ skill.id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="empty-state">
+                                            <i class="fas fa-cogs fa-2x text-muted mb-3"></i>
+                                            <p class="text-muted">Aucune compétence ajoutée</p>
+                                            <button type="button" class="btn btn-outline-primary" id="add-first-skill">
+                                                <i class="fas fa-plus"></i>
+                                                Ajouter une compétence
+                                            </button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals pour l'ajout/édition d'éléments -->
+<!-- Modal Expérience -->
+<div class="modal fade" id="experienceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter/Modifier une expérience</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="experience-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Poste</label>
+                                <input type="text" class="form-control" name="job_title" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Entreprise</label>
+                                <input type="text" class="form-control" name="company" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Date de début</label>
+                                <input type="date" class="form-control" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Date de fin</label>
+                                <input type="date" class="form-control" name="end_date">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" name="is_current" id="is-current">
+                                    <label class="form-check-label" for="is-current">
+                                        Poste actuel
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="4" placeholder="Décrivez vos responsabilités et réalisations..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="save-experience">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Formation -->
+<div class="modal fade" id="educationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter/Modifier une formation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="education-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Diplôme</label>
+                                <input type="text" class="form-control" name="degree" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Établissement</label>
+                                <input type="text" class="form-control" name="institution" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Année de début</label>
+                                <input type="number" class="form-control" name="start_date" min="1950" max="2030" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Année de fin</label>
+                                <input type="number" class="form-control" name="end_date" min="1950" max="2030">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" name="is_current" id="is-current-edu">
+                                    <label class="form-check-label" for="is-current-edu">
+                                        Formation en cours
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Détails sur la formation..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="save-education">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Compétence -->
+<div class="modal fade" id="skillModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter/Modifier une compétence</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="skill-form">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Nom de la compétence</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Niveau</label>
+                        <select class="form-select" name="level" required>
+                            <option value="">Sélectionner un niveau</option>
+                            <option value="beginner">Débutant</option>
+                            <option value="intermediate">Intermédiaire</option>
+                            <option value="advanced">Avancé</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="save-skill">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.cv-editor-sidebar {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.cv-info h6 {
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.section-nav-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section-nav .nav-link {
+    color: #6c757d;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 2px;
+    transition: all 0.2s ease;
+}
+
+.section-nav .nav-link:hover,
+.section-nav .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.quick-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.display-settings {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.cv-editor-main {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.editor-toolbar {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.cv-editor-content {
+    padding: 30px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.cv-section {
+    margin-bottom: 30px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.section-header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.section-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.section-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.section-content {
+    padding: 20px;
+}
+
+.experience-item,
+.education-item,
+.skill-item {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.2s ease;
+}
+
+.experience-item:hover,
+.education-item:hover,
+.skill-item:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.item-header h6 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.item-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.item-details p {
+    margin-bottom: 5px;
+}
+
+.skill-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.skill-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.skill-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.skill-level {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.skill-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    display: block;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .cv-editor-sidebar {
+        height: auto;
+        position: static;
+        margin-bottom: 20px;
+    }
+    
+    .cv-editor-content {
+        padding: 20px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .section-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation des sections
+    const sectionLinks = document.querySelectorAll('.section-nav .nav-link');
+    const sections = document.querySelectorAll('.cv-section');
+    
+    sectionLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Mettre à jour la navigation active
+            sectionLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Faire défiler vers la section
+            const targetSection = document.querySelector(this.getAttribute('href'));
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Gestion du zoom
+    const zoomSlider = document.getElementById('zoom-slider');
+    const zoomValue = document.getElementById('zoom-value');
+    const editorContent = document.querySelector('.cv-editor-content');
+    
+    zoomSlider.addEventListener('input', function() {
+        const zoom = this.value;
+        zoomValue.textContent = zoom + '%';
+        editorContent.style.transform = `scale(${zoom / 100})`;
+        editorContent.style.transformOrigin = 'top left';
+    });
+    
+    // Auto-sauvegarde
+    let autoSaveTimeout;
+    const form = document.getElementById('cv-edit-form');
+    
+    function autoSave() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            // Ici, vous pourriez implémenter l'auto-sauvegarde via AJAX
+            console.log('Auto-sauvegarde...');
+        }, 2000);
+    }
+    
+    // Écouter les changements dans le formulaire
+    form.addEventListener('input', autoSave);
+    
+    // Gestion des modals d'ajout/édition
+    const addExperienceBtn = document.getElementById('add-experience');
+    const addEducationBtn = document.getElementById('add-education');
+    const addSkillBtn = document.getElementById('add-skill');
+    
+    addExperienceBtn.addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('experienceModal'));
+        modal.show();
+    });
+    
+    addEducationBtn.addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('educationModal'));
+        modal.show();
+    });
+    
+    addSkillBtn.addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('skillModal'));
+        modal.show();
+    });
+    
+    // Sauvegarde des éléments
+    document.getElementById('save-experience').addEventListener('click', function() {
+        // Ici, vous pourriez implémenter la sauvegarde via AJAX
+        console.log('Sauvegarde de l\'expérience...');
+        bootstrap.Modal.getInstance(document.getElementById('experienceModal')).hide();
+    });
+    
+    document.getElementById('save-education').addEventListener('click', function() {
+        // Ici, vous pourriez implémenter la sauvegarde via AJAX
+        console.log('Sauvegarde de la formation...');
+        bootstrap.Modal.getInstance(document.getElementById('educationModal')).hide();
+    });
+    
+    document.getElementById('save-skill').addEventListener('click', function() {
+        // Ici, vous pourriez implémenter la sauvegarde via AJAX
+        console.log('Sauvegarde de la compétence...');
+        bootstrap.Modal.getInstance(document.getElementById('skillModal')).hide();
+    });
+    
+    // Gestion des boutons d'édition et suppression
+    document.querySelectorAll('.edit-experience, .edit-education, .edit-skill').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            // Charger les données existantes dans le modal
+            console.log('Édition de l\'élément:', id);
+        });
+    });
+    
+    document.querySelectorAll('.delete-experience, .delete-education, .delete-skill').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) {
+                const id = this.dataset.id;
+                // Supprimer l'élément via AJAX
+                console.log('Suppression de l\'élément:', id);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+
+

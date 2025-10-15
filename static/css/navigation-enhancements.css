@@ -1,0 +1,570 @@
+/* Navigation Enhancements */
+
+/* =============================================================================
+   BACK TO TOP BUTTON
+   ============================================================================= */
+
+.back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--recruitment-primary);
+    color: var(--recruitment-text-inverse);
+    border: none;
+    box-shadow: var(--recruitment-shadow-lg);
+    z-index: var(--recruitment-z-fixed);
+    display: none;
+    transition: all var(--recruitment-transition-normal);
+    cursor: pointer;
+}
+
+.back-to-top:hover {
+    background-color: var(--recruitment-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--recruitment-shadow-xl);
+}
+
+.back-to-top:active {
+    transform: translateY(0);
+}
+
+/* =============================================================================
+   ENHANCED NAVBAR
+   ============================================================================= */
+
+.navbar {
+    transition: all var(--recruitment-transition-normal);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.navbar-scrolled {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: var(--recruitment-shadow-md);
+}
+
+[data-theme="dark"] .navbar-scrolled {
+    background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+.navbar-brand {
+    font-weight: var(--recruitment-font-bold);
+    transition: color var(--recruitment-transition-fast);
+}
+
+.navbar-brand:hover {
+    color: var(--recruitment-primary) !important;
+}
+
+.navbar-nav .nav-link {
+    position: relative;
+    font-weight: var(--recruitment-font-medium);
+    transition: color var(--recruitment-transition-fast);
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: var(--recruitment-primary);
+    transition: all var(--recruitment-transition-fast);
+    transform: translateX(-50%);
+}
+
+.navbar-nav .nav-link:hover::after,
+.navbar-nav .nav-link.active::after {
+    width: 100%;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--recruitment-primary) !important;
+}
+
+/* =============================================================================
+   DROPDOWN ENHANCEMENTS
+   ============================================================================= */
+
+.dropdown-menu {
+    border: none;
+    border-radius: var(--recruitment-radius-lg);
+    box-shadow: var(--recruitment-shadow-lg);
+    padding: var(--recruitment-space-2) 0;
+    margin-top: var(--recruitment-space-2);
+    background-color: var(--recruitment-bg-card);
+    border: 1px solid var(--recruitment-border-light);
+}
+
+.dropdown-item {
+    padding: var(--recruitment-space-3) var(--recruitment-space-4);
+    font-weight: var(--recruitment-font-medium);
+    transition: all var(--recruitment-transition-fast);
+    color: var(--recruitment-text-primary);
+}
+
+.dropdown-item:hover {
+    background-color: var(--recruitment-bg-secondary);
+    color: var(--recruitment-primary);
+}
+
+.dropdown-item:focus {
+    background-color: var(--recruitment-bg-secondary);
+    color: var(--recruitment-primary);
+    outline: none;
+}
+
+.dropdown-divider {
+    border-color: var(--recruitment-border-light);
+    margin: var(--recruitment-space-2) 0;
+}
+
+/* =============================================================================
+   THEME TOGGLE BUTTON
+   ============================================================================= */
+
+.theme-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--recruitment-transition-fast);
+    border: 1px solid var(--recruitment-border-medium);
+    background-color: var(--recruitment-bg-primary);
+    color: var(--recruitment-text-primary);
+}
+
+.theme-toggle:hover {
+    background-color: var(--recruitment-bg-secondary);
+    border-color: var(--recruitment-primary);
+    color: var(--recruitment-primary);
+    transform: scale(1.05);
+}
+
+.theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--recruitment-primary);
+}
+
+/* =============================================================================
+   MOBILE NAVIGATION
+   ============================================================================= */
+
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background-color: var(--recruitment-bg-primary);
+        border-top: 1px solid var(--recruitment-border-light);
+        margin-top: var(--recruitment-space-4);
+        padding-top: var(--recruitment-space-4);
+        box-shadow: var(--recruitment-shadow-sm);
+        border-radius: var(--recruitment-radius-lg);
+    }
+    
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .navbar-nav .nav-item {
+        width: 100%;
+        margin-bottom: var(--recruitment-space-1);
+    }
+    
+    .navbar-nav .nav-link {
+        padding: var(--recruitment-space-4);
+        border-radius: var(--recruitment-radius-md);
+        transition: background-color var(--recruitment-transition-fast);
+        width: 100%;
+        text-align: left;
+    }
+    
+    .navbar-nav .nav-link:hover {
+        background-color: var(--recruitment-bg-secondary);
+    }
+    
+    .navbar-nav .nav-link::after {
+        display: none;
+    }
+    
+    .navbar-toggler {
+        border: 1px solid var(--recruitment-border-medium);
+        border-radius: var(--recruitment-radius-md);
+        padding: var(--recruitment-space-2);
+        transition: all var(--recruitment-transition-fast);
+    }
+    
+    .navbar-toggler:hover {
+        background-color: var(--recruitment-bg-secondary);
+        border-color: var(--recruitment-primary);
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 2px var(--recruitment-primary);
+    }
+    
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+    
+    [data-theme="dark"] .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+}
+
+/* =============================================================================
+   BREADCRUMB ENHANCEMENTS
+   ============================================================================= */
+
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: var(--recruitment-space-6);
+}
+
+.breadcrumb-item {
+    font-size: var(--recruitment-text-sm);
+    color: var(--recruitment-text-secondary);
+}
+
+.breadcrumb-item a {
+    color: var(--recruitment-text-link);
+    text-decoration: none;
+    transition: color var(--recruitment-transition-fast);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--recruitment-text-link-hover);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--recruitment-text-primary);
+    font-weight: var(--recruitment-font-medium);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: var(--recruitment-text-muted);
+    font-weight: var(--recruitment-font-bold);
+}
+
+/* =============================================================================
+   PAGINATION ENHANCEMENTS
+   ============================================================================= */
+
+.pagination {
+    justify-content: center;
+    margin-top: var(--recruitment-space-8);
+}
+
+.page-link {
+    color: var(--recruitment-text-link);
+    border-color: var(--recruitment-border-light);
+    padding: var(--recruitment-space-3) var(--recruitment-space-4);
+    margin: 0 var(--recruitment-space-1);
+    border-radius: var(--recruitment-radius-md);
+    transition: all var(--recruitment-transition-fast);
+    font-weight: var(--recruitment-font-medium);
+}
+
+.page-link:hover {
+    color: var(--recruitment-text-link-hover);
+    background-color: var(--recruitment-bg-secondary);
+    border-color: var(--recruitment-border-medium);
+    transform: translateY(-1px);
+}
+
+.page-link:focus {
+    box-shadow: 0 0 0 2px var(--recruitment-primary);
+    outline: none;
+}
+
+.page-item.active .page-link {
+    background-color: var(--recruitment-primary);
+    border-color: var(--recruitment-primary);
+    color: var(--recruitment-text-inverse);
+    box-shadow: var(--recruitment-shadow-sm);
+}
+
+.page-item.disabled .page-link {
+    color: var(--recruitment-text-muted);
+    background-color: var(--recruitment-bg-primary);
+    border-color: var(--recruitment-border-light);
+    cursor: not-allowed;
+}
+
+/* =============================================================================
+   TAB ENHANCEMENTS
+   ============================================================================= */
+
+.nav-tabs {
+    border-bottom: 2px solid var(--recruitment-border-light);
+    margin-bottom: var(--recruitment-space-6);
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--recruitment-text-secondary);
+    font-weight: var(--recruitment-font-medium);
+    padding: var(--recruitment-space-3) var(--recruitment-space-4);
+    transition: all var(--recruitment-transition-fast);
+    border-radius: var(--recruitment-radius-md) var(--recruitment-radius-md) 0 0;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: var(--recruitment-border-medium);
+    color: var(--recruitment-text-primary);
+    background-color: var(--recruitment-bg-secondary);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--recruitment-primary);
+    background-color: var(--recruitment-bg-primary);
+    border-color: var(--recruitment-primary);
+    border-bottom-color: var(--recruitment-bg-primary);
+}
+
+.nav-tabs .nav-link:focus {
+    box-shadow: 0 0 0 2px var(--recruitment-primary);
+    outline: none;
+}
+
+/* =============================================================================
+   PROGRESS BAR ENHANCEMENTS
+   ============================================================================= */
+
+.progress {
+    height: 8px;
+    background-color: var(--recruitment-bg-secondary);
+    border-radius: var(--recruitment-radius-full);
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--recruitment-primary), var(--recruitment-primary-light));
+    transition: width var(--recruitment-transition-normal);
+    border-radius: var(--recruitment-radius-full);
+}
+
+.progress-bar-striped {
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
+}
+
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% {
+        background-position-x: 1rem;
+    }
+}
+
+/* =============================================================================
+   BADGE ENHANCEMENTS
+   ============================================================================= */
+
+.badge {
+    font-weight: var(--recruitment-font-semibold);
+    padding: var(--recruitment-space-1) var(--recruitment-space-2);
+    border-radius: var(--recruitment-radius-md);
+    font-size: var(--recruitment-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-primary {
+    background-color: var(--recruitment-primary);
+    color: var(--recruitment-text-inverse);
+}
+
+.badge-secondary {
+    background-color: var(--recruitment-secondary);
+    color: var(--recruitment-text-inverse);
+}
+
+.badge-success {
+    background-color: var(--recruitment-success);
+    color: var(--recruitment-text-inverse);
+}
+
+.badge-warning {
+    background-color: var(--recruitment-warning);
+    color: var(--recruitment-text-inverse);
+}
+
+.badge-danger {
+    background-color: var(--recruitment-danger);
+    color: var(--recruitment-text-inverse);
+}
+
+.badge-info {
+    background-color: var(--recruitment-info);
+    color: var(--recruitment-text-inverse);
+}
+
+.badge-light {
+    background-color: var(--recruitment-bg-secondary);
+    color: var(--recruitment-text-primary);
+}
+
+.badge-dark {
+    background-color: var(--recruitment-gray-800);
+    color: var(--recruitment-text-inverse);
+}
+
+/* =============================================================================
+   ALERT ENHANCEMENTS
+   ============================================================================= */
+
+.alert {
+    border: none;
+    border-radius: var(--recruitment-radius-lg);
+    padding: var(--recruitment-space-4) var(--recruitment-space-6);
+    margin-bottom: var(--recruitment-space-6);
+    font-weight: var(--recruitment-font-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.alert::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: currentColor;
+    opacity: 0.3;
+}
+
+.alert-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--recruitment-success-dark);
+    border-left: 4px solid var(--recruitment-success);
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--recruitment-danger-dark);
+    border-left: 4px solid var(--recruitment-danger);
+}
+
+.alert-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--recruitment-warning-dark);
+    border-left: 4px solid var(--recruitment-warning);
+}
+
+.alert-info {
+    background-color: rgba(6, 182, 212, 0.1);
+    color: var(--recruitment-info-dark);
+    border-left: 4px solid var(--recruitment-info);
+}
+
+.alert-dismissible .btn-close {
+    padding: var(--recruitment-space-4);
+    font-size: var(--recruitment-text-lg);
+    opacity: 0.7;
+    transition: opacity var(--recruitment-transition-fast);
+}
+
+.alert-dismissible .btn-close:hover {
+    opacity: 1;
+}
+
+/* =============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================= */
+
+@media (max-width: 767.98px) {
+    .back-to-top {
+        bottom: 1rem;
+        right: 1rem;
+        width: 45px;
+        height: 45px;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+        gap: var(--recruitment-space-1);
+    }
+    
+    .page-link {
+        padding: var(--recruitment-space-2) var(--recruitment-space-3);
+        font-size: var(--recruitment-text-sm);
+        min-width: 40px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nav-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: var(--recruitment-space-2) var(--recruitment-space-3);
+        font-size: var(--recruitment-text-sm);
+    }
+}
+
+/* =============================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================================================= */
+
+/* Focus styles for keyboard navigation */
+.nav-link:focus,
+.dropdown-item:focus,
+.page-link:focus,
+.theme-toggle:focus,
+.back-to-top:focus {
+    outline: 2px solid var(--recruitment-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .navbar {
+        border-bottom: 2px solid var(--recruitment-text-primary);
+    }
+    
+    .nav-link,
+    .dropdown-item,
+    .page-link {
+        border: 1px solid transparent;
+    }
+    
+    .nav-link:hover,
+    .dropdown-item:hover,
+    .page-link:hover {
+        border-color: var(--recruitment-text-primary);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .navbar,
+    .nav-link,
+    .dropdown-item,
+    .page-link,
+    .back-to-top,
+    .theme-toggle {
+        transition: none;
+    }
+    
+    .back-to-top:hover {
+        transform: none;
+    }
+}
+
+

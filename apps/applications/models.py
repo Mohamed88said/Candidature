@@ -57,6 +57,23 @@ class Application(models.Model):
         resource_type='raw'
     )
     
+    # Vidéo de présentation
+    presentation_video = CloudinaryField(
+        'video',
+        folder='recruitment/applications/videos/',
+        null=True,
+        blank=True,
+        resource_type='video',
+        transformation=[
+            {'width': 1280, 'height': 720, 'crop': 'fill'},
+            {'quality': 'auto'},
+            {'format': 'mp4'}
+        ]
+    )
+    video_duration = models.PositiveIntegerField(blank=True, null=True, help_text='Durée en secondes')
+    video_transcript = models.TextField(blank=True, help_text='Transcription automatique de la vidéo')
+    video_questions = models.JSONField(default=list, blank=True, help_text='Questions posées dans la vidéo')
+    
     # Informations supplémentaires
     expected_salary = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     availability_date = models.DateField(blank=True, null=True)
@@ -279,3 +296,95 @@ class ApplicationDocument(models.Model):
         if self.file:
             return round(self.file.size / (1024 * 1024), 2)
         return 0
+
+
+class VideoQuestion(models.Model):
+    """Questions personnalisées pour les vidéos de candidature"""
+    QUESTION_TYPES = (
+        ('introduction', 'Présentation personnelle'),
+        ('motivation', 'Motivation pour le poste'),
+        ('experience', 'Expérience pertinente'),
+        ('skills', 'Compétences techniques'),
+        ('challenge', 'Défi professionnel'),
+        ('goals', 'Objectifs de carrière'),
+        ('custom', 'Question personnalisée'),
+    )
+    
+    job = models.ForeignKey('jobs.Job', on_delete=models.CASCADE, related_name='video_questions')
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
+    question_text = models.TextField()
+    is_required = models.BooleanField(default=True)
+    time_limit = models.PositiveIntegerField(default=120, help_text='Temps limite en secondes')
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Question vidéo'
+        verbose_name_plural = 'Questions vidéo'
+        ordering = ['order', 'created_at']
+    
+    def __str__(self):
+        return f"{self.get_question_type_display()} - {self.job.title}"
+
+
+class VideoApplication(models.Model):
+    """Candidature vidéo spécialisée"""
+    application = models.OneToOneField(Application, on_delete=models.CASCADE, related_name='video_application')
+    
+    # Vidéo principale
+    main_video = CloudinaryField(
+        'video',
+        folder='recruitment/applications/main_videos/',
+        resource_type='video',
+        transformation=[
+            {'width': 1280, 'height': 720, 'crop': 'fill'},
+            {'quality': 'auto'},
+            {'format': 'mp4'}
+        ]
+    )
+    
+    # Réponses aux questions
+    question_responses = models.JSONField(default=list, help_text='Réponses aux questions vidéo')
+    
+    # Métadonnées vidéo
+    total_duration = models.PositiveIntegerField(help_text='Durée totale en secondes')
+    video_quality = models.CharField(max_length=20, choices=[
+        ('low', 'Basse'),
+        ('medium', 'Moyenne'),
+        ('high', 'Haute'),
+        ('ultra', 'Ultra'),
+    ], default='medium')
+    
+    # Transcription et analyse
+    transcript = models.TextField(blank=True)
+    keywords_extracted = models.JSONField(default=list, blank=True)
+    sentiment_analysis = models.JSONField(default=dict, blank=True)
+    
+    # Statut de traitement
+    is_processed = models.BooleanField(default=False)
+    processing_status = models.CharField(max_length=20, choices=[
+        ('pending', 'En attente'),
+        ('processing', 'En cours'),
+        ('completed', 'Terminé'),
+        ('failed', 'Échec'),
+    ], default='pending')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Candidature vidéo'
+        verbose_name_plural = 'Candidatures vidéo'
+    
+    def __str__(self):
+        return f"Vidéo - {self.application.candidate.user.full_name} - {self.application.job.title}"
+    
+    @property
+    def duration_formatted(self):
+        """Durée formatée (mm:ss)"""
+        minutes = self.total_duration // 60
+        seconds = self.total_duration % 60
+        return f"{minutes:02d}:{seconds:02d}"

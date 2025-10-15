@@ -1,0 +1,378 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Matching intelligent - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Matching intelligent</h1>
+            <p>Découvrez les offres qui correspondent parfaitement à votre profil</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Matching Stats -->
+            <div class="col-12">
+                <div class="matching-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ match_percentage }}%</h3>
+                            <p>Score de correspondance moyen</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_matches }}</h3>
+                            <p>Offres correspondantes</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ high_matches }}</h3>
+                            <p>Correspondances élevées</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ new_matches }}</h3>
+                            <p>Nouvelles correspondances</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Matching Filters -->
+            <div class="col-lg-3">
+                <div class="matching-filters">
+                    <div class="filters-header">
+                        <h3>Filtres de matching</h3>
+                        <button class="btn btn-sm btn-outline-primary" id="clear-filters">
+                            <i class="fas fa-times"></i>
+                            <span>Effacer</span>
+                        </button>
+                    </div>
+                    
+                    <form method="get" class="filters-form">
+                        <div class="filter-group">
+                            <label class="filter-label">Score minimum</label>
+                            <input type="range" name="min_score" class="form-range" min="0" max="100" value="{{ request.GET.min_score|default:70 }}" id="score-range">
+                            <div class="range-value">
+                                <span id="score-value">{{ request.GET.min_score|default:70 }}%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Localisation</label>
+                            <input type="text" name="location" class="form-control" placeholder="Ville, région..." value="{{ request.GET.location }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Type de contrat</label>
+                            <select name="job_type" class="form-select">
+                                <option value="">Tous les types</option>
+                                <option value="full_time" {% if request.GET.job_type == 'full_time' %}selected{% endif %}>CDI</option>
+                                <option value="part_time" {% if request.GET.job_type == 'part_time' %}selected{% endif %}>CDD</option>
+                                <option value="contract" {% if request.GET.job_type == 'contract' %}selected{% endif %}>Contrat</option>
+                                <option value="internship" {% if request.GET.job_type == 'internship' %}selected{% endif %}>Stage</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Niveau d'expérience</label>
+                            <select name="experience_level" class="form-select">
+                                <option value="">Tous les niveaux</option>
+                                <option value="entry" {% if request.GET.experience_level == 'entry' %}selected{% endif %}>Débutant</option>
+                                <option value="mid" {% if request.GET.experience_level == 'mid' %}selected{% endif %}>Intermédiaire</option>
+                                <option value="senior" {% if request.GET.experience_level == 'senior' %}selected{% endif %}>Senior</option>
+                                <option value="executive" {% if request.GET.experience_level == 'executive' %}selected{% endif %}>Direction</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Salaire minimum</label>
+                            <input type="number" name="min_salary" class="form-control" placeholder="€" value="{{ request.GET.min_salary }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Salaire maximum</label>
+                            <input type="number" name="max_salary" class="form-control" placeholder="€" value="{{ request.GET.max_salary }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Secteur d'activité</label>
+                            <select name="category" class="form-select">
+                                <option value="">Tous les secteurs</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Télétravail</label>
+                            <select name="remote_work" class="form-select">
+                                <option value="">Tous</option>
+                                <option value="yes" {% if request.GET.remote_work == 'yes' %}selected{% endif %}>Oui</option>
+                                <option value="no" {% if request.GET.remote_work == 'no' %}selected{% endif %}>Non</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-filter">
+                            <i class="fas fa-search"></i>
+                            <span>Appliquer les filtres</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Matches List -->
+            <div class="col-lg-9">
+                <div class="matches-content">
+                    <div class="matches-header">
+                        <div class="matches-count">
+                            <h3>{{ matches|length }} correspondance{{ matches|length|pluralize }} trouvée{{ matches|length|pluralize }}</h3>
+                        </div>
+                        <div class="matches-sort">
+                            <select class="form-select" id="sort-select">
+                                <option value="score">Score de correspondance</option>
+                                <option value="newest">Plus récentes</option>
+                                <option value="oldest">Plus anciennes</option>
+                                <option value="salary_high">Salaire élevé</option>
+                                <option value="salary_low">Salaire faible</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="matches-list">
+                        {% for match in matches %}
+                        <div class="match-card" data-match-id="{{ match.id }}">
+                            <div class="match-card-header">
+                                <div class="match-title">
+                                    <h4><a href="{% url 'jobs:job_detail' match.job.id %}">{{ match.job.title }}</a></h4>
+                                    <p class="match-company">{{ match.job.company.name }}</p>
+                                </div>
+                                <div class="match-score">
+                                    <div class="score-circle">
+                                        <span class="score-value">{{ match.score|floatformat:0 }}%</span>
+                                    </div>
+                                    <p class="score-label">Correspondance</p>
+                                </div>
+                            </div>
+                            
+                            <div class="match-card-body">
+                                <div class="match-details">
+                                    <div class="match-detail">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>{{ match.job.location }}</span>
+                                    </div>
+                                    <div class="match-detail">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span>{{ match.job.get_job_type_display }}</span>
+                                    </div>
+                                    <div class="match-detail">
+                                        <i class="fas fa-clock"></i>
+                                        <span>{{ match.job.get_experience_level_display }}</span>
+                                    </div>
+                                    {% if match.job.salary_min or match.job.salary_max %}
+                                    <div class="match-detail">
+                                        <i class="fas fa-euro-sign"></i>
+                                        <span>
+                                            {% if match.job.salary_min and match.job.salary_max %}
+                                                {{ match.job.salary_min|floatformat:0 }}€ - {{ match.job.salary_max|floatformat:0 }}€
+                                            {% elif match.job.salary_min %}
+                                                À partir de {{ match.job.salary_min|floatformat:0 }}€
+                                            {% elif match.job.salary_max %}
+                                                Jusqu'à {{ match.job.salary_max|floatformat:0 }}€
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="match-description">
+                                    <p>{{ match.job.description|truncatewords:30 }}</p>
+                                </div>
+                                
+                                <div class="match-skills">
+                                    <h5>Compétences correspondantes</h5>
+                                    <div class="skills-list">
+                                        {% for skill in match.matching_skills %}
+                                        <span class="skill-tag skill-matched">{{ skill.name }}</span>
+                                        {% endfor %}
+                                        {% for skill in match.missing_skills %}
+                                        <span class="skill-tag skill-missing">{{ skill.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div class="match-analysis">
+                                    <h5>Analyse de correspondance</h5>
+                                    <div class="analysis-items">
+                                        <div class="analysis-item">
+                                            <span class="analysis-label">Compétences</span>
+                                            <div class="analysis-bar">
+                                                <div class="analysis-fill" style="width: {{ match.skills_score }}%"></div>
+                                            </div>
+                                            <span class="analysis-value">{{ match.skills_score }}%</span>
+                                        </div>
+                                        <div class="analysis-item">
+                                            <span class="analysis-label">Expérience</span>
+                                            <div class="analysis-bar">
+                                                <div class="analysis-fill" style="width: {{ match.experience_score }}%"></div>
+                                            </div>
+                                            <span class="analysis-value">{{ match.experience_score }}%</span>
+                                        </div>
+                                        <div class="analysis-item">
+                                            <span class="analysis-label">Localisation</span>
+                                            <div class="analysis-bar">
+                                                <div class="analysis-fill" style="width: {{ match.location_score }}%"></div>
+                                            </div>
+                                            <span class="analysis-value">{{ match.location_score }}%</span>
+                                        </div>
+                                        <div class="analysis-item">
+                                            <span class="analysis-label">Préférences</span>
+                                            <div class="analysis-bar">
+                                                <div class="analysis-fill" style="width: {{ match.preferences_score }}%"></div>
+                                            </div>
+                                            <span class="analysis-value">{{ match.preferences_score }}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="match-card-footer">
+                                <div class="match-meta">
+                                    <span class="match-date">
+                                        <i class="fas fa-calendar"></i>
+                                        Publié {{ match.job.created_at|timesince }} ago
+                                    </span>
+                                    {% if match.job.remote_work %}
+                                    <span class="match-remote">
+                                        <i class="fas fa-home"></i>
+                                        Télétravail possible
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="match-actions">
+                                    <a href="{% url 'jobs:job_detail' match.job.id %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Voir l'offre</span>
+                                    </a>
+                                    <a href="{% url 'applications:apply' match.job.id %}" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>Postuler</span>
+                                    </a>
+                                    <button class="btn btn-outline-secondary" onclick="saveMatch({{ match.id }})">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-matches">
+                            <div class="no-matches-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>Aucune correspondance trouvée</h3>
+                            <p>Essayez de modifier vos critères de recherche ou mettez à jour votre profil</p>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-primary">
+                                <i class="fas fa-user-edit"></i>
+                                <span>Mettre à jour mon profil</span>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if matches.has_other_pages %}
+                    <nav class="pagination-nav">
+                        <ul class="pagination">
+                            {% if matches.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ matches.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in matches.paginator.page_range %}
+                            {% if matches.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > matches.number|add:'-3' and num < matches.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if matches.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ matches.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Score range functionality
+    const scoreRange = document.getElementById('score-range');
+    const scoreValue = document.getElementById('score-value');
+    
+    scoreRange.addEventListener('input', function() {
+        scoreValue.textContent = this.value + '%';
+    });
+    
+    // Save match functionality
+    function saveMatch(matchId) {
+        // Implementation for saving match
+        console.log('Saving match:', matchId);
+    }
+    
+    // Sort functionality
+    document.getElementById('sort-select').addEventListener('change', function() {
+        const sortValue = this.value;
+        const url = new URL(window.location);
+        url.searchParams.set('sort', sortValue);
+        window.location.href = url.toString();
+    });
+    
+    // Clear filters
+    document.getElementById('clear-filters').addEventListener('click', function() {
+        const form = document.querySelector('.filters-form');
+        form.reset();
+        form.submit();
+    });
+</script>
+{% endblock %}

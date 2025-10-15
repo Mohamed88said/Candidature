@@ -1,215 +1,214 @@
-{% extends 'base.html' %}
+{% extends 'base_dashboard.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 
-{% block title %}Dashboard - {{ user.full_name }}{% endblock %}
+{% block title %}Tableau de bord - Plateforme de Recrutement{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-lg-3 mb-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    {% if user.candidate_profile.profile_picture %}
-                        <img src="{{ user.candidate_profile.profile_picture.url }}" 
-                             alt="Photo" class="rounded-circle mb-3" 
-                             style="width: 80px; height: 80px; object-fit: cover;">
-                    {% else %}
-                        <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
-                             style="width: 80px; height: 80px;">
-                            <i class="fas fa-user fa-2x"></i>
-                        </div>
-                    {% endif %}
-                    <h5 class="fw-bold">{{ user.full_name }}</h5>
-                    <p class="text-muted">{{ user.candidate_profile.current_position|default:"Candidat" }}</p>
-                    
-                    <div class="mb-3">
-                        <small class="text-muted">Profil complété</small>
-                        <div class="progress mt-1" style="height: 6px;">
-                            <div class="progress-bar bg-success" 
-                                 style="width: {{ user.candidate_profile.profile_completion }}%"></div>
-                        </div>
-                        <small class="text-success">{{ user.candidate_profile.profile_completion }}%</small>
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Tableau de bord</h1>
+            <p>Bienvenue {{ user.get_full_name|default:user.username }}, voici un aperçu de votre activité</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ user.applications.count }}</h3>
+                        <p>Candidatures</p>
                     </div>
                 </div>
-                
-                <div class="list-group list-group-flush">
-                    <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action">
-                        <i class="fas fa-user me-2"></i>Mon Profil
-                    </a>
-                    <a href="{% url 'applications:my_applications' %}" class="list-group-item list-group-item-action">
-                        <i class="fas fa-file-alt me-2"></i>Mes Candidatures
-                    </a>
-                    <a href="{% url 'jobs:saved_jobs' %}" class="list-group-item list-group-item-action">
-                        <i class="fas fa-heart me-2"></i>Favoris
-                    </a>
-                    <a href="{% url 'jobs:job_alerts' %}" class="list-group-item list-group-item-action">
-                        <i class="fas fa-bell me-2"></i>Alertes Emploi
-                    </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ profile_views }}</h3>
+                        <p>Vues du profil</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ user.points|default:0 }}</h3>
+                        <p>Points</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ user.badges.count|default:0 }}</h3>
+                        <p>Badges</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-lg-9">
-            <!-- Stats Cards -->
-            <div class="row mb-4">
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="fw-bold">{{ stats.total_applications }}</h4>
-                                    <p class="mb-0">Candidatures</p>
-                                </div>
-                                <i class="fas fa-file-alt fa-2x opacity-75"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-success text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="fw-bold">{{ stats.pending_applications }}</h4>
-                                    <p class="mb-0">En attente</p>
-                                </div>
-                                <i class="fas fa-clock fa-2x opacity-75"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-info text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="fw-bold">{{ stats.interviews }}</h4>
-                                    <p class="mb-0">Entretiens</p>
-                                </div>
-                                <i class="fas fa-handshake fa-2x opacity-75"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-warning text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="fw-bold">{{ stats.offers }}</h4>
-                                    <p class="mb-0">Offres reçues</p>
-                                </div>
-                                <i class="fas fa-trophy fa-2x opacity-75"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="row">
             <!-- Recent Applications -->
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-file-alt me-2"></i>Candidatures Récentes
-                    </h5>
-                    <a href="{% url 'applications:my_applications' %}" class="btn btn-sm btn-outline-primary">
-                        Voir tout
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% if recent_applications %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Poste</th>
-                                    <th>Entreprise</th>
-                                    <th>Statut</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for application in recent_applications %}
-                                <tr>
-                                    <td>
-                                        <strong>{{ application.job.title }}</strong>
-                                    </td>
-                                    <td>{{ application.job.company }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ application.status|default:'secondary' }}">
-                                            {{ application.get_status_display }}
-                                        </span>
-                                    </td>
-                                    <td>{{ application.applied_at|date:"d/m/Y" }}</td>
-                                    <td>
-                                        <a href="{% url 'applications:application_detail' application.pk %}" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Aucune candidature</h5>
-                        <p class="text-muted">Commencez par postuler à des offres d'emploi</p>
-                        <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
-                            <i class="fas fa-search me-2"></i>Parcourir les offres
+            <div class="col-lg-8">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Dernières candidatures</h3>
+                        <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir tout</span>
                         </a>
                     </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Recommended Jobs -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-star me-2"></i>Offres Recommandées
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if recommended_jobs %}
-                    <div class="row">
-                        {% for job in recommended_jobs %}
-                        <div class="col-md-6 mb-3">
-                            <div class="card border">
-                                <div class="card-body">
-                                    <h6 class="card-title">{{ job.title }}</h6>
-                                    <p class="card-text text-muted">{{ job.company }}</p>
-                                    <p class="card-text">
-                                        <small class="text-muted">
-                                            <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
-                                        </small>
-                                    </p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">{{ job.created_at|timesince }}</small>
-                                        <a href="{% url 'jobs:job_detail' job.slug %}" class="btn btn-sm btn-primary">
-                                            Voir
-                                        </a>
-                                    </div>
+                    <div class="card-body">
+                        {% for application in recent_applications %}
+                        <div class="application-item">
+                            <div class="application-info">
+                                <h4><a href="{% url 'jobs:job_detail' application.job.id %}">{{ application.job.title }}</a></h4>
+                                <p class="application-company">{{ application.job.company.name }}</p>
+                                <div class="application-meta">
+                                    <span class="application-date">{{ application.created_at|timesince }} ago</span>
+                                    <span class="application-status status-{{ application.status }}">
+                                        {{ application.get_status_display }}
+                                    </span>
                                 </div>
                             </div>
+                            <div class="application-actions">
+                                <a href="{% url 'applications:application_detail' application.id %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="fas fa-file-alt"></i>
+                            <h4>Aucune candidature</h4>
+                            <p>Commencez par postuler à des offres d'emploi</p>
+                            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                                <span>Parcourir les offres</span>
+                            </a>
                         </div>
                         {% endfor %}
                     </div>
-                    {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Aucune recommandation</h5>
-                        <p class="text-muted">Complétez votre profil pour recevoir des recommandations personnalisées</p>
-                        <a href="{% url 'accounts:edit_profile' %}" class="btn btn-outline-primary">
-                            <i class="fas fa-user-edit me-2"></i>Compléter mon profil
-                        </a>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-lg-4">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Actions rapides</h3>
                     </div>
-                    {% endif %}
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="{% url 'jobs:job_list' %}" class="quick-action">
+                                <i class="fas fa-search"></i>
+                                <span>Rechercher un emploi</span>
+                            </a>
+                            <a href="{% url 'cv_builder:dashboard' %}" class="quick-action">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Créer un CV</span>
+                            </a>
+                            <a href="{% url 'matching:dashboard' %}" class="quick-action">
+                                <i class="fas fa-magic"></i>
+                                <span>Matching intelligent</span>
+                            </a>
+                            <a href="{% url 'accounts:profile' %}" class="quick-action">
+                                <i class="fas fa-user-edit"></i>
+                                <span>Compléter mon profil</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Completion -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Complétion du profil</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="profile-completion">
+                            <div class="completion-bar">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ profile_completion }}%" aria-valuenow="{{ profile_completion }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <span class="completion-percentage">{{ profile_completion }}%</span>
+                            </div>
+                            <div class="completion-items">
+                                {% if not user.candidate_profile.photo %}
+                                <div class="completion-item">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Ajouter une photo</span>
+                                </div>
+                                {% endif %}
+                                {% if not user.candidate_profile.bio %}
+                                <div class="completion-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>Rédiger une bio</span>
+                                </div>
+                                {% endif %}
+                                {% if not user.candidate_profile.skills.exists %}
+                                <div class="completion-item">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Ajouter des compétences</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit"></i>
+                                <span>Compléter le profil</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Activité récente</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-timeline">
+                            {% for activity in recent_activities %}
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-{{ activity.icon }}"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <h4>{{ activity.title }}</h4>
+                                    <p>{{ activity.description }}</p>
+                                    <span class="activity-time">{{ activity.created_at|timesince }} ago</span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-history"></i>
+                                <h4>Aucune activité récente</h4>
+                                <p>Votre activité apparaîtra ici</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

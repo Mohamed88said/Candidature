@@ -240,7 +240,7 @@ local_settings.py
 # Test files
 test_*.py
 *_test.py
-tests/
+
 
 # Documentation
 docs/build/

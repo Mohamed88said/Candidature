@@ -1,0 +1,292 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Gamification - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Gamification</h1>
+            <p>Gagnez des points, débloquez des badges et montez de niveau en utilisant la plateforme</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- User Stats -->
+            <div class="col-12">
+                <div class="user-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ user.points }}</h3>
+                            <p>Points</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ user.level }}</h3>
+                            <p>Niveau</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ user.badges_count }}</h3>
+                            <p>Badges</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ user.achievements_count }}</h3>
+                            <p>Succès</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="col-12">
+                <div class="level-progress">
+                    <div class="progress-header">
+                        <h3>Progression vers le niveau {{ user.next_level }}</h3>
+                        <span class="progress-percentage">{{ user.level_progress }}%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ user.level_progress }}%" aria-valuenow="{{ user.level_progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span>{{ user.points }} / {{ user.next_level_points }} points</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Badges -->
+            <div class="col-lg-6">
+                <div class="badges-section">
+                    <div class="section-header">
+                        <h3>Badges</h3>
+                        <a href="{% url 'gamification:badges_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir tous</span>
+                        </a>
+                    </div>
+                    
+                    <div class="badges-list">
+                        {% for badge in recent_badges %}
+                        <div class="badge-item {% if badge.is_earned %}earned{% endif %}">
+                            <div class="badge-icon">
+                                <i class="{{ badge.icon }}"></i>
+                            </div>
+                            <div class="badge-content">
+                                <h4>{{ badge.name }}</h4>
+                                <p>{{ badge.description }}</p>
+                                <div class="badge-meta">
+                                    <span class="badge-points">{{ badge.points }} points</span>
+                                    {% if badge.is_earned %}
+                                    <span class="badge-earned">
+                                        <i class="fas fa-check-circle"></i>
+                                        Obtenu
+                                    </span>
+                                    {% else %}
+                                    <span class="badge-progress">
+                                        <i class="fas fa-clock"></i>
+                                        En cours
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-badges">
+                            <div class="no-badges-icon">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                            <h3>Aucun badge</h3>
+                            <p>Commencez à utiliser la plateforme pour gagner vos premiers badges</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Achievements -->
+            <div class="col-lg-6">
+                <div class="achievements-section">
+                    <div class="section-header">
+                        <h3>Succès</h3>
+                        <a href="{% url 'gamification:achievements_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir tous</span>
+                        </a>
+                    </div>
+                    
+                    <div class="achievements-list">
+                        {% for achievement in recent_achievements %}
+                        <div class="achievement-item {% if achievement.is_completed %}completed{% endif %}">
+                            <div class="achievement-icon">
+                                <i class="{{ achievement.icon }}"></i>
+                            </div>
+                            <div class="achievement-content">
+                                <h4>{{ achievement.name }}</h4>
+                                <p>{{ achievement.description }}</p>
+                                <div class="achievement-meta">
+                                    <span class="achievement-points">{{ achievement.points }} points</span>
+                                    {% if achievement.is_completed %}
+                                    <span class="achievement-completed">
+                                        <i class="fas fa-check-circle"></i>
+                                        Terminé
+                                    </span>
+                                    {% else %}
+                                    <div class="achievement-progress">
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ achievement.progress }}%" aria-valuenow="{{ achievement.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="progress-text">{{ achievement.progress }}%</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-achievements">
+                            <div class="no-achievements-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3>Aucun succès</h3>
+                            <p>Commencez à utiliser la plateforme pour débloquer vos premiers succès</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leaderboard -->
+            <div class="col-lg-6">
+                <div class="leaderboard-section">
+                    <div class="section-header">
+                        <h3>Classement</h3>
+                        <a href="{% url 'gamification:leaderboard' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir tout</span>
+                        </a>
+                    </div>
+                    
+                    <div class="leaderboard-list">
+                        {% for entry in leaderboard %}
+                        <div class="leaderboard-item {% if entry.user == user %}current-user{% endif %}">
+                            <div class="leaderboard-rank">
+                                <span class="rank-number">{{ forloop.counter }}</span>
+                            </div>
+                            <div class="leaderboard-user">
+                                <div class="user-avatar">
+                                    {% if entry.user.candidate_profile.photo %}
+                                        <img src="{{ entry.user.candidate_profile.photo.url }}" alt="{{ entry.user.get_full_name }}">
+                                    {% else %}
+                                        <i class="fas fa-user"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="user-info">
+                                    <h4>{{ entry.user.get_full_name|default:entry.user.username }}</h4>
+                                    <p>Niveau {{ entry.level }}</p>
+                                </div>
+                            </div>
+                            <div class="leaderboard-points">
+                                <span class="points-value">{{ entry.points }}</span>
+                                <span class="points-label">points</span>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-leaderboard">
+                            <div class="no-leaderboard-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <h3>Aucun classement</h3>
+                            <p>Le classement sera bientôt disponible</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rewards -->
+            <div class="col-lg-6">
+                <div class="rewards-section">
+                    <div class="section-header">
+                        <h3>Récompenses</h3>
+                        <a href="{% url 'gamification:rewards_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            <span>Voir toutes</span>
+                        </a>
+                    </div>
+                    
+                    <div class="rewards-list">
+                        {% for reward in available_rewards %}
+                        <div class="reward-item {% if user.points >= reward.points_required %}available{% else %}locked{% endif %}">
+                            <div class="reward-icon">
+                                <i class="{{ reward.icon }}"></i>
+                            </div>
+                            <div class="reward-content">
+                                <h4>{{ reward.name }}</h4>
+                                <p>{{ reward.description }}</p>
+                                <div class="reward-meta">
+                                    <span class="reward-points">{{ reward.points_required }} points</span>
+                                    <span class="reward-type">{{ reward.get_type_display }}</span>
+                                </div>
+                            </div>
+                            <div class="reward-actions">
+                                {% if user.points >= reward.points_required %}
+                                <button class="btn btn-primary btn-sm" onclick="claimReward({{ reward.id }})">
+                                    <i class="fas fa-gift"></i>
+                                    <span>Réclamer</span>
+                                </button>
+                                {% else %}
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-lock"></i>
+                                    <span>Verrouillé</span>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-rewards">
+                            <div class="no-rewards-icon">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                            <h3>Aucune récompense</h3>
+                            <p>Les récompenses seront bientôt disponibles</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Claim reward
+    function claimReward(rewardId) {
+        if (confirm('Êtes-vous sûr de vouloir réclamer cette récompense ?')) {
+            // Implementation for claiming reward
+            console.log('Claiming reward:', rewardId);
+        }
+    }
+</script>
+{% endblock %}

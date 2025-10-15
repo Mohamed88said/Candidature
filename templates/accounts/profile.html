@@ -1,378 +1,549 @@
-{% extends 'base.html' %}
+{% extends 'base_dashboard.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 
-{% block title %}Mon Profil - {{ user.full_name }}{% endblock %}
+{% block title %}Mon profil - Plateforme de Recrutement{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Header Profile -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card bg-primary text-white profile-header-mobile">
-                <div class="card-body p-4">
-                    <div class="row align-items-center text-center text-md-start">
-                        <div class="col-12 col-md-3 text-center mb-3 mb-md-0">
-                            {% if profile.profile_picture %}
-                                <img src="{{ profile.profile_picture.url }}" alt="Photo de profil" 
-                                     class="rounded-circle img-fluid profile-picture-mobile" 
-                                     style="width: 120px; height: 120px; object-fit: cover;">
-                            {% else %}
-                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center profile-picture-mobile" 
-                                     style="width: 120px; height: 120px;">
-                                    <i class="fas fa-user fa-3x text-muted"></i>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="col-12 col-md-6 mb-3 mb-md-0">
-                            <h2 class="fw-bold mb-2">{{ user.full_name }}</h2>
-                            <p class="mb-1">
-                                <i class="fas fa-briefcase me-2"></i>
-                                {{ profile.current_position|default:"Poste non renseigné" }}
-                            </p>
-                            <p class="mb-1">
-                                <i class="fas fa-building me-2"></i>
-                                {{ profile.current_company|default:"Entreprise non renseignée" }}
-                            </p>
-                            <p class="mb-0">
-                                <i class="fas fa-map-marker-alt me-2"></i>
-                                {{ profile.city|default:"Ville non renseignée" }}
-                            </p>
-                        </div>
-                        <div class="col-12 col-md-3 text-center">
-                            <div class="mb-3">
-                                <h4>{{ profile.profile_completion }}%</h4>
-                                <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar bg-success" style="width: {{ profile.profile_completion }}%"></div>
-                                </div>
-                                <small>Profil complété</small>
-                            </div>
-                            <a href="{% url 'accounts:edit_profile' %}" class="btn btn-light btn-mobile-full">
-                                <i class="fas fa-edit me-2"></i>Modifier
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Mon profil</h1>
+            <p>Gérez vos informations personnelles et professionnelles</p>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-lg-4 mb-4 sidebar-mobile">
-            <!-- Quick Stats -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistiques</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-6 mb-mobile">
-                            <h4 class="text-primary">{{ profile.applications.count }}</h4>
-                            <small class="text-muted">Candidatures</small>
-                        </div>
-                        <div class="col-6 mb-mobile">
-                            <h4 class="text-success">{{ profile.years_of_experience }}</h4>
-                            <small class="text-muted">Années d'exp.</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Info -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-address-card me-2"></i>Contact</h5>
-                </div>
-                <div class="card-body">
-                    <p class="mb-2">
-                        <i class="fas fa-envelope me-2 text-muted"></i>
-                        {{ user.email }}
-                    </p>
-                    {% if profile.mobile_phone %}
-                    <p class="mb-2">
-                        <i class="fas fa-phone me-2 text-muted"></i>
-                        {{ profile.mobile_phone }}
-                    </p>
-                    {% endif %}
-                    {% if profile.linkedin_url %}
-                    <p class="mb-2">
-                        <i class="fab fa-linkedin me-2 text-muted"></i>
-                        <a href="{{ profile.linkedin_url }}" target="_blank">LinkedIn</a>
-                    </p>
-                    {% endif %}
-                    {% if profile.website_url %}
-                    <p class="mb-0">
-                        <i class="fas fa-globe me-2 text-muted"></i>
-                        <a href="{{ profile.website_url }}" target="_blank">Site web</a>
-                    </p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Documents -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Documents</h5>
-                </div>
-                <div class="card-body">
-                    {% if profile.cv_file %}
-                    <p class="mb-2">
-                        <i class="fas fa-file-pdf me-2 text-danger"></i>
-                        <a href="{{ profile.cv_file.url }}" target="_blank">CV</a>
-                    </p>
-                    {% endif %}
-                    {% if profile.cover_letter %}
-                    <p class="mb-0">
-                        <i class="fas fa-file-alt me-2 text-primary"></i>
-                        <a href="{{ profile.cover_letter.url }}" target="_blank">Lettre de motivation</a>
-                    </p>
-                    {% endif %}
-                    {% if not profile.cv_file and not profile.cover_letter %}
-                    <p class="text-muted mb-0">Aucun document uploadé</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <!-- Experience -->
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Expérience Professionnelle</h5>
-                    <a href="{% url 'accounts:add_experience' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-plus me-1"></i>Ajouter
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% for experience in experiences %}
-                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="fas fa-building"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1">{{ experience.position }}</h6>
-                            <p class="text-muted mb-1">{{ experience.company }}</p>
-                            <p class="small text-muted mb-2">
-                                {{ experience.start_date|date:"M Y" }} - 
-                                {% if experience.is_current %}Présent{% else %}{{ experience.end_date|date:"M Y" }}{% endif %}
-                            </p>
-                            <p class="mb-0">{{ experience.description|truncatewords:20 }}</p>
-                            <div class="mt-2">
-                                <a href="{% url 'accounts:edit_experience' experience.id %}" class="btn btn-sm btn-outline-secondary me-2">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'accounts:delete_experience' experience.id %}" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="text-muted text-center py-4">
-                        <i class="fas fa-briefcase fa-2x mb-3 d-block"></i>
-                        Aucune expérience ajoutée
-                    </p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Education -->
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Formation</h5>
-                    <a href="{% url 'accounts:add_education' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-plus me-1"></i>Ajouter
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% for education in educations %}
-                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="fas fa-graduation-cap"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1">{{ education.degree }}</h6>
-                            <p class="text-muted mb-1">{{ education.institution }}</p>
-                            <p class="small text-muted mb-2">
-                                {{ education.start_date|date:"Y" }} - 
-                                {% if education.is_current %}En cours{% else %}{{ education.end_date|date:"Y" }}{% endif %}
-                            </p>
-                            <div class="mt-2">
-                                <a href="{% url 'accounts:edit_education' education.id %}" class="btn btn-sm btn-outline-secondary me-2">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'accounts:delete_education' education.id %}" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="text-muted text-center py-4">
-                        <i class="fas fa-graduation-cap fa-2x mb-3 d-block"></i>
-                        Aucune formation ajoutée
-                    </p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Skills -->
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Compétences</h5>
-                    <a href="{% url 'accounts:add_skill' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-plus me-1"></i>Ajouter
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% if skills %}
-                    <div class="row">
-                        {% for skill in skills %}
-                        <div class="col-md-6 mb-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-primary me-2">{{ skill.name }}</span>
-                                <small class="text-muted">{{ skill.get_level_display }}</small>
-                                <button class="btn btn-sm btn-outline-danger delete-skill-btn" 
-                                        data-skill-id="{{ skill.id }}" 
-                                        href="{% url 'accounts:delete_skill' skill.id %}">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-muted text-center py-4">
-                        <i class="fas fa-cogs fa-2x mb-3 d-block"></i>
-                        Aucune compétence ajoutée
-                    </p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Languages -->
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-language me-2"></i>Langues</h5>
-                    <a href="{% url 'accounts:add_language' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-plus me-1"></i>Ajouter
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% if languages %}
-                    <div class="row">
-                        {% for language in languages %}
-                        <div class="col-md-6 mb-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-info me-2">{{ language.language }}</span>
-                                <small class="text-muted">{{ language.get_proficiency_display }}</small>
-                                <button class="btn btn-sm btn-outline-danger delete-language-btn" 
-                                        data-language-id="{{ language.id }}"
-                                        href="{% url 'accounts:delete_language' language.id %}">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-muted text-center py-4">
-                        <i class="fas fa-language fa-2x mb-3 d-block"></i>
-                        Aucune langue ajoutée
-                    </p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Projects -->
-            {% if projects %}
-            <div class="card mt-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Projets</h5>
-                    <a href="{% url 'accounts:add_project' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-plus me-1"></i>Ajouter
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% for project in projects %}
-                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="fas fa-project-diagram"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1">{{ project.title }}</h6>
-                            <p class="text-muted mb-1">{{ project.get_project_type_display }}</p>
-                            <p class="small text-muted mb-2">
-                                {{ project.start_date|date:"M Y" }} - 
-                                {% if project.is_ongoing %}En cours{% else %}{{ project.end_date|date:"M Y" }}{% endif %}
-                            </p>
-                            <p class="mb-0">{{ project.description|truncatewords:15 }}</p>
-                            {% if project.project_url %}
-                                <a href="{{ project.project_url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
-                                    <i class="fas fa-external-link-alt me-1"></i>Voir le projet
-                                </a>
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Profile Sidebar -->
+            <div class="col-lg-4">
+                <div class="profile-sidebar">
+                    <div class="profile-card">
+                        <div class="profile-avatar">
+                            {% if user.candidate_profile.photo %}
+                                <img src="{{ user.candidate_profile.photo.url }}" alt="{{ user.get_full_name }}" id="profile-photo">
+                            {% else %}
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
                             {% endif %}
+                            <button class="btn btn-primary btn-sm" onclick="changePhoto()">
+                                <i class="fas fa-camera"></i>
+                                <span>Changer</span>
+                            </button>
                         </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Certifications -->
-            {% if certifications %}
-            <div class="card mt-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-certificate me-2"></i>Certifications</h5>
-                    <a href="{% url 'accounts:add_certification' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-plus me-1"></i>Ajouter
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% for certification in certifications %}
-                    <div class="d-flex mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
-                        <div class="flex-shrink-0 me-3">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="fas fa-certificate"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1">{{ certification.name }}</h6>
-                            <p class="text-muted mb-1">{{ certification.issuing_organization }}</p>
-                            <p class="small text-muted mb-0">
-                                {{ certification.issue_date|date:"M Y" }}
-                                {% if certification.expiration_date %} - {{ certification.expiration_date|date:"M Y" }}{% endif %}
+                        <div class="profile-info">
+                            <h3>{{ user.get_full_name|default:user.username }}</h3>
+                            <p class="profile-title">{{ user.candidate_profile.profession|default:"Candidat" }}</p>
+                            <p class="profile-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ user.candidate_profile.location|default:"Non spécifié" }}
                             </p>
                         </div>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">{{ user.applications.count }}</span>
+                                <span class="stat-label">Candidatures</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">{{ profile_views }}</span>
+                                <span class="stat-label">Vues</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">{{ user.points|default:0 }}</span>
+                                <span class="stat-label">Points</span>
+                            </div>
+                        </div>
                     </div>
-                    {% endfor %}
+
+                    <!-- Profile Navigation -->
+                    <div class="profile-nav">
+                        <ul class="nav-list">
+                            <li class="nav-item">
+                                <a href="#personal-info" class="nav-link active" data-section="personal-info">
+                                    <i class="fas fa-user"></i>
+                                    <span>Informations personnelles</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#professional-info" class="nav-link" data-section="professional-info">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span>Informations professionnelles</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#skills" class="nav-link" data-section="skills">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Compétences</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#experience" class="nav-link" data-section="experience">
+                                    <i class="fas fa-history"></i>
+                                    <span>Expérience</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#education" class="nav-link" data-section="education">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    <span>Formation</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#preferences" class="nav-link" data-section="preferences">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Préférences</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            {% endif %}
+
+            <!-- Profile Content -->
+            <div class="col-lg-8">
+                <div class="profile-content">
+                    <!-- Personal Information -->
+                    <div class="profile-section active" id="personal-info">
+                        <div class="section-header">
+                            <h3>Informations personnelles</h3>
+                            <button class="btn btn-primary btn-sm" onclick="editSection('personal-info')">
+                                <i class="fas fa-edit"></i>
+                                <span>Modifier</span>
+                            </button>
+                        </div>
+                        <div class="section-content">
+                            <form method="post" enctype="multipart/form-data" class="profile-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="section" value="personal-info">
+                                
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label class="form-label">Prénom</label>
+                                        {{ user_form.first_name|add_class:"form-control" }}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="form-label">Nom</label>
+                                        {{ user_form.last_name|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    {{ user_form.email|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Téléphone</label>
+                                    {{ profile_form.phone|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Localisation</label>
+                                    {{ profile_form.location|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Date de naissance</label>
+                                    {{ profile_form.date_of_birth|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Bio</label>
+                                    {{ profile_form.bio|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i>
+                                        <span>Sauvegarder</span>
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="cancelEdit('personal-info')">
+                                        <i class="fas fa-times"></i>
+                                        <span>Annuler</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="profile-section" id="professional-info">
+                        <div class="section-header">
+                            <h3>Informations professionnelles</h3>
+                            <button class="btn btn-primary btn-sm" onclick="editSection('professional-info')">
+                                <i class="fas fa-edit"></i>
+                                <span>Modifier</span>
+                            </button>
+                        </div>
+                        <div class="section-content">
+                            <form method="post" class="profile-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="section" value="professional-info">
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Profession</label>
+                                    {{ profile_form.profession|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Niveau d'expérience</label>
+                                    {{ profile_form.experience_level|add_class:"form-select" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Salaire souhaité (minimum)</label>
+                                    {{ profile_form.desired_salary_min|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Salaire souhaité (maximum)</label>
+                                    {{ profile_form.desired_salary_max|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Type de contrat préféré</label>
+                                    {{ profile_form.preferred_job_type|add_class:"form-select" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Disponibilité</label>
+                                    {{ profile_form.availability|add_class:"form-select" }}
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i>
+                                        <span>Sauvegarder</span>
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="cancelEdit('professional-info')">
+                                        <i class="fas fa-times"></i>
+                                        <span>Annuler</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="profile-section" id="skills">
+                        <div class="section-header">
+                            <h3>Compétences</h3>
+                            <button class="btn btn-primary btn-sm" onclick="addSkill()">
+                                <i class="fas fa-plus"></i>
+                                <span>Ajouter</span>
+                            </button>
+                        </div>
+                        <div class="section-content">
+                            <div class="skills-list">
+                                {% for skill in user.candidate_profile.skills.all %}
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <h4>{{ skill.name }}</h4>
+                                        <p>{{ skill.get_level_display }}</p>
+                                    </div>
+                                    <div class="skill-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editSkill({{ skill.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteSkill({{ skill.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="empty-state">
+                                    <i class="fas fa-tools"></i>
+                                    <h4>Aucune compétence</h4>
+                                    <p>Ajoutez vos compétences pour améliorer votre profil</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Experience -->
+                    <div class="profile-section" id="experience">
+                        <div class="section-header">
+                            <h3>Expérience professionnelle</h3>
+                            <button class="btn btn-primary btn-sm" onclick="addExperience()">
+                                <i class="fas fa-plus"></i>
+                                <span>Ajouter</span>
+                            </button>
+                        </div>
+                        <div class="section-content">
+                            <div class="experience-list">
+                                {% for exp in user.candidate_profile.experiences.all %}
+                                <div class="experience-item">
+                                    <div class="experience-info">
+                                        <h4>{{ exp.title }}</h4>
+                                        <p class="experience-company">{{ exp.company }}</p>
+                                        <p class="experience-duration">
+                                            {{ exp.start_date|date:"M Y" }} - 
+                                            {% if exp.end_date %}{{ exp.end_date|date:"M Y" }}{% else %}En cours{% endif %}
+                                        </p>
+                                        <p class="experience-description">{{ exp.description }}</p>
+                                    </div>
+                                    <div class="experience-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editExperience({{ exp.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteExperience({{ exp.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="empty-state">
+                                    <i class="fas fa-history"></i>
+                                    <h4>Aucune expérience</h4>
+                                    <p>Ajoutez votre expérience professionnelle</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education -->
+                    <div class="profile-section" id="education">
+                        <div class="section-header">
+                            <h3>Formation</h3>
+                            <button class="btn btn-primary btn-sm" onclick="addEducation()">
+                                <i class="fas fa-plus"></i>
+                                <span>Ajouter</span>
+                            </button>
+                        </div>
+                        <div class="section-content">
+                            <div class="education-list">
+                                {% for edu in user.candidate_profile.educations.all %}
+                                <div class="education-item">
+                                    <div class="education-info">
+                                        <h4>{{ edu.degree }}</h4>
+                                        <p class="education-school">{{ edu.school }}</p>
+                                        <p class="education-duration">
+                                            {{ edu.start_date|date:"Y" }} - 
+                                            {% if edu.end_date %}{{ edu.end_date|date:"Y" }}{% else %}En cours{% endif %}
+                                        </p>
+                                        <p class="education-description">{{ edu.description }}</p>
+                                    </div>
+                                    <div class="education-actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editEducation({{ edu.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteEducation({{ edu.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="empty-state">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    <h4>Aucune formation</h4>
+                                    <p>Ajoutez votre formation</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preferences -->
+                    <div class="profile-section" id="preferences">
+                        <div class="section-header">
+                            <h3>Préférences</h3>
+                            <button class="btn btn-primary btn-sm" onclick="editSection('preferences')">
+                                <i class="fas fa-edit"></i>
+                                <span>Modifier</span>
+                            </button>
+                        </div>
+                        <div class="section-content">
+                            <form method="post" class="profile-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="section" value="preferences">
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Secteurs d'activité préférés</label>
+                                    {{ profile_form.preferred_industries|add_class:"form-select" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Localisations préférées</label>
+                                    {{ profile_form.preferred_locations|add_class:"form-control" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Télétravail</label>
+                                    {{ profile_form.remote_work_preference|add_class:"form-select" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Déplacements</label>
+                                    {{ profile_form.travel_willingness|add_class:"form-select" }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        {{ profile_form.is_public|add_class:"form-check-input" }}
+                                        <label class="form-check-label" for="{{ profile_form.is_public.id_for_label }}">
+                                            Profil public
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        {{ profile_form.allow_contact|add_class:"form-check-input" }}
+                                        <label class="form-check-label" for="{{ profile_form.allow_contact.id_for_label }}">
+                                            Autoriser les recruteurs à me contacter
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i>
+                                        <span>Sauvegarder</span>
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="cancelEdit('preferences')">
+                                        <i class="fas fa-times"></i>
+                                        <span>Annuler</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.progress {
-    background-color: rgba(255,255,255,0.3);
-}
-.card {
-    border: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-</style>
+{% block extra_js %}
+<script>
+    // Profile navigation
+    document.querySelectorAll('.profile-nav .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all links
+            document.querySelectorAll('.profile-nav .nav-link').forEach(l => l.classList.remove('active'));
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            // Hide all sections
+            document.querySelectorAll('.profile-section').forEach(section => section.classList.remove('active'));
+            // Show target section
+            const targetSection = this.dataset.section;
+            document.getElementById(targetSection).classList.add('active');
+        });
+    });
+    
+    // Edit section
+    function editSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        const form = section.querySelector('.profile-form');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(input => {
+            input.disabled = false;
+            input.readOnly = false;
+        });
+        
+        form.style.display = 'block';
+    }
+    
+    // Cancel edit
+    function cancelEdit(sectionId) {
+        const section = document.getElementById(sectionId);
+        const form = section.querySelector('.profile-form');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(input => {
+            input.disabled = true;
+            input.readOnly = true;
+        });
+        
+        form.style.display = 'none';
+    }
+    
+    // Change photo
+    function changePhoto() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-photo').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
+    }
+    
+    // Add skill
+    function addSkill() {
+        // Implementation for adding skill
+        console.log('Adding skill');
+    }
+    
+    // Edit skill
+    function editSkill(skillId) {
+        // Implementation for editing skill
+        console.log('Editing skill:', skillId);
+    }
+    
+    // Delete skill
+    function deleteSkill(skillId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')) {
+            // Implementation for deleting skill
+            console.log('Deleting skill:', skillId);
+        }
+    }
+    
+    // Add experience
+    function addExperience() {
+        // Implementation for adding experience
+        console.log('Adding experience');
+    }
+    
+    // Edit experience
+    function editExperience(expId) {
+        // Implementation for editing experience
+        console.log('Editing experience:', expId);
+    }
+    
+    // Delete experience
+    function deleteExperience(expId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette expérience ?')) {
+            // Implementation for deleting experience
+            console.log('Deleting experience:', expId);
+        }
+    }
+    
+    // Add education
+    function addEducation() {
+        // Implementation for adding education
+        console.log('Adding education');
+    }
+    
+    // Edit education
+    function editEducation(eduId) {
+        // Implementation for editing education
+        console.log('Editing education:', eduId);
+    }
+    
+    // Delete education
+    function deleteEducation(eduId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette formation ?')) {
+            // Implementation for deleting education
+            console.log('Deleting education:', eduId);
+        }
+    }
+</script>
 {% endblock %}

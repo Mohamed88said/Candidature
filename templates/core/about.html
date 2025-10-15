@@ -1,303 +1,279 @@
 ﻿{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}À propos - {% if site_settings %}{{ site_settings.site_name }}{% else %}Plateforme de Recrutement{% endif %}{% endblock %}
+{% block title %}À propos - Plateforme de Recrutement{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="bg-primary text-white py-5">
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>À propos de nous</h1>
+            <p>Découvrez notre mission et notre vision pour révolutionner le recrutement</p>
+        </div>
+    </div>
+</div>
+
+<!-- About Section -->
+<section class="about-section">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6 mb-4 mb-lg-0 text-center text-lg-start">
-                <h1 class="display-4 fw-bold mb-4">
-                    {% if site_settings and site_settings.about_title %}
-                        {{ site_settings.about_title }}
-                    {% else %}
-                        À propos de nous
-                    {% endif %}
-                </h1>
-                <p class="lead">
-                    {% if site_settings and site_settings.about_content %}
-                        {{ site_settings.about_content|truncatewords:30 }}
-                    {% else %}
-                        Nous connectons les talents aux opportunités, en révolutionnant le processus de recrutement grâce à la technologie.
-                    {% endif %}
-                </p>
-            </div>
-            <div class="col-lg-6 text-center d-none d-lg-block">
-                {% if site_settings and site_settings.hero_image %}
-                    <img src="{{ site_settings.hero_image.url }}" 
-                         alt="Notre équipe" class="img-fluid rounded shadow">
-                {% else %}
-                    <img src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=600" 
-                         alt="Notre équipe" class="img-fluid rounded shadow">
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Mission Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <h2 class="fw-bold mb-4">Notre Mission</h2>
-                <p class="lead text-muted mb-5">
-                    {% if site_settings and site_settings.about_mission %}
-                        {{ site_settings.about_mission }}
-                    {% else %}
-                        Simplifier et optimiser le processus de recrutement en offrant une plateforme 
-                        intuitive qui met en relation les meilleurs talents avec les entreprises 
-                        qui partagent leurs valeurs et ambitions.
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                        <h5 class="fw-bold">Pour les Candidats</h5>
-                        <p class="text-muted">
-                            Nous aidons les professionnels à trouver des opportunités 
-                            qui correspondent à leurs compétences et aspirations.
-                        </p>
+            <div class="col-lg-6">
+                <div class="about-content">
+                    <h2>Notre mission</h2>
+                    <p>Nous croyons que chaque candidat mérite de trouver l'emploi qui correspond parfaitement à ses compétences, ses aspirations et ses valeurs. Notre plateforme utilise l'intelligence artificielle pour créer des connexions authentiques entre les talents et les entreprises.</p>
+                    
+                    <h3>Notre vision</h3>
+                    <p>Révolutionner le monde du recrutement en rendant le processus plus humain, plus efficace et plus équitable pour tous. Nous voulons éliminer les barrières et créer un écosystème où les talents et les opportunités se rencontrent naturellement.</p>
+                    
+                    <div class="about-stats">
+                        <div class="stat-item">
+                            <h3>{{ total_users }}</h3>
+                            <p>Utilisateurs actifs</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>{{ total_jobs }}</h3>
+                            <p>Offres d'emploi</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>{{ total_companies }}</h3>
+                            <p>Entreprises partenaires</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <i class="fas fa-building fa-3x text-success mb-3"></i>
-                        <h5 class="fw-bold">Pour les Entreprises</h5>
-                        <p class="text-muted">
-                            Nous permettons aux entreprises de trouver les talents 
-                            qui feront la différence dans leur croissance.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <i class="fas fa-handshake fa-3x text-info mb-3"></i>
-                        <h5 class="fw-bold">Ensemble</h5>
-                        <p class="text-muted">
-                            Nous créons des connexions durables qui bénéficient 
-                            à tous les acteurs du marché de l'emploi.
-                        </p>
-                    </div>
+            <div class="col-lg-6">
+                <div class="about-image">
+                    <img src="{% static 'images/about-image.png' %}" alt="À propos" class="img-fluid">
                 </div>
             </div>
         </div>
     </div>
 </section>
-
-<!-- Stats Section -->
-{% if statistics %}
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-12 mb-5">
-                <h2 class="fw-bold">Nos Résultats</h2>
-                <p class="text-muted">Des chiffres qui parlent de notre impact</p>
-            </div>
-        </div>
-        
-        <div class="row">
-            {% for stat in statistics %}
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="text-center">
-                    <div class="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
-                         style="width: 80px; height: 80px;">
-                        <i class="{{ stat.icon }} fa-2x"></i>
-                    </div>
-                    <h3 class="fw-bold text-primary">{{ stat.value }}</h3>
-                    <p class="text-muted">{{ stat.title }}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-{% endif %}
 
 <!-- Values Section -->
-{% if values %}
-<section class="py-5">
+<section class="values-section">
     <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h2 class="fw-bold">Nos Valeurs</h2>
-                <p class="text-muted">Les principes qui guident notre action au quotidien</p>
-            </div>
+        <div class="section-header">
+            <h2>Nos valeurs</h2>
+            <p>Les principes qui guident notre action</p>
         </div>
         
         <div class="row">
-            {% for value in values %}
-            <div class="col-lg-6 mb-4">
-                <div class="d-flex">
-                    <div class="flex-shrink-0 me-4">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                             style="width: 60px; height: 60px;">
-                            <i class="{{ value.icon }}"></i>
-                        </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
                     </div>
-                    <div>
-                        <h5 class="fw-bold">{{ value.title }}</h5>
-                        <p class="text-muted">{{ value.description }}</p>
-                    </div>
+                    <h3>Transparence</h3>
+                    <p>Nous croyons en la transparence totale dans le processus de recrutement. Chaque candidat mérite de connaître les critères et les étapes.</p>
                 </div>
             </div>
-            {% endfor %}
+            <div class="col-lg-4 col-md-6">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Inclusion</h3>
+                    <p>Nous nous engageons à promouvoir la diversité et l'inclusion dans le recrutement, en donnant une chance égale à tous les talents.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Innovation</h3>
+                    <p>Nous utilisons les dernières technologies pour améliorer constamment l'expérience de recrutement et créer de nouvelles opportunités.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Confiance</h3>
+                    <p>Nous construisons des relations de confiance avec nos utilisateurs en protégeant leurs données et en respectant leur vie privée.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Excellence</h3>
+                    <p>Nous nous efforçons d'offrir la meilleure expérience possible à nos utilisateurs, en continuant d'améliorer nos services.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Impact social</h3>
+                    <p>Nous croyons que le recrutement peut avoir un impact positif sur la société en créant des emplois de qualité et en réduisant le chômage.</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
-{% endif %}
 
 <!-- Team Section -->
-{% if team_members %}
-<section class="py-5 bg-light">
+<section class="team-section">
     <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h2 class="fw-bold">Notre Équipe</h2>
-                <p class="text-muted">Des experts passionnés au service de votre réussite</p>
-            </div>
+        <div class="section-header">
+            <h2>Notre équipe</h2>
+            <p>Les personnes qui font de cette plateforme une réalité</p>
         </div>
         
         <div class="row">
-            {% for member in team_members %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center p-4">
-                        {% if member.photo %}
-                        <img src="{{ member.photo.url }}" 
-                             alt="{{ member.user.get_full_name }}" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
-                        {% else %}
-                        <div class="rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center bg-secondary text-white" 
-                             style="width: 100px; height: 100px;">
-                            <i class="fas fa-user fa-2x"></i>
+            <div class="col-lg-4 col-md-6">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="{% static 'images/team-1.jpg' %}" alt="Équipe" class="img-fluid">
+                    </div>
+                    <div class="team-info">
+                        <h3>Jean Dupont</h3>
+                        <p class="team-role">Fondateur & CEO</p>
+                        <p class="team-description">Passionné par l'innovation et l'impact social, Jean a créé cette plateforme pour révolutionner le recrutement.</p>
+                        <div class="team-social">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
                         </div>
-                        {% endif %}
-                        <h5 class="fw-bold">{{ member.user.get_full_name }}</h5>
-                        <p class="text-primary mb-2">{{ member.get_role_display }}</p>
-                        <p class="text-muted small">{{ member.bio|truncatewords:20 }}</p>
-                        {% if member.linkedin_url or member.twitter_url %}
-                        <div class="mt-3">
-                            {% if member.linkedin_url %}
-                            <a href="{{ member.linkedin_url }}" target="_blank" class="text-decoration-none me-2">
-                                <i class="fab fa-linkedin fa-lg text-muted"></i>
-                            </a>
-                            {% endif %}
-                            {% if member.twitter_url %}
-                            <a href="{{ member.twitter_url }}" target="_blank" class="text-decoration-none">
-                                <i class="fab fa-twitter fa-lg text-muted"></i>
-                            </a>
-                            {% endif %}
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
-            {% endfor %}
+            <div class="col-lg-4 col-md-6">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="{% static 'images/team-2.jpg' %}" alt="Équipe" class="img-fluid">
+                    </div>
+                    <div class="team-info">
+                        <h3>Marie Martin</h3>
+                        <p class="team-role">CTO</p>
+                        <p class="team-description">Experte en intelligence artificielle, Marie développe les algorithmes qui rendent notre matching possible.</p>
+                        <div class="team-social">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="{% static 'images/team-3.jpg' %}" alt="Équipe" class="img-fluid">
+                    </div>
+                    <div class="team-info">
+                        <h3>Pierre Durand</h3>
+                        <p class="team-role">Head of Product</p>
+                        <p class="team-description">Pierre s'assure que notre plateforme offre la meilleure expérience utilisateur possible.</p>
+                        <div class="team-social">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-dribbble"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
-{% endif %}
 
-<!-- Company Info Section -->
-{% if site_settings %}
-<section class="py-5">
+<!-- History Section -->
+<section class="history-section">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-5">
-                        <h3 class="fw-bold text-center mb-4">Informations de l'Entreprise</h3>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5 class="fw-bold text-primary">Coordonnées</h5>
-                                <p class="mb-3">
-                                    <i class="fas fa-building me-2 text-muted"></i>
-                                    <strong>{{ site_settings.site_name }}</strong>
-                                </p>
-                                {% if site_settings.address %}
-                                <p class="mb-3">
-                                    <i class="fas fa-map-marker-alt me-2 text-muted"></i>
-                                    {{ site_settings.address|linebreaksbr }}
-                                </p>
-                                {% endif %}
-                                {% if site_settings.contact_phone %}
-                                <p class="mb-3">
-                                    <i class="fas fa-phone me-2 text-muted"></i>
-                                    {{ site_settings.contact_phone }}
-                                </p>
-                                {% endif %}
-                                {% if site_settings.contact_email %}
-                                <p class="mb-3">
-                                    <i class="fas fa-envelope me-2 text-muted"></i>
-                                    {{ site_settings.contact_email }}
-                                </p>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <h5 class="fw-bold text-primary">Informations légales</h5>
-                                <!-- Ces champs seront disponibles après les migrations -->
-                                {% if site_settings.siret %}
-                                <p class="mb-2">
-                                    <small class="text-muted">SIRET:</small><br>
-                                    {{ site_settings.siret }}
-                                </p>
-                                {% endif %}
-                                {% if site_settings.rcs %}
-                                <p class="mb-2">
-                                    <small class="text-muted">RCS:</small><br>
-                                    {{ site_settings.rcs }}
-                                </p>
-                                {% endif %}
-                                {% if site_settings.vat_number %}
-                                <p class="mb-2">
-                                    <small class="text-muted">N° TVA:</small><br>
-                                    {{ site_settings.vat_number }}
-                                </p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
+        <div class="section-header">
+            <h2>Notre histoire</h2>
+            <p>Un parcours marqué par l'innovation et la croissance</p>
+        </div>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-date">2020</div>
+                <div class="timeline-content">
+                    <h3>Fondation</h3>
+                    <p>Création de la plateforme avec une vision claire : révolutionner le recrutement grâce à l'IA.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">2021</div>
+                <div class="timeline-content">
+                    <h3>Première version</h3>
+                    <p>Lancement de la première version avec les fonctionnalités de base de matching et de candidature.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">2022</div>
+                <div class="timeline-content">
+                    <h3>Expansion</h3>
+                    <p>Ajout des fonctionnalités de chat, tests en ligne et candidature vidéo.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">2023</div>
+                <div class="timeline-content">
+                    <h3>Innovation</h3>
+                    <p>Intégration de l'IA avancée, gamification et système de parrainage.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">2024</div>
+                <div class="timeline-content">
+                    <h3>Croissance</h3>
+                    <p>Plus de 100 000 utilisateurs actifs et expansion internationale.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
-{% endif %}
 
 <!-- CTA Section -->
-<section class="py-5 bg-primary text-white">
-    <div class="container text-center">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <h2 class="fw-bold mb-3">Rejoignez notre communauté</h2>
-                <p class="lead mb-4">
-                    Que vous soyez candidat ou recruteur, découvrez comment notre plateforme 
-                    peut transformer votre approche du recrutement.
-                </p>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg">
-                        <i class="fas fa-user-plus me-2"></i>Créer un compte
-                    </a>
-                    <a href="{% url 'core:contact' %}" class="btn btn-outline-light btn-lg">
-                        <i class="fas fa-envelope me-2"></i>Nous contacter
-                    </a>
-                </div>
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Rejoignez notre mission</h2>
+            <p>Devenez partie prenante de la révolution du recrutement</p>
+            <div class="cta-actions">
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Créer un compte</span>
+                </a>
+                <a href="{% url 'core:contact' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-envelope"></i>
+                    <span>Nous contacter</span>
+                </a>
             </div>
         </div>
     </div>
 </section>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+    // Animate timeline on scroll
+    const timelineObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.timeline-item').forEach(item => {
+        timelineObserver.observe(item);
+    });
+    
+    // Animate team cards on scroll
+    const teamObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.team-card').forEach(card => {
+        teamObserver.observe(card);
+    });
+</script>
+{% endblock %}

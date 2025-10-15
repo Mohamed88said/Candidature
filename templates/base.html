@@ -1,466 +1,379 @@
-﻿<!DOCTYPE html>
-<html lang="fr" class="h-100">
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#007bff">
+    <meta name="description" content="{% block meta_description %}Plateforme de recrutement moderne et intelligente{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}recrutement, emploi, candidature, CV, matching{% endblock %}">
+    <meta name="author" content="Recruitment Platform">
     
-    <title>{% block title %}{{ site_settings.site_name|default:"Plateforme de Recrutement" }}{% endblock %}</title>
+    <title>{% block title %}Plateforme de Recrutement{% endblock %}</title>
     
-    {% if site_settings.favicon %}
-        <link rel="icon" type="image/x-icon" href="{{ site_settings.favicon.url }}">
-        <link rel="apple-touch-icon" href="{{ site_settings.favicon.url }}">
-    {% endif %}
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     
-    <!-- Preload critical resources -->
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
-    <!-- Animate.css for smooth animations -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    {% load static %}
-    
-    <!-- Custom CSS -->
-    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
-    <!-- Mobile Optimizations -->
-    <link href="{% static 'css/mobile.css' %}" rel="stylesheet">
-    
-    <!-- Dynamic Theme Colors -->
-    {% if active_theme %}
-    <style>
-        :root {
-            --bs-primary: {{ active_theme.primary_color }};
-            --bs-secondary: {{ active_theme.secondary_color }};
-            --bs-success: {{ active_theme.success_color }};
-            --bs-info: {{ active_theme.info_color }};
-            --bs-warning: {{ active_theme.warning_color }};
-            --bs-danger: {{ active_theme.danger_color }};
-            --bs-light: {{ active_theme.light_color }};
-            --bs-dark: {{ active_theme.dark_color }};
-            --bs-border-radius: {{ active_theme.border_radius }}px;
-            --bs-font-family: {{ active_theme.font_family }};
-            --bs-font-size-base: {{ active_theme.font_size_base }}px;
-        }
-        
-        body {
-            font-family: var(--bs-font-family);
-            font-size: var(--bs-font-size-base);
-        }
-        
-        .btn, .card, .form-control, .modal-content {
-            border-radius: var(--bs-border-radius);
-        }
-        
-        {{ active_theme.custom_css|safe }}
-    </style>
-    {% endif %}
-    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/modern-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
     {% block extra_css %}{% endblock %}
     
-    <!-- Inline critical CSS -->
-    <style>
-        .critical-css {
-            opacity: 0;
-        }
-        
-        .critical-css.loaded {
-            opacity: 1;
-            transition: opacity 0.3s ease;
-        }
-        
-        .loading-spinner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-    </style>
+    <!-- Meta Tags for Social Media -->
+    <meta property="og:title" content="{% block og_title %}{{ block.super }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ block.meta_description }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'images/og-image.jpg' %}{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="website">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ block.super }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ block.meta_description }}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% static 'images/twitter-image.jpg' %}{% endblock %}">
+    
+    <!-- CSRF Token -->
+    {% csrf_token %}
 </head>
-<body class="d-flex flex-column h-100 critical-css">
+<body class="{% block body_class %}{% endblock %}">
     <!-- Loading Spinner -->
-    <div id="loadingSpinner" class="loading-spinner">
-        <div class="text-center text-white">
-            <div class="spinner-border mb-3" style="width: 3rem; height: 3rem;"></div>
-            <p class="h5">Chargement...</p>
+    <div id="loading-spinner" class="loading-spinner">
+        <div class="spinner">
+            <div class="spinner-inner"></div>
         </div>
     </div>
 
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <nav class="navbar">
         <div class="container">
-            <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'core:home' %}">
-                {% if site_settings.site_logo %}
-                    <img src="{{ site_settings.site_logo.url }}" alt="Logo" style="height: 35px;" class="me-2 rounded">
-                {% else %}
-                    <i class="fas fa-briefcase me-2"></i>
-                {% endif %}
-                <span class="d-none d-sm-inline">{{ site_settings.site_name|default:"RecrutementPro" }}</span>
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
-                           href="{% url 'core:home' %}">
-                            <i class="fas fa-home d-lg-none me-2"></i>Accueil
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'jobs' in request.resolver_match.namespaces %}active{% endif %}" 
-                           href="{% url 'jobs:job_list' %}">
-                            <i class="fas fa-briefcase d-lg-none me-2"></i>Offres d'emploi
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'jobs:job_categories' %}">
-                            <i class="fas fa-tags d-lg-none me-2"></i>Catégories
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:about' %}">
-                            <i class="fas fa-info-circle d-lg-none me-2"></i>À propos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:contact' %}">
-                            <i class="fas fa-envelope d-lg-none me-2"></i>Contact
-                        </a>
-                    </li>
-                </ul>
-                
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" 
-                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle me-2"></i>
-                                <span class="d-none d-md-inline">{{ user.first_name|default:user.username }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="navbarDropdown">
-                                {% if user.user_type == 'candidate' %}
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:profile' %}">
-                                            <i class="fas fa-user me-2 text-primary"></i>Mon Profil
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'applications:my_applications' %}">
-                                            <i class="fas fa-file-alt me-2 text-info"></i>Mes Candidatures
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'jobs:saved_jobs' %}">
-                                            <i class="fas fa-heart me-2 text-danger"></i>Favoris
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'jobs:job_alerts' %}">
-                                            <i class="fas fa-bell me-2 text-warning"></i>Alertes Emploi
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'dashboard:admin_dashboard' %}">
-                                            <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'applications:applications_list' %}">
-                                            <i class="fas fa-file-alt me-2 text-info"></i>Candidatures
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'jobs:create_job' %}">
-                                            <i class="fas fa-plus me-2 text-success"></i>Créer une offre
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline w-100">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item d-flex align-items-center border-0 bg-transparent w-100">
-                                            <i class="fas fa-sign-out-alt me-2 text-muted"></i>Déconnexion
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
+            <div class="navbar-content">
+                <!-- Brand -->
+                <a href="{% url 'core:home' %}" class="navbar-brand">
+                    <i class="fas fa-briefcase"></i>
+                    <span>RecruitPro</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="navbar-nav-desktop">
+                    <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center" href="{% url 'accounts:login' %}">
-                                <i class="fas fa-sign-in-alt me-1 d-lg-none"></i>
-                                <span class="d-none d-lg-inline">Connexion</span>
+                            <a href="{% url 'core:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                                <i class="fas fa-home"></i>
+                                <span>Accueil</span>
                             </a>
                         </li>
-                        <li class="nav-item ms-lg-2">
-                            <a class="nav-link btn btn-outline-light px-3 mt-2 mt-lg-0" href="{% url 'accounts:register' %}">
-                                <i class="fas fa-user-plus me-1"></i>Inscription
+                        <li class="nav-item">
+                            <a href="{% url 'jobs:job_list' %}" class="nav-link {% if 'jobs' in request.resolver_match.namespace %}active{% endif %}">
+                                <i class="fas fa-search"></i>
+                                <span>Offres</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{% url 'matching:dashboard' %}" class="nav-link {% if 'matching' in request.resolver_match.namespace %}active{% endif %}">
+                                <i class="fas fa-magic"></i>
+                                <span>Matching</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'cv_builder:dashboard' %}" class="nav-link {% if 'cv_builder' in request.resolver_match.namespace %}active{% endif %}">
+                                <i class="fas fa-file-alt"></i>
+                                <span>CV Builder</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'chat:dashboard' %}" class="nav-link {% if 'chat' in request.resolver_match.namespace %}active{% endif %}">
+                                <i class="fas fa-comments"></i>
+                                <span>Messages</span>
+                                <span class="notification-badge" id="chat-notifications" style="display: none;">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- User Menu -->
+                <div class="navbar-user">
+                    {% if user.is_authenticated %}
+                        <!-- Notifications -->
+                        <div class="notification-dropdown">
+                            <button class="notification-btn" id="notification-btn">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" id="notification-count" style="display: none;">0</span>
+                            </button>
+                            <div class="notification-dropdown-menu" id="notification-menu">
+                                <div class="notification-header">
+                                    <h4>Notifications</h4>
+                                    <a href="{% url 'push_notifications:dashboard' %}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                                </div>
+                                <div class="notification-list" id="notification-list">
+                                    <div class="notification-empty">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>Aucune notification</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Dropdown -->
+                        <div class="user-dropdown">
+                            <button class="user-btn" id="user-btn">
+                                <div class="user-avatar">
+                                    {% if user.candidate_profile.photo %}
+                                        <img src="{{ user.candidate_profile.photo.url }}" alt="{{ user.get_full_name }}">
+                                    {% else %}
+                                        <i class="fas fa-user"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="user-dropdown-menu" id="user-menu">
+                                <div class="user-info">
+                                    <div class="user-avatar-large">
+                                        {% if user.candidate_profile.photo %}
+                                            <img src="{{ user.candidate_profile.photo.url }}" alt="{{ user.get_full_name }}">
+                                        {% else %}
+                                            <i class="fas fa-user"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="user-details">
+                                        <h4>{{ user.get_full_name|default:user.username }}</h4>
+                                        <p>{{ user.email }}</p>
+                                    </div>
+                                </div>
+                                <div class="user-menu-items">
+                                    <a href="{% url 'accounts:dashboard' %}" class="menu-item">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span>Tableau de bord</span>
+                                    </a>
+                                    <a href="{% url 'accounts:profile' %}" class="menu-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>Mon profil</span>
+                                    </a>
+                                    <a href="{% url 'applications:my_applications' %}" class="menu-item">
+                                        <i class="fas fa-file-alt"></i>
+                                        <span>Mes candidatures</span>
+                                    </a>
+                                    <a href="{% url 'gamification:dashboard' %}" class="menu-item">
+                                        <i class="fas fa-trophy"></i>
+                                        <span>Gamification</span>
+                                    </a>
+                                    <a href="{% url 'push_notifications:dashboard' %}" class="menu-item">
+                                        <i class="fas fa-bell"></i>
+                                        <span>Notifications</span>
+                                    </a>
+                                    <div class="menu-divider"></div>
+                                    <a href="{% url 'accounts:logout' %}" class="menu-item logout">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Déconnexion</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="auth-buttons">
+                            <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">Connexion</a>
+                            <a href="{% url 'accounts:register' %}" class="btn btn-primary">Inscription</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav" id="mobile-nav">
+            <div class="mobile-nav-content">
+                <div class="mobile-nav-header">
+                    <h3>Menu</h3>
+                    <button class="mobile-nav-close" id="mobile-nav-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <ul class="mobile-nav-list">
+                    <li>
+                        <a href="{% url 'core:home' %}" class="mobile-nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Accueil</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'jobs:job_list' %}" class="mobile-nav-link">
+                            <i class="fas fa-search"></i>
+                            <span>Offres d'emploi</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'matching:dashboard' %}" class="mobile-nav-link">
+                            <i class="fas fa-magic"></i>
+                            <span>Matching intelligent</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'cv_builder:dashboard' %}" class="mobile-nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>CV Builder</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'chat:dashboard' %}" class="mobile-nav-link">
+                            <i class="fas fa-comments"></i>
+                            <span>Messages</span>
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li>
+                        <a href="{% url 'accounts:dashboard' %}" class="mobile-nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'accounts:profile' %}" class="mobile-nav-link">
+                            <i class="fas fa-user"></i>
+                            <span>Mon profil</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'accounts:logout' %}" class="mobile-nav-link logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{% url 'accounts:login' %}" class="mobile-nav-link">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Connexion</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'accounts:register' %}" class="mobile-nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Inscription</span>
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Messages -->
-    {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="fas 
-                            {% if message.tags == 'success' %}fa-check-circle
-                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
-                            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-times-circle
-                            {% else %}fa-info-circle{% endif %} 
-                            me-2"></i>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages-container">
+            <div class="container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <div class="alert-content">
+                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
                         <span>{{ message }}</span>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-    {% endif %}
+        {% endif %}
 
-    <!-- Main Content -->
-    <main class="flex-shrink-0">
+        <!-- Page Content -->
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light mt-auto">
-        <div class="container py-5">
-            <div class="row g-4">
-                <div class="col-lg-4 mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                        {% if site_settings.site_logo %}
-                            <img src="{{ site_settings.site_logo.url }}" alt="Logo" style="height: 30px;" class="me-2 rounded">
-                        {% else %}
-                            <i class="fas fa-briefcase me-2 text-primary"></i>
-                        {% endif %}
-                        <h5 class="fw-bold mb-0">{{ site_settings.site_name|default:"RecrutementPro" }}</h5>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>RecruitPro</h4>
+                    <p>La plateforme de recrutement nouvelle génération qui connecte les talents aux opportunités.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
                     </div>
-                    <p class="text-muted mb-3">
-                        {% if site_settings.footer_text %}
-                            {{ site_settings.footer_text }}
-                        {% else %}
-                            Plateforme complète de gestion de recrutement pour connecter 
-                            les talents aux opportunités. Votre carrière commence ici.
-                        {% endif %}
-                    </p>
-                    {% if site_settings.show_social_links %}
-                    <div class="social-links d-flex gap-2">
-                        {% if site_settings.facebook_url %}
-                            <a href="{{ site_settings.facebook_url }}" class="text-light" target="_blank" 
-                               data-bs-toggle="tooltip" title="Facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                        {% endif %}
-                        {% if site_settings.twitter_url %}
-                            <a href="{{ site_settings.twitter_url }}" class="text-light" target="_blank"
-                               data-bs-toggle="tooltip" title="Twitter">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                        {% endif %}
-                        {% if site_settings.linkedin_url %}
-                            <a href="{{ site_settings.linkedin_url }}" class="text-light" target="_blank"
-                               data-bs-toggle="tooltip" title="LinkedIn">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                        {% endif %}
-                        {% if site_settings.instagram_url %}
-                            <a href="{{ site_settings.instagram_url }}" class="text-light" target="_blank"
-                               data-bs-toggle="tooltip" title="Instagram">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                        {% endif %}
-                        {% if site_settings.youtube_url %}
-                            <a href="{{ site_settings.youtube_url }}" class="text-light" target="_blank"
-                               data-bs-toggle="tooltip" title="YouTube">
-                                <i class="fab fa-youtube"></i>
-                            </a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
                 </div>
-                
-                <div class="col-lg-2 col-md-4 mb-4">
-                    <h6 class="fw-bold mb-3 text-primary">Candidats</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{% url 'jobs:job_list' %}" class="text-muted text-decoration-none hover-lift">
-                                Offres d'emploi
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'jobs:job_categories' %}" class="text-muted text-decoration-none hover-lift">
-                                Catégories
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'accounts:register' %}" class="text-muted text-decoration-none hover-lift">
-                                Créer un compte
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'core:faq' %}" class="text-muted text-decoration-none hover-lift">
-                                FAQ
-                            </a>
-                        </li>
+                <div class="footer-section">
+                    <h5>Candidats</h5>
+                    <ul>
+                        <li><a href="{% url 'jobs:job_list' %}">Trouver un emploi</a></li>
+                        <li><a href="{% url 'cv_builder:dashboard' %}">Créer un CV</a></li>
+                        <li><a href="{% url 'matching:dashboard' %}">Matching intelligent</a></li>
+                        <li><a href="{% url 'alerts:dashboard' %}">Alertes emploi</a></li>
                     </ul>
                 </div>
-                
-                <div class="col-lg-2 col-md-4 mb-4">
-                    <h6 class="fw-bold mb-3 text-primary">Entreprises</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{% url 'jobs:create_job' %}" class="text-muted text-decoration-none hover-lift">
-                                Publier une offre
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'dashboard:admin_dashboard' %}" class="text-muted text-decoration-none hover-lift">
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'core:contact' %}" class="text-muted text-decoration-none hover-lift">
-                                Nous contacter
-                            </a>
-                        </li>
+                <div class="footer-section">
+                    <h5>Recruteurs</h5>
+                    <ul>
+                        <li><a href="{% url 'jobs:create_job' %}">Publier une offre</a></li>
+                        <li><a href="{% url 'dashboard:admin_dashboard' %}">Tableau de bord</a></li>
+                        <li><a href="{% url 'chat:dashboard' %}">Messages</a></li>
+                        <li><a href="{% url 'company_reviews:companies_list' %}">Avis entreprises</a></li>
                     </ul>
                 </div>
-                
-                <div class="col-lg-2 col-md-4 mb-4">
-                    <h6 class="fw-bold mb-3 text-primary">Ressources</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{% url 'core:blog' %}" class="text-muted text-decoration-none hover-lift">
-                                Blog
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'core:about' %}" class="text-muted text-decoration-none hover-lift">
-                                À propos
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'core:terms' %}" class="text-muted text-decoration-none hover-lift">
-                                Conditions
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'core:privacy' %}" class="text-muted text-decoration-none hover-lift">
-                                Confidentialité
-                            </a>
-                        </li>
+                <div class="footer-section">
+                    <h5>Support</h5>
+                    <ul>
+                        <li><a href="{% url 'core:about' %}">À propos</a></li>
+                        <li><a href="{% url 'core:contact' %}">Contact</a></li>
+                        <li><a href="{% url 'core:faq' %}">FAQ</a></li>
+                        <li><a href="{% url 'core:privacy' %}">Confidentialité</a></li>
+                        <li><a href="{% url 'core:terms' %}">Conditions</a></li>
                     </ul>
-                </div>
-                
-                <div class="col-lg-2 mb-4">
-                    <h6 class="fw-bold mb-3 text-primary">Newsletter</h6>
-                    <p class="text-muted small mb-3">Recevez les dernières offres d'emploi</p>
-                    <form id="newsletter-form" class="newsletter-form">
-                        {% csrf_token %}
-                        <div class="input-group input-group-sm mb-2">
-                            <input type="email" class="form-control" name="email" placeholder="Votre email" required
-                                   aria-label="Email pour newsletter">
-                            <button class="btn btn-primary" type="submit" aria-label="S'abonner">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                        <small class="text-muted">En vous abonnant, vous acceptez notre politique de confidentialité.</small>
-                    </form>
                 </div>
             </div>
-            
-            <hr class="my-4 border-secondary">
-            
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="text-muted small mb-0">
-                        © {{ now|date:"Y" }} {{ site_settings.site_name|default:"RecrutementPro" }}. Tous droits réservés.
-                    </p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="{% url 'core:sitemap' %}" class="text-muted text-decoration-none small me-3 hover-lift">
-                        Plan du site
-                    </a>
-                    <a href="{% url 'core:privacy' %}" class="text-muted text-decoration-none small hover-lift">
-                        Politique de confidentialité
-                    </a>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 RecruitPro. Tous droits réservés.</p>
+                    <div class="footer-links">
+                        <a href="{% url 'core:privacy' %}">Confidentialité</a>
+                        <a href="{% url 'core:terms' %}">Conditions</a>
+                        <a href="{% url 'core:sitemap' %}">Plan du site</a>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="back-to-top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/modern-ui.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+
     <!-- Analytics -->
-    {% if site_settings.enable_tracking and site_settings.google_analytics_id %}
+    {% if not debug %}
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.google_analytics_id }}"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', '{{ site_settings.google_analytics_id }}');
+        gtag('config', 'GA_MEASUREMENT_ID');
     </script>
     {% endif %}
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" 
-            crossorigin="anonymous"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" 
-            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" 
-            crossorigin="anonymous"></script>
-    <!-- Custom JS -->
-    <script src="{% static 'js/custom.js' %}"></script>
-    
-    <!-- Loader Script -->
-    <script>
-        // Hide loading spinner when page is loaded
-        window.addEventListener('load', function() {
-            const spinner = document.getElementById('loadingSpinner');
-            const criticalCss = document.querySelector('.critical-css');
-            
-            if (spinner) {
-                spinner.style.display = 'none';
-            }
-            if (criticalCss) {
-                criticalCss.classList.add('loaded');
-            }
-        });
-
-        // Fallback: hide spinner after 3 seconds
-        setTimeout(function() {
-            const spinner = document.getElementById('loadingSpinner');
-            const criticalCss = document.querySelector('.critical-css');
-            
-            if (spinner) {
-                spinner.style.display = 'none';
-            }
-            if (criticalCss) {
-                criticalCss.classList.add('loaded');
-            }
-        }, 3000);
-    </script>
-    
-    {% block extra_js %}{% endblock %}
 </body>
 </html>

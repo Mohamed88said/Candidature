@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Div, HTML, Field
-from .models import Application, ApplicationComment, Interview, ApplicationRating
+from .models import Application, ApplicationComment, Interview, ApplicationRating, VideoQuestion, VideoApplication
 from apps.jobs.models import Job
 
 
@@ -12,6 +12,7 @@ class ApplicationForm(forms.ModelForm):
         model = Application
         fields = [
             'cover_letter', 'resume_file', 'additional_documents',
+            'presentation_video', 'video_duration', 'video_transcript',
             'expected_salary', 'availability_date', 'willing_to_relocate'
         ]
         widgets = {
@@ -262,6 +263,194 @@ class ApplicationSearchForm(forms.Form):
             Row(
                 Column('priority', css_class='form-group col-md-4 mb-0'),
                 Column('date_from', css_class='form-group col-md-4 mb-0'),
+                Column('date_to', css_class='form-group col-md-4 mb-0'),
+                css_class='form-row'
+            ),
+            Submit('submit', 'Rechercher', css_class='btn btn-primary')
+        )
+
+
+class VideoApplicationForm(forms.ModelForm):
+    """Formulaire pour candidature vidéo"""
+    class Meta:
+        model = VideoApplication
+        fields = ['main_video', 'total_duration', 'video_quality']
+        widgets = {
+            'total_duration': forms.NumberInput(attrs={'min': 30, 'max': 600, 'placeholder': 'Durée en secondes'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.job = kwargs.pop('job', None)
+        super().__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            HTML('<h4>Vidéo de présentation</h4>'),
+            HTML('<p class="text-muted">Enregistrez une vidéo de 2-5 minutes pour vous présenter</p>'),
+            'main_video',
+            Row(
+                Column('total_duration', css_class='form-group col-md-6 mb-0'),
+                Column('video_quality', css_class='form-group col-md-6 mb-0'),
+                css_class='form-row'
+            ),
+            Submit('submit', 'Envoyer ma candidature vidéo', css_class='btn btn-primary btn-lg mt-4')
+        )
+
+    def clean_main_video(self):
+        video = self.cleaned_data.get('main_video')
+        if video:
+            # Vérifier la taille du fichier (100MB max)
+            if video.size > 100 * 1024 * 1024:
+                raise ValidationError("La vidéo ne peut pas dépasser 100MB.")
+            
+            # Vérifier l'extension
+            allowed_extensions = ['.mp4', '.mov', '.avi', '.webm']
+            file_extension = video.name.lower().split('.')[-1]
+            if f'.{file_extension}' not in allowed_extensions:
+                raise ValidationError("Seuls les fichiers MP4, MOV, AVI et WEBM sont autorisés.")
+        
+        return video
+
+    def clean_total_duration(self):
+        duration = self.cleaned_data.get('total_duration')
+        if duration:
+            if duration < 30:
+                raise ValidationError("La vidéo doit durer au moins 30 secondes.")
+            if duration > 600:
+                raise ValidationError("La vidéo ne peut pas dépasser 10 minutes.")
+        return duration
+
+
+class VideoQuestionForm(forms.ModelForm):
+    """Formulaire pour créer des questions vidéo"""
+    class Meta:
+        model = VideoQuestion
+        fields = ['question_type', 'question_text', 'is_required', 'time_limit', 'order', 'is_active']
+        widgets = {
+            'question_text': forms.Textarea(attrs={'rows': 4}),
+            'time_limit': forms.NumberInput(attrs={'min': 30, 'max': 300}),
+            'order': forms.NumberInput(attrs={'min': 0}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Row(
+                Column('question_type', css_class='form-group col-md-6 mb-0'),
+                Column('order', css_class='form-group col-md-6 mb-0'),
+                css_class='form-row'
+            ),
+            'question_text',
+            Row(
+                Column('time_limit', css_class='form-group col-md-4 mb-0'),
+                Column('is_required', css_class='form-group col-md-4 mb-0'),
+                Column('is_active', css_class='form-group col-md-4 mb-0'),
+                css_class='form-row'
+            ),
+            Submit('submit', 'Enregistrer la question', css_class='btn btn-primary')
+        )
+
+
+class VideoResponseForm(forms.Form):
+    """Formulaire pour répondre à une question vidéo"""
+    video_response = forms.FileField(
+        label="Votre réponse vidéo",
+        help_text="Enregistrez votre réponse (max 5 minutes)",
+        widget=forms.FileInput(attrs={
+            'accept': 'video/*',
+            'class': 'form-control'
+        })
+    )
+    transcript = forms.CharField(
+        label="Transcription (optionnel)",
+        widget=forms.Textarea(attrs={'rows': 4}),
+        required=False,
+        help_text="Vous pouvez fournir une transcription de votre réponse"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.question = kwargs.pop('question', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.question:
+            self.fields['video_response'].help_text = f"Temps limite: {self.question.time_limit} secondes"
+        
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            HTML(f'<h5>{self.question.question_text if self.question else "Question"}</h5>'),
+            'video_response',
+            'transcript',
+            Submit('submit', 'Enregistrer la réponse', css_class='btn btn-primary')
+        )
+
+    def clean_video_response(self):
+        video = self.cleaned_data.get('video_response')
+        if video:
+            # Vérifier la taille du fichier (50MB max)
+            if video.size > 50 * 1024 * 1024:
+                raise ValidationError("La vidéo ne peut pas dépasser 50MB.")
+            
+            # Vérifier l'extension
+            allowed_extensions = ['.mp4', '.mov', '.avi', '.webm']
+            file_extension = video.name.lower().split('.')[-1]
+            if f'.{file_extension}' not in allowed_extensions:
+                raise ValidationError("Seuls les fichiers MP4, MOV, AVI et WEBM sont autorisés.")
+        
+        return video
+
+
+class VideoApplicationSearchForm(forms.Form):
+    """Formulaire de recherche pour les candidatures vidéo"""
+    keywords = forms.CharField(
+        max_length=200, 
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Nom, poste, entreprise...'})
+    )
+    job = forms.ModelChoiceField(
+        queryset=Job.objects.filter(status='published'),
+        required=False,
+        empty_label="Toutes les offres"
+    )
+    video_quality = forms.ChoiceField(
+        choices=[('', 'Toutes les qualités')] + list(VideoApplication._meta.get_field('video_quality').choices),
+        required=False
+    )
+    processing_status = forms.ChoiceField(
+        choices=[('', 'Tous les statuts')] + list(VideoApplication._meta.get_field('processing_status').choices),
+        required=False
+    )
+    has_transcript = forms.BooleanField(
+        required=False,
+        label="Avec transcription"
+    )
+    date_from = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    date_to = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'get'
+        self.helper.layout = Layout(
+            Row(
+                Column('keywords', css_class='form-group col-md-4 mb-0'),
+                Column('job', css_class='form-group col-md-4 mb-0'),
+                Column('video_quality', css_class='form-group col-md-4 mb-0'),
+                css_class='form-row'
+            ),
+            Row(
+                Column('processing_status', css_class='form-group col-md-4 mb-0'),
+                Column('has_transcript', css_class='form-group col-md-4 mb-0'),
+                Column('date_from', css_class='form-group col-md-4 mb-0'),
+                css_class='form-row'
+            ),
+            Row(
                 Column('date_to', css_class='form-group col-md-4 mb-0'),
                 css_class='form-row'
             ),

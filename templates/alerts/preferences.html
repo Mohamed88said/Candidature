@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Préférences d'alertes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="alerts-preferences">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <h1><i class="fas fa-cog"></i> Préférences d'alertes</h1>
+                    <p>Configurez vos préférences pour recevoir des alertes personnalisées</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-bell"></i> Configuration des alertes</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" class="preferences-form">
+                            {% csrf_token %}
+                            
+                            <!-- Préférences de notification -->
+                            <div class="preference-section">
+                                <h5><i class="fas fa-envelope"></i> Canaux de notification</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.email_alerts }}
+                                            <label class="form-check-label" for="{{ form.email_alerts.id_for_label }}">
+                                                <i class="fas fa-envelope"></i> Email
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.push_notifications }}
+                                            <label class="form-check-label" for="{{ form.push_notifications.id_for_label }}">
+                                                <i class="fas fa-mobile-alt"></i> Notifications push
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.sms_alerts }}
+                                            <label class="form-check-label" for="{{ form.sms_alerts.id_for_label }}">
+                                                <i class="fas fa-sms"></i> SMS
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Fréquence -->
+                            <div class="preference-section">
+                                <h5><i class="fas fa-clock"></i> Fréquence des alertes</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.frequency.id_for_label }}">Fréquence</label>
+                                            {{ form.frequency }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.max_alerts_per_day.id_for_label }}">Maximum par jour</label>
+                                            {{ form.max_alerts_per_day }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Filtres de contenu -->
+                            <div class="preference-section">
+                                <h5><i class="fas fa-filter"></i> Filtres de contenu</h5>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.include_salary }}
+                                            <label class="form-check-label" for="{{ form.include_salary.id_for_label }}">
+                                                Inclure les salaires
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.include_remote_jobs }}
+                                            <label class="form-check-label" for="{{ form.include_remote_jobs.id_for_label }}">
+                                                Emplois à distance
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.include_part_time }}
+                                            <label class="form-check-label" for="{{ form.include_part_time.id_for_label }}">
+                                                Temps partiel
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.include_internships }}
+                                            <label class="form-check-label" for="{{ form.include_internships.id_for_label }}">
+                                                Stages
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Filtres géographiques -->
+                            <div class="preference-section">
+                                <h5><i class="fas fa-map-marker-alt"></i> Localisation</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.max_distance.id_for_label }}">Distance maximale (km)</label>
+                                            {{ form.max_distance }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.preferred_locations.id_for_label }}">Villes préférées</label>
+                                            {{ form.preferred_locations }}
+                                            <small class="form-text text-muted">Séparer par des virgules</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Filtres de salaire -->
+                            <div class="preference-section">
+                                <h5><i class="fas fa-euro-sign"></i> Fourchette de salaire</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.min_salary.id_for_label }}">Salaire minimum</label>
+                                            {{ form.min_salary }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.max_salary.id_for_label }}">Salaire maximum</label>
+                                            {{ form.max_salary }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Filtres d'expérience -->
+                            <div class="preference-section">
+                                <h5><i class="fas fa-briefcase"></i> Expérience</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.min_experience.id_for_label }}">Expérience minimum (années)</label>
+                                            {{ form.min_experience }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.max_experience.id_for_label }}">Expérience maximum (années)</label>
+                                            {{ form.max_experience }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Préférences -->
+                            <div class="preference-section">
+                                <h5><i class="fas fa-heart"></i> Préférences</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.preferred_job_types.id_for_label }}">Types d'emploi</label>
+                                            {{ form.preferred_job_types }}
+                                            <small class="form-text text-muted">Séparer par des virgules</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.preferred_industries.id_for_label }}">Secteurs</label>
+                                            {{ form.preferred_industries }}
+                                            <small class="form-text text-muted">Séparer par des virgules</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.preferred_skills.id_for_label }}">Compétences</label>
+                                            {{ form.preferred_skills }}
+                                            <small class="form-text text-muted">Séparer par des virgules</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Types d'alertes -->
+                            <div class="preference-section">
+                                <h5><i class="fas fa-tags"></i> Types d'alertes activés</h5>
+                                <div class="alert-types-grid">
+                                    {% for alert_type in alert_types %}
+                                    <div class="alert-type-option">
+                                        <div class="form-check">
+                                            <input type="checkbox" 
+                                                   class="form-check-input" 
+                                                   name="enabled_alert_types" 
+                                                   value="{{ alert_type.id }}"
+                                                   id="alert_type_{{ alert_type.id }}"
+                                                   {% if alert_type in preferences.enabled_alert_types.all %}checked{% endif %}>
+                                            <label class="form-check-label" for="alert_type_{{ alert_type.id }}">
+                                                <i class="{{ alert_type.icon }}" style="color: {{ alert_type.color }}"></i>
+                                                {{ alert_type.name }}
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">{{ alert_type.description }}</small>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Sauvegarder les préférences
+                                </button>
+                                <a href="{% url 'alerts:dashboard' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left"></i> Retour au dashboard
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Aperçu des préférences -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-eye"></i> Aperçu</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="preference-preview">
+                            <div class="preview-item">
+                                <strong>Fréquence :</strong>
+                                <span id="frequency-preview">{{ preferences.frequency|title }}</span>
+                            </div>
+                            <div class="preview-item">
+                                <strong>Maximum par jour :</strong>
+                                <span id="max-alerts-preview">{{ preferences.max_alerts_per_day }}</span>
+                            </div>
+                            <div class="preview-item">
+                                <strong>Distance :</strong>
+                                <span id="distance-preview">{{ preferences.max_distance }} km</span>
+                            </div>
+                            <div class="preview-item">
+                                <strong>Types activés :</strong>
+                                <span id="types-preview">{{ preferences.enabled_alert_types.count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistiques -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-preview">
+                            <div class="stat-item">
+                                <span class="stat-number">{{ preferences.user.alert_notifications.count }}</span>
+                                <span class="stat-label">Alertes reçues</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ preferences.user.alert_notifications.filter(status='clicked').count }}</span>
+                                <span class="stat-label">Alertes cliquées</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conseils -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-lightbulb"></i> Conseils</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="tips">
+                            <div class="tip-item">
+                                <i class="fas fa-info-circle text-info"></i>
+                                <p>Activez plusieurs types d'alertes pour ne rien manquer</p>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-map-marker-alt text-warning"></i>
+                                <p>Définissez vos villes préférées pour des alertes plus pertinentes</p>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-euro-sign text-success"></i>
+                                <p>Indiquez votre fourchette de salaire pour filtrer les offres</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Mise à jour de l'aperçu en temps réel
+    $('#id_frequency').change(function() {
+        $('#frequency-preview').text($(this).find('option:selected').text());
+    });
+    
+    $('#id_max_alerts_per_day').change(function() {
+        $('#max-alerts-preview').text($(this).val());
+    });
+    
+    $('#id_max_distance').change(function() {
+        $('#distance-preview').text($(this).val() + ' km');
+    });
+    
+    // Comptage des types d'alertes activés
+    $('input[name="enabled_alert_types"]').change(function() {
+        const count = $('input[name="enabled_alert_types"]:checked').length;
+        $('#types-preview').text(count);
+    });
+    
+    // Validation du formulaire
+    $('.preferences-form').submit(function(e) {
+        const minSalary = parseInt($('#id_min_salary').val()) || 0;
+        const maxSalary = parseInt($('#id_max_salary').val()) || 0;
+        const minExp = parseInt($('#id_min_experience').val()) || 0;
+        const maxExp = parseInt($('#id_max_experience').val()) || 0;
+        
+        if (minSalary > 0 && maxSalary > 0 && minSalary > maxSalary) {
+            e.preventDefault();
+            alert('Le salaire minimum ne peut pas être supérieur au salaire maximum.');
+            return false;
+        }
+        
+        if (minExp > 0 && maxExp > 0 && minExp > maxExp) {
+            e.preventDefault();
+            alert('L\'expérience minimum ne peut pas être supérieure à l\'expérience maximum.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}
+
+
+

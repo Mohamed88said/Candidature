@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - Paramètres{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-settings">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-cog"></i> Paramètres du chat</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="settings-section">
+                                <h5>Notifications</h5>
+                                
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        {{ form.notifications_enabled }}
+                                        <label class="form-check-label" for="{{ form.notifications_enabled.id_for_label }}">
+                                            Activer les notifications
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        {{ form.email_notifications }}
+                                        <label class="form-check-label" for="{{ form.email_notifications.id_for_label }}">
+                                            Notifications par email
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        {{ form.push_notifications }}
+                                        <label class="form-check-label" for="{{ form.push_notifications.id_for_label }}">
+                                            Notifications push
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h5>Interface</h5>
+                                
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        {{ form.sound_enabled }}
+                                        <label class="form-check-label" for="{{ form.sound_enabled.id_for_label }}">
+                                            Activer les sons
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="{{ form.theme.id_for_label }}">Thème</label>
+                                    {{ form.theme }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="{{ form.messages_per_page.id_for_label }}">Messages par page</label>
+                                    {{ form.messages_per_page }}
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <a href="{% url 'chat:dashboard' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Retour
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Sauvegarder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <a href="{% url 'chat:notifications' %}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-bell"></i> Voir les notifications
+                            </a>
+                            
+                            <a href="{% url 'chat:rooms_list' %}" class="btn btn-outline-secondary btn-block">
+                                <i class="fas fa-list"></i> Toutes les conversations
+                            </a>
+                            
+                            <button class="btn btn-outline-warning btn-block" onclick="clearChatHistory()">
+                                <i class="fas fa-trash"></i> Effacer l'historique
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function clearChatHistory() {
+    if (confirm('Êtes-vous sûr de vouloir effacer tout l\'historique de chat ? Cette action est irréversible.')) {
+        // AJAX call pour effacer l'historique
+        $.post('/chat/api/clear-history/', {
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        }, function(data) {
+            if (data.success) {
+                alert('Historique effacé avec succès');
+                location.reload();
+            } else {
+                alert('Erreur lors de l\'effacement de l\'historique');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
+
+
+

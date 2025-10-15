@@ -1,0 +1,566 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Rapports - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Rapports</h1>
+                    <p class="welcome-subtitle">Analysez vos données et performances</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="generateReport()">
+                        <i class="fas fa-plus"></i>
+                        <span>Générer un rapport</span>
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="exportReports()">
+                        <i class="fas fa-download"></i>
+                        <span>Exporter</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <!-- Reports Statistics -->
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_reports }}</h3>
+                            <p>Total rapports</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ reports_this_month }}</h3>
+                            <p>Ce mois</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_views }}</h3>
+                            <p>Vues totales</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-share"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_shares }}</h3>
+                            <p>Partages</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Report Filters -->
+                <div class="filters-section">
+                    <div class="filters-header">
+                        <h3>Filtrer les rapports</h3>
+                    </div>
+                    <div class="filters-content">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">
+                                <i class="fas fa-list"></i>
+                                <span>Tous ({{ total_reports }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="performance">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Performance ({{ performance_reports }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="analytics">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Analytiques ({{ analytics_reports }})</span>
+                            </button>
+                            <button class="filter-tab" data-filter="financial">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>Financiers ({{ financial_reports }})</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports List -->
+                <div class="reports-section">
+                    <div class="section-header">
+                        <h3>Mes rapports</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshReports()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        {% if reports %}
+                        <div class="reports-list">
+                            {% for report in reports %}
+                            <div class="report-item" data-report-id="{{ report.id }}">
+                                <div class="report-checkbox">
+                                    <input type="checkbox" onchange="selectReport({{ report.id }})">
+                                </div>
+                                <div class="report-content">
+                                    <div class="report-header">
+                                        <div class="report-info">
+                                            <div class="report-icon">
+                                                {% if report.type == 'performance' %}
+                                                <i class="fas fa-chart-line"></i>
+                                                {% elif report.type == 'analytics' %}
+                                                <i class="fas fa-chart-bar"></i>
+                                                {% elif report.type == 'financial' %}
+                                                <i class="fas fa-dollar-sign"></i>
+                                                {% else %}
+                                                <i class="fas fa-file-alt"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="report-details">
+                                                <h4>{{ report.title }}</h4>
+                                                <p>{{ report.description }}</p>
+                                                <div class="report-meta">
+                                                    <span class="report-type">
+                                                        <i class="fas fa-tag"></i>
+                                                        {{ report.get_type_display }}
+                                                    </span>
+                                                    <span class="report-date">
+                                                        <i class="fas fa-calendar"></i>
+                                                        {{ report.created_at|date:"d/m/Y" }}
+                                                    </span>
+                                                    <span class="report-status">
+                                                        <i class="fas fa-circle"></i>
+                                                        {{ report.get_status_display }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="report-actions">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewReport({{ report.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="editReport({{ report.id }})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm" onclick="downloadReport({{ report.id }})">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="deleteReport({{ report.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="report-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Vues</span>
+                                            <span class="stat-value">{{ report.views }}</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-label">Partages</span>
+                                            <span class="stat-value">{{ report.shares }}</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-label">Taille</span>
+                                            <span class="stat-value">{{ report.file_size|filesizeformat }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                        <div class="pagination-wrapper">
+                            <nav aria-label="Pagination des rapports">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                        
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line"></i>
+                            <h4>Aucun rapport</h4>
+                            <p>Commencez par générer votre premier rapport</p>
+                            <button class="btn btn-primary" onclick="generateReport()">
+                                <i class="fas fa-plus"></i>
+                                <span>Générer un rapport</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Report Generator -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Générer un rapport</h3>
+                    </div>
+                    <div class="widget-content">
+                        <form class="quick-report-form" id="quick-report-form">
+                            <div class="form-group">
+                                <label class="form-label">Type de rapport</label>
+                                <select name="report_type" class="form-select" required>
+                                    <option value="">Sélectionnez un type</option>
+                                    <option value="performance">Performance</option>
+                                    <option value="analytics">Analytique</option>
+                                    <option value="financial">Financier</option>
+                                    <option value="custom">Personnalisé</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Période</label>
+                                <select name="period" class="form-select" required>
+                                    <option value="">Sélectionnez une période</option>
+                                    <option value="last_7_days">7 derniers jours</option>
+                                    <option value="last_30_days">30 derniers jours</option>
+                                    <option value="last_3_months">3 derniers mois</option>
+                                    <option value="last_year">Dernière année</option>
+                                    <option value="custom">Période personnalisée</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Format</label>
+                                <select name="format" class="form-select" required>
+                                    <option value="">Sélectionnez un format</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="json">JSON</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Titre du rapport</label>
+                                <input type="text" name="title" class="form-control" placeholder="Titre du rapport">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="3" placeholder="Description du rapport"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Générer le rapport</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Report Categories -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Catégories de rapports</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="report-categories">
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Performance</h5>
+                                    <p>{{ performance_reports }} rapports</p>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Analytiques</h5>
+                                    <p>{{ analytics_reports }} rapports</p>
+                                </div>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="category-info">
+                                    <h5>Financiers</h5>
+                                    <p>{{ financial_reports }} rapports</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Reports -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Rapports récents</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="recent-reports">
+                            {% for report in recent_reports %}
+                            <div class="recent-item">
+                                <div class="recent-icon">
+                                    {% if report.type == 'performance' %}
+                                    <i class="fas fa-chart-line"></i>
+                                    {% elif report.type == 'analytics' %}
+                                    <i class="fas fa-chart-bar"></i>
+                                    {% elif report.type == 'financial' %}
+                                    <i class="fas fa-dollar-sign"></i>
+                                    {% else %}
+                                    <i class="fas fa-file-alt"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="recent-info">
+                                    <h5>{{ report.title }}</h5>
+                                    <p>{{ report.created_at|timesince }} ago</p>
+                                </div>
+                                <div class="recent-actions">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewReport({{ report.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-recent">
+                                <i class="fas fa-chart-line"></i>
+                                <p>Aucun rapport récent</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Statistics -->
+                <div class="dashboard-widget">
+                    <div class="widget-header">
+                        <h3>Statistiques des rapports</h3>
+                    </div>
+                    <div class="widget-content">
+                        <div class="report-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ total_reports }}</h4>
+                                    <p>Total rapports</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ reports_this_month }}</h4>
+                                    <p>Ce mois</p>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>{{ total_views }}</h4>
+                                    <p>Vues totales</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filter tabs functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Filter reports based on selected tab
+            const filter = this.dataset.filter;
+            filterReports(filter);
+        });
+    });
+
+    // Filter reports
+    function filterReports(filter) {
+        const reports = document.querySelectorAll('.report-item');
+        
+        reports.forEach(report => {
+            switch(filter) {
+                case 'all':
+                    report.style.display = 'flex';
+                    break;
+                case 'performance':
+                    // This would typically filter by performance type
+                    report.style.display = 'flex';
+                    break;
+                case 'analytics':
+                    // This would typically filter by analytics type
+                    report.style.display = 'flex';
+                    break;
+                case 'financial':
+                    // This would typically filter by financial type
+                    report.style.display = 'flex';
+                    break;
+            }
+        });
+    }
+
+    // Select report
+    function selectReport(reportId) {
+        // This would typically select the report for bulk actions
+        console.log('Report selected:', reportId);
+    }
+
+    // Generate report
+    function generateReport() {
+        // This would typically open a modal to generate a report
+        alert('Génération de rapport...');
+    }
+
+    // View report
+    function viewReport(reportId) {
+        // This would typically open a modal to view the report
+        alert('Affichage du rapport: ' + reportId);
+    }
+
+    // Edit report
+    function editReport(reportId) {
+        // This would typically open a modal to edit the report
+        alert('Édition du rapport: ' + reportId);
+    }
+
+    // Download report
+    function downloadReport(reportId) {
+        // This would typically download the report
+        alert('Téléchargement du rapport: ' + reportId);
+    }
+
+    // Delete report
+    function deleteReport(reportId) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')) {
+            // This would typically make an AJAX request to delete the report
+            const report = document.querySelector(`[data-report-id="${reportId}"]`);
+            report.remove();
+            alert('Rapport supprimé !');
+        }
+    }
+
+    // Export reports
+    function exportReports() {
+        // This would typically export all reports
+        alert('Export des rapports...');
+    }
+
+    // Refresh reports
+    function refreshReports() {
+        // This would typically refresh the reports list
+        location.reload();
+    }
+
+    // Report type change handler
+    document.querySelector('select[name="report_type"]').addEventListener('change', function() {
+        const reportType = this.value;
+        const periodSelect = document.querySelector('select[name="period"]');
+        
+        // Clear existing options
+        periodSelect.innerHTML = '<option value="">Sélectionnez une période</option>';
+        
+        if (reportType) {
+            // This would typically populate options based on report type
+            // For now, we'll just show a placeholder
+            const option = document.createElement('option');
+            option.value = 'last_30_days';
+            option.textContent = '30 derniers jours';
+            periodSelect.appendChild(option);
+        }
+    });
+
+    // Quick report form submission
+    document.getElementById('quick-report-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // This would typically generate the report
+        alert('Rapport généré avec succès !');
+        this.reset();
+    });
+
+    // Auto-refresh reports
+    setInterval(function() {
+        // This would typically check for report updates
+        console.log('Checking for report updates...');
+    }, 60000); // Check every minute
+</script>
+{% endblock %}

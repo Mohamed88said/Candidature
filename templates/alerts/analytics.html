@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics des alertes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="alerts-analytics">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <h1><i class="fas fa-chart-line"></i> Analytics des alertes</h1>
+                    <p>Statistiques et analyses du système d'alertes</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistiques principales -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ total_alerts }}</h3>
+                        <p>Alertes totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-envelope-open"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ total_delivered }}</h3>
+                        <p>Alertes livrées</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-mouse-pointer"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ total_opened }}</h3>
+                        <p>Alertes ouvertes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-hand-pointer"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>{{ total_clicked }}</h3>
+                        <p>Alertes cliquées</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Taux de conversion -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-percentage"></i> Taux de livraison</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="conversion-rate">
+                            <div class="rate-circle">
+                                <span class="rate-number">{{ delivery_rate|floatformat:1 }}%</span>
+                            </div>
+                            <p>{{ total_delivered }} / {{ total_alerts }} alertes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-eye"></i> Taux d'ouverture</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="conversion-rate">
+                            <div class="rate-circle">
+                                <span class="rate-number">{{ open_rate|floatformat:1 }}%</span>
+                            </div>
+                            <p>{{ total_opened }} / {{ total_delivered }} alertes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-mouse-pointer"></i> Taux de clic</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="conversion-rate">
+                            <div class="rate-circle">
+                                <span class="rate-number">{{ click_rate|floatformat:1 }}%</span>
+                            </div>
+                            <p>{{ total_clicked }} / {{ total_opened }} alertes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Graphiques -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> Alertes par jour (30 derniers jours)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="dailyAlertsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-pie"></i> Alertes par type</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="alertsByTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top des offres -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-trophy"></i> Top des offres les plus alertées</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if top_jobs %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Rang</th>
+                                            <th>Offre</th>
+                                            <th>Entreprise</th>
+                                            <th>Localisation</th>
+                                            <th>Alertes</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for job in top_jobs %}
+                                        <tr>
+                                            <td>
+                                                <span class="rank-badge rank-{{ forloop.counter }}">
+                                                    {{ forloop.counter }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong>{{ job.title }}</strong>
+                                            </td>
+                                            <td>{{ job.company }}</td>
+                                            <td>{{ job.location }}</td>
+                                            <td>
+                                                <span class="alert-count">{{ job.alert_count }}</span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'jobs:job_detail' job.slug %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Voir
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="no-data">
+                                <i class="fas fa-chart-bar fa-3x"></i>
+                                <p>Aucune donnée disponible</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alertes par type -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-tags"></i> Détail par type d'alerte</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if alerts_by_type %}
+                            <div class="row">
+                                {% for alert_type in alerts_by_type %}
+                                <div class="col-md-4">
+                                    <div class="alert-type-card">
+                                        <div class="alert-type-header">
+                                            <div class="alert-type-icon" style="color: {{ alert_type.color }}">
+                                                <i class="{{ alert_type.icon }}"></i>
+                                            </div>
+                                            <div class="alert-type-info">
+                                                <h6>{{ alert_type.name }}</h6>
+                                                <span class="alert-count">{{ alert_type.alert_count }} alertes</span>
+                                            </div>
+                                        </div>
+                                        <div class="alert-type-description">
+                                            {{ alert_type.description }}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="no-data">
+                                <i class="fas fa-tags fa-3x"></i>
+                                <p>Aucun type d'alerte disponible</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Graphique des alertes par jour
+    const dailyAlertsCtx = document.getElementById('dailyAlertsChart').getContext('2d');
+    const dailyAlertsData = {{ daily_alerts|safe }};
+    
+    new Chart(dailyAlertsCtx, {
+        type: 'line',
+        data: {
+            labels: dailyAlertsData.map(item => item.day),
+            datasets: [{
+                label: 'Alertes par jour',
+                data: dailyAlertsData.map(item => item.count),
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Graphique des alertes par type
+    const alertsByTypeCtx = document.getElementById('alertsByTypeChart').getContext('2d');
+    const alertsByTypeData = [
+        {% for alert_type in alerts_by_type %}
+        {
+            label: '{{ alert_type.name }}',
+            data: {{ alert_type.alert_count }},
+            backgroundColor: '{{ alert_type.color }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    new Chart(alertsByTypeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: alertsByTypeData.map(item => item.label),
+            datasets: [{
+                data: alertsByTypeData.map(item => item.data),
+                backgroundColor: alertsByTypeData.map(item => item.backgroundColor)
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Animation des cartes
+    $('.stat-card').each(function(index) {
+        $(this).css('animation-delay', (index * 0.1) + 's');
+    });
+});
+</script>
+
+<style>
+.conversion-rate {
+    text-align: center;
+}
+
+.rate-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.rank-badge {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #6c757d;
+    color: white;
+    text-align: center;
+    line-height: 30px;
+    font-weight: bold;
+}
+
+.rank-1 { background: #ffd700; }
+.rank-2 { background: #c0c0c0; }
+.rank-3 { background: #cd7f32; }
+
+.alert-count {
+    background: #007bff;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.alert-type-card {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+.alert-type-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.alert-type-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.alert-type-info h6 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.alert-type-description {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.no-data i {
+    margin-bottom: 1rem;
+    color: #adb5bd;
+}
+</style>
+{% endblock %}
+
+
+

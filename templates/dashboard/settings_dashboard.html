@@ -1,0 +1,657 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Paramètres - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <h1>Paramètres</h1>
+                    <p class="welcome-subtitle">Gérez vos préférences et paramètres</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i>
+                        <span>Enregistrer</span>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="resetSettings()">
+                        <i class="fas fa-undo"></i>
+                        <span>Réinitialiser</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Settings Navigation -->
+            <div class="col-lg-3">
+                <div class="settings-nav">
+                    <div class="nav-header">
+                        <h3>Paramètres</h3>
+                    </div>
+                    <div class="nav-content">
+                        <ul class="nav-list">
+                            <li class="nav-item">
+                                <a href="#profile" class="nav-link active" data-section="profile">
+                                    <i class="fas fa-user"></i>
+                                    <span>Profil</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#notifications" class="nav-link" data-section="notifications">
+                                    <i class="fas fa-bell"></i>
+                                    <span>Notifications</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#privacy" class="nav-link" data-section="privacy">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Confidentialité</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#security" class="nav-link" data-section="security">
+                                    <i class="fas fa-lock"></i>
+                                    <span>Sécurité</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#preferences" class="nav-link" data-section="preferences">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Préférences</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#account" class="nav-link" data-section="account">
+                                    <i class="fas fa-user-cog"></i>
+                                    <span>Compte</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="col-lg-9">
+                <div class="settings-content">
+                    <!-- Profile Settings -->
+                    <div class="settings-section active" id="profile-section">
+                        <div class="section-header">
+                            <h3>Paramètres du profil</h3>
+                            <p>Gérez vos informations personnelles</p>
+                        </div>
+                        <div class="section-content">
+                            <form class="settings-form" id="profile-form">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Prénom</label>
+                                            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Nom</label>
+                                            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" name="email" class="form-control" value="{{ user.email }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Téléphone</label>
+                                            <input type="tel" name="phone" class="form-control" value="{{ user.phone }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Bio</label>
+                                    <textarea name="bio" class="form-control" rows="4" placeholder="Décrivez-vous en quelques mots">{{ user.bio }}</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Localisation</label>
+                                    <input type="text" name="location" class="form-control" value="{{ user.location }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Site web</label>
+                                    <input type="url" name="website" class="form-control" value="{{ user.website }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Photo de profil</label>
+                                    <div class="profile-photo-upload">
+                                        <div class="photo-preview">
+                                            <img src="{{ user.profile_photo.url|default:'/static/images/default-avatar.png' }}" alt="Photo de profil">
+                                        </div>
+                                        <div class="photo-upload">
+                                            <input type="file" name="profile_photo" class="form-control" accept="image/*">
+                                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-upload"></i>
+                                                <span>Changer la photo</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div class="settings-section" id="notifications-section">
+                        <div class="section-header">
+                            <h3>Paramètres de notification</h3>
+                            <p>Configurez vos préférences de notification</p>
+                        </div>
+                        <div class="section-content">
+                            <form class="settings-form" id="notifications-form">
+                                <div class="notification-group">
+                                    <h4>Notifications par email</h4>
+                                    <div class="notification-item">
+                                        <div class="notification-info">
+                                            <h5>Nouvelles offres d'emploi</h5>
+                                            <p>Recevez des notifications pour les nouvelles offres correspondant à votre profil</p>
+                                        </div>
+                                        <div class="notification-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="email_job_alerts" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="notification-item">
+                                        <div class="notification-info">
+                                            <h5>Mises à jour d'application</h5>
+                                            <p>Recevez des notifications sur le statut de vos candidatures</p>
+                                        </div>
+                                        <div class="notification-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="email_application_updates" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="notification-item">
+                                        <div class="notification-info">
+                                            <h5>Messages</h5>
+                                            <p>Recevez des notifications pour les nouveaux messages</p>
+                                        </div>
+                                        <div class="notification-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="email_messages" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="notification-group">
+                                    <h4>Notifications push</h4>
+                                    <div class="notification-item">
+                                        <div class="notification-info">
+                                            <h5>Notifications push</h5>
+                                            <p>Recevez des notifications push sur votre appareil</p>
+                                        </div>
+                                        <div class="notification-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="push_notifications" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="notification-item">
+                                        <div class="notification-info">
+                                            <h5>Notifications de chat</h5>
+                                            <p>Recevez des notifications pour les nouveaux messages de chat</p>
+                                        </div>
+                                        <div class="notification-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="push_chat" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="notification-group">
+                                    <h4>Fréquence des notifications</h4>
+                                    <div class="form-group">
+                                        <label class="form-label">Fréquence des alertes d'emploi</label>
+                                        <select name="job_alert_frequency" class="form-select">
+                                            <option value="immediate">Immédiatement</option>
+                                            <option value="daily">Quotidien</option>
+                                            <option value="weekly">Hebdomadaire</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Privacy Settings -->
+                    <div class="settings-section" id="privacy-section">
+                        <div class="section-header">
+                            <h3>Paramètres de confidentialité</h3>
+                            <p>Contrôlez qui peut voir vos informations</p>
+                        </div>
+                        <div class="section-content">
+                            <form class="settings-form" id="privacy-form">
+                                <div class="privacy-group">
+                                    <h4>Visibilité du profil</h4>
+                                    <div class="privacy-item">
+                                        <div class="privacy-info">
+                                            <h5>Profil public</h5>
+                                            <p>Rendez votre profil visible par tous les utilisateurs</p>
+                                        </div>
+                                        <div class="privacy-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="public_profile" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="privacy-item">
+                                        <div class="privacy-info">
+                                            <h5>Profil visible par les recruteurs</h5>
+                                            <p>Permettez aux recruteurs de voir votre profil</p>
+                                        </div>
+                                        <div class="privacy-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="recruiter_visible" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="privacy-item">
+                                        <div class="privacy-info">
+                                            <h5>Profil visible par les candidats</h5>
+                                            <p>Permettez aux autres candidats de voir votre profil</p>
+                                        </div>
+                                        <div class="privacy-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="candidate_visible" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="privacy-group">
+                                    <h4>Informations personnelles</h4>
+                                    <div class="privacy-item">
+                                        <div class="privacy-info">
+                                            <h5>Email visible</h5>
+                                            <p>Rendez votre adresse email visible</p>
+                                        </div>
+                                        <div class="privacy-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="email_visible">
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="privacy-item">
+                                        <div class="privacy-info">
+                                            <h5>Téléphone visible</h5>
+                                            <p>Rendez votre numéro de téléphone visible</p>
+                                        </div>
+                                        <div class="privacy-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="phone_visible">
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="privacy-item">
+                                        <div class="privacy-info">
+                                            <h5>Localisation visible</h5>
+                                            <p>Rendez votre localisation visible</p>
+                                        </div>
+                                        <div class="privacy-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="location_visible" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="settings-section" id="security-section">
+                        <div class="section-header">
+                            <h3>Paramètres de sécurité</h3>
+                            <p>Gérez la sécurité de votre compte</p>
+                        </div>
+                        <div class="section-content">
+                            <form class="settings-form" id="security-form">
+                                <div class="security-group">
+                                    <h4>Changer le mot de passe</h4>
+                                    <div class="form-group">
+                                        <label class="form-label">Mot de passe actuel</label>
+                                        <input type="password" name="current_password" class="form-control">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Nouveau mot de passe</label>
+                                        <input type="password" name="new_password" class="form-control">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Confirmer le nouveau mot de passe</label>
+                                        <input type="password" name="confirm_password" class="form-control">
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" onclick="changePassword()">
+                                        <i class="fas fa-key"></i>
+                                        <span>Changer le mot de passe</span>
+                                    </button>
+                                </div>
+                                
+                                <div class="security-group">
+                                    <h4>Authentification à deux facteurs</h4>
+                                    <div class="security-item">
+                                        <div class="security-info">
+                                            <h5>Activer 2FA</h5>
+                                            <p>Ajoutez une couche de sécurité supplémentaire à votre compte</p>
+                                        </div>
+                                        <div class="security-toggle">
+                                            <label class="switch">
+                                                <input type="checkbox" name="two_factor_auth">
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="security-group">
+                                    <h4>Sessions actives</h4>
+                                    <div class="active-sessions">
+                                        <div class="session-item">
+                                            <div class="session-info">
+                                                <h5>Session actuelle</h5>
+                                                <p>Windows 10 • Chrome • 127.0.0.1</p>
+                                                <span class="session-time">Maintenant</span>
+                                            </div>
+                                            <div class="session-actions">
+                                                <button class="btn btn-outline-danger btn-sm" onclick="terminateSession('current')">
+                                                    <i class="fas fa-sign-out-alt"></i>
+                                                    <span>Terminer</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Preferences Settings -->
+                    <div class="settings-section" id="preferences-section">
+                        <div class="section-header">
+                            <h3>Préférences</h3>
+                            <p>Personnalisez votre expérience</p>
+                        </div>
+                        <div class="section-content">
+                            <form class="settings-form" id="preferences-form">
+                                <div class="preferences-group">
+                                    <h4>Interface</h4>
+                                    <div class="form-group">
+                                        <label class="form-label">Thème</label>
+                                        <select name="theme" class="form-select">
+                                            <option value="light">Clair</option>
+                                            <option value="dark">Sombre</option>
+                                            <option value="auto">Automatique</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Langue</label>
+                                        <select name="language" class="form-select">
+                                            <option value="fr">Français</option>
+                                            <option value="en">English</option>
+                                            <option value="es">Español</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Fuseau horaire</label>
+                                        <select name="timezone" class="form-select">
+                                            <option value="Europe/Paris">Europe/Paris</option>
+                                            <option value="Europe/London">Europe/London</option>
+                                            <option value="America/New_York">America/New_York</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="preferences-group">
+                                    <h4>Recherche d'emploi</h4>
+                                    <div class="form-group">
+                                        <label class="form-label">Type d'emploi préféré</label>
+                                        <select name="job_type" class="form-select">
+                                            <option value="full-time">Temps plein</option>
+                                            <option value="part-time">Temps partiel</option>
+                                            <option value="contract">Contrat</option>
+                                            <option value="freelance">Freelance</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Niveau d'expérience</label>
+                                        <select name="experience_level" class="form-select">
+                                            <option value="entry">Débutant</option>
+                                            <option value="mid">Intermédiaire</option>
+                                            <option value="senior">Senior</option>
+                                            <option value="executive">Direction</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Salaire minimum souhaité</label>
+                                        <input type="number" name="min_salary" class="form-control" placeholder="Salaire minimum">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Account Settings -->
+                    <div class="settings-section" id="account-section">
+                        <div class="section-header">
+                            <h3>Paramètres du compte</h3>
+                            <p>Gérez votre compte et vos données</p>
+                        </div>
+                        <div class="section-content">
+                            <form class="settings-form" id="account-form">
+                                <div class="account-group">
+                                    <h4>Informations du compte</h4>
+                                    <div class="form-group">
+                                        <label class="form-label">Nom d'utilisateur</label>
+                                        <input type="text" name="username" class="form-control" value="{{ user.username }}" readonly>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Date de création</label>
+                                        <input type="text" class="form-control" value="{{ user.date_joined|date:'d/m/Y' }}" readonly>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Dernière connexion</label>
+                                        <input type="text" class="form-control" value="{{ user.last_login|date:'d/m/Y H:i' }}" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="account-group">
+                                    <h4>Actions du compte</h4>
+                                    <div class="account-actions">
+                                        <button type="button" class="btn btn-outline-primary" onclick="exportData()">
+                                            <i class="fas fa-download"></i>
+                                            <span>Exporter mes données</span>
+                                        </button>
+                                        
+                                        <button type="button" class="btn btn-outline-warning" onclick="deactivateAccount()">
+                                            <i class="fas fa-pause"></i>
+                                            <span>Désactiver le compte</span>
+                                        </button>
+                                        
+                                        <button type="button" class="btn btn-outline-danger" onclick="deleteAccount()">
+                                            <i class="fas fa-trash"></i>
+                                            <span>Supprimer le compte</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Settings navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all links
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            // Hide all sections
+            document.querySelectorAll('.settings-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            const sectionId = this.dataset.section + '-section';
+            document.getElementById(sectionId).classList.add('active');
+        });
+    });
+
+    // Save settings
+    function saveSettings() {
+        // This would typically save all settings
+        alert('Paramètres enregistrés avec succès !');
+    }
+
+    // Reset settings
+    function resetSettings() {
+        if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?')) {
+            // This would typically reset all settings to default
+            alert('Paramètres réinitialisés !');
+        }
+    }
+
+    // Change password
+    function changePassword() {
+        const currentPassword = document.querySelector('input[name="current_password"]').value;
+        const newPassword = document.querySelector('input[name="new_password"]').value;
+        const confirmPassword = document.querySelector('input[name="confirm_password"]').value;
+        
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            alert('Veuillez remplir tous les champs');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            alert('Les mots de passe ne correspondent pas');
+            return;
+        }
+        
+        // This would typically make an AJAX request to change password
+        alert('Mot de passe changé avec succès !');
+        
+        // Clear password fields
+        document.querySelector('input[name="current_password"]').value = '';
+        document.querySelector('input[name="new_password"]').value = '';
+        document.querySelector('input[name="confirm_password"]').value = '';
+    }
+
+    // Export data
+    function exportData() {
+        // This would typically export user data
+        alert('Export de vos données en cours...');
+    }
+
+    // Deactivate account
+    function deactivateAccount() {
+        if (confirm('Êtes-vous sûr de vouloir désactiver votre compte ?')) {
+            // This would typically deactivate the account
+            alert('Compte désactivé !');
+        }
+    }
+
+    // Delete account
+    function deleteAccount() {
+        if (confirm('Êtes-vous sûr de vouloir supprimer définitivement votre compte ? Cette action est irréversible.')) {
+            if (confirm('Cette action supprimera définitivement toutes vos données. Êtes-vous absolument sûr ?')) {
+                // This would typically delete the account
+                alert('Compte supprimé !');
+            }
+        }
+    }
+
+    // Terminate session
+    function terminateSession(sessionId) {
+        if (confirm('Êtes-vous sûr de vouloir terminer cette session ?')) {
+            // This would typically terminate the session
+            alert('Session terminée !');
+        }
+    }
+
+    // Auto-save settings
+    let autoSaveTimeout;
+    document.querySelectorAll('.settings-form input, .settings-form select, .settings-form textarea').forEach(input => {
+        input.addEventListener('change', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(function() {
+                // This would typically auto-save the settings
+                console.log('Auto-saving settings...');
+            }, 2000); // Auto-save after 2 seconds of inactivity
+        });
+    });
+
+    // Profile photo upload
+    document.querySelector('input[name="profile_photo"]').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.querySelector('.photo-preview img').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

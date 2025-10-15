@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Badges - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/gamification.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="badges-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-medal"></i> Mes Badges</h1>
+                <p>Découvrez tous les badges disponibles et vos accomplissements</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ earned_badges }}</span>
+                    <span class="stat-label">Obtenus</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_badges }}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ completion_rate|floatformat:0 }}%</span>
+                    <span class="stat-label">Complétion</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="completion-progress">
+            <div class="progress-container">
+                <div class="progress-bar" style="width: {{ completion_rate }}%"></div>
+            </div>
+            <div class="progress-text">
+                <span>{{ earned_badges }} sur {{ total_badges }} badges obtenus</span>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label>Rechercher</label>
+                    <input type="text" class="form-control" id="search-badges" placeholder="Nom du badge...">
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select class="form-select" id="type-filter">
+                        <option value="">Tous les types</option>
+                        <option value="profile_completion">Complétion de profil</option>
+                        <option value="job_application">Candidature</option>
+                        <option value="cv_creation">Création de CV</option>
+                        <option value="skill_verification">Vérification de compétences</option>
+                        <option value="referral">Parrainage</option>
+                        <option value="achievement">Réussite</option>
+                        <option value="streak">Série</option>
+                        <option value="social">Social</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Rareté</label>
+                    <select class="form-select" id="rarity-filter">
+                        <option value="">Toutes les raretés</option>
+                        <option value="common">Commun</option>
+                        <option value="uncommon">Peu commun</option>
+                        <option value="rare">Rare</option>
+                        <option value="epic">Épique</option>
+                        <option value="legendary">Légendaire</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Statut</label>
+                    <select class="form-select" id="status-filter">
+                        <option value="">Tous</option>
+                        <option value="earned">Obtenus</option>
+                        <option value="not-earned">Non obtenus</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges Grid -->
+        <div class="badges-container">
+            {% for badge_type, badges in badges_by_type.items %}
+            <div class="badge-category">
+                <div class="category-header">
+                    <h3>{{ badge_type }}</h3>
+                    <span class="category-count">{{ badges|length }} badges</span>
+                </div>
+                <div class="badges-grid">
+                    {% for badge in badges %}
+                    <div class="badge-card {% if badge.id in user_badges %}earned{% else %}not-earned{% endif %}" 
+                         data-type="{{ badge.badge_type }}" 
+                         data-rarity="{{ badge.rarity }}"
+                         data-name="{{ badge.name|lower }}">
+                        <div class="badge-icon-container">
+                            <div class="badge-icon" style="color: {{ badge.color }}">
+                                <i class="{{ badge.icon }}"></i>
+                            </div>
+                            {% if badge.id in user_badges %}
+                            <div class="earned-indicator">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            {% endif %}
+                            <div class="rarity-indicator {{ badge.rarity }}"></div>
+                        </div>
+                        <div class="badge-content">
+                            <h4>{{ badge.name }}</h4>
+                            <p>{{ badge.description }}</p>
+                            <div class="badge-meta">
+                                <span class="badge-points">+{{ badge.points }} points</span>
+                                <span class="badge-rarity">{{ badge.get_rarity_display }}</span>
+                            </div>
+                        </div>
+                        <div class="badge-actions">
+                            <a href="{% url 'gamification:badge_detail' badge.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye"></i> Détails
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>Aucun badge trouvé</h3>
+            <p>Essayez de modifier vos critères de recherche</p>
+        </div>
+    </div>
+</div>
+
+<!-- Badge Detail Modal -->
+<div class="modal fade" id="badgeDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Détails du badge</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="badge-detail-content">
+                    <div class="badge-detail-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <div class="badge-detail-info">
+                        <h4 id="modal-badge-name">Nom du badge</h4>
+                        <p id="modal-badge-description">Description du badge</p>
+                        <div class="badge-detail-meta">
+                            <span class="badge-points">+<span id="modal-badge-points">0</span> points</span>
+                            <span class="badge-rarity" id="modal-badge-rarity">Commun</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-badges');
+    const typeFilter = document.getElementById('type-filter');
+    const rarityFilter = document.getElementById('rarity-filter');
+    const statusFilter = document.getElementById('status-filter');
+    const badgeCards = document.querySelectorAll('.badge-card');
+    const emptyState = document.getElementById('empty-state');
+    const badgeCategories = document.querySelectorAll('.badge-category');
+
+    function filterBadges() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedType = typeFilter.value;
+        const selectedRarity = rarityFilter.value;
+        const selectedStatus = statusFilter.value;
+        
+        let visibleCount = 0;
+        let visibleCategories = 0;
+
+        badgeCategories.forEach(category => {
+            const badges = category.querySelectorAll('.badge-card');
+            let categoryVisibleCount = 0;
+
+            badges.forEach(badge => {
+                const name = badge.dataset.name;
+                const type = badge.dataset.type;
+                const rarity = badge.dataset.rarity;
+                const isEarned = badge.classList.contains('earned');
+
+                let show = true;
+
+                // Filtre par nom
+                if (searchTerm && !name.includes(searchTerm)) {
+                    show = false;
+                }
+
+                // Filtre par type
+                if (selectedType && type !== selectedType) {
+                    show = false;
+                }
+
+                // Filtre par rareté
+                if (selectedRarity && rarity !== selectedRarity) {
+                    show = false;
+                }
+
+                // Filtre par statut
+                if (selectedStatus === 'earned' && !isEarned) {
+                    show = false;
+                } else if (selectedStatus === 'not-earned' && isEarned) {
+                    show = false;
+                }
+
+                if (show) {
+                    badge.style.display = 'block';
+                    categoryVisibleCount++;
+                    visibleCount++;
+                } else {
+                    badge.style.display = 'none';
+                }
+            });
+
+            // Afficher/masquer la catégorie
+            if (categoryVisibleCount > 0) {
+                category.style.display = 'block';
+                visibleCategories++;
+            } else {
+                category.style.display = 'none';
+            }
+        });
+
+        // Afficher l'état vide si aucun badge visible
+        if (visibleCount === 0) {
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+        }
+    }
+
+    // Événements de filtrage
+    searchInput.addEventListener('input', filterBadges);
+    typeFilter.addEventListener('change', filterBadges);
+    rarityFilter.addEventListener('change', filterBadges);
+    statusFilter.addEventListener('change', filterBadges);
+
+    // Animation des cartes au chargement
+    badgeCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+
+    // Effet hover sur les cartes
+    badgeCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px) scale(1.02)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}
+
+

@@ -1,60 +1,116 @@
-{% extends 'base.html' %}
+{% extends 'base_auth.html' %}
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}Connexion - Plateforme de Recrutement{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-lg border-0">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-sign-in-alt fa-3x text-primary mb-3"></i>
-                        <h2 class="fw-bold">Connexion</h2>
-                        <p class="text-muted">Accédez à votre espace personnel</p>
-                    </div>
+{% block auth_title %}Connexion{% endblock %}
 
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
-                            </button>
-                        </div>
-                    </form>
+{% block auth_subtitle %}Connectez-vous à votre compte pour accéder à toutes les fonctionnalités{% endblock %}
 
-                    <div class="text-center mt-4">
-                        <p class="mb-2">
-                            <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none">
-                                Mot de passe oublié ?
-                            </a>
-                        </p>
-                        <hr>
-                        <p class="mb-0">
-                            Pas encore de compte ? 
-                            <a href="{% url 'accounts:register' %}" class="text-decoration-none fw-bold">
-                                Créer un compte
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
+{% block auth_content %}
+<form method="post" class="auth-form">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="{{ form.username.id_for_label }}" class="form-label">
+            <i class="fas fa-user"></i>
+            <span>Nom d'utilisateur ou email</span>
+        </label>
+        {{ form.username|add_class:"form-control" }}
+        {% if form.username.errors %}
+        <div class="form-errors">
+            {% for error in form.username.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
         </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form.password.id_for_label }}" class="form-label">
+            <i class="fas fa-lock"></i>
+            <span>Mot de passe</span>
+        </label>
+        <div class="password-input">
+            {{ form.password|add_class:"form-control" }}
+            <button type="button" class="password-toggle" id="password-toggle">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+        {% if form.password.errors %}
+        <div class="form-errors">
+            {% for error in form.password.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="form-options">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="remember-me" name="remember_me">
+            <label class="form-check-label" for="remember-me">
+                Se souvenir de moi
+            </label>
+        </div>
+        <a href="{% url 'accounts:password_reset' %}" class="forgot-password">
+            Mot de passe oublié ?
+        </a>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-auth">
+        <i class="fas fa-sign-in-alt"></i>
+        <span>Se connecter</span>
+    </button>
+</form>
+{% endblock %}
+
+{% block auth_footer %}
+<div class="auth-footer-content">
+    <p>Pas encore de compte ? <a href="{% url 'accounts:register' %}">Créer un compte</a></p>
+    <div class="auth-divider">
+        <span>ou</span>
+    </div>
+    <div class="social-auth">
+        <button class="btn btn-social btn-google">
+            <i class="fab fa-google"></i>
+            <span>Continuer avec Google</span>
+        </button>
+        <button class="btn btn-social btn-linkedin">
+            <i class="fab fa-linkedin"></i>
+            <span>Continuer avec LinkedIn</span>
+        </button>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.card {
-    border-radius: 15px;
-}
-.btn-lg {
-    padding: 12px 30px;
-    border-radius: 8px;
-}
-</style>
+{% block extra_js %}
+<script>
+    // Password toggle
+    document.getElementById('password-toggle').addEventListener('click', function() {
+        const passwordInput = document.querySelector('input[name="password"]');
+        const icon = this.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+    
+    // Form validation
+    document.querySelector('.auth-form').addEventListener('submit', function(e) {
+        const username = document.querySelector('input[name="username"]').value.trim();
+        const password = document.querySelector('input[name="password"]').value.trim();
+        
+        if (!username || !password) {
+            e.preventDefault();
+            alert('Veuillez remplir tous les champs obligatoires.');
+        }
+    });
+</script>
 {% endblock %}

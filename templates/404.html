@@ -1,0 +1,43 @@
+{% extends 'base_error.html' %}
+{% load static %}
+
+{% block title %}Page non trouvée - Plateforme de Recrutement{% endblock %}
+
+{% block error_icon %}
+<i class="fas fa-search"></i>
+{% endblock %}
+
+{% block error_title %}404 - Page non trouvée{% endblock %}
+
+{% block error_subtitle %}Désolé, la page que vous recherchez n'existe pas ou a été déplacée.{% endblock %}
+
+{% block error_content %}
+<div class="error-actions">
+    <a href="{% url 'core:home' %}" class="btn btn-primary">
+        <i class="fas fa-home"></i>
+        <span>Retour à l'accueil</span>
+    </a>
+    <button class="btn btn-outline-primary" onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span>Page précédente</span>
+    </button>
+</div>
+
+<div class="error-suggestions">
+    <h4>Suggestions :</h4>
+    <ul>
+        <li><a href="{% url 'jobs:job_list' %}">Parcourir les offres d'emploi</a></li>
+        <li><a href="{% url 'accounts:register' %}">Créer un compte</a></li>
+        <li><a href="{% url 'core:contact' %}">Nous contacter</a></li>
+        <li><a href="{% url 'core:faq' %}">Consulter la FAQ</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block error_footer %}
+<div class="error-footer-content">
+    <p>Si vous pensez qu'il s'agit d'une erreur, n'hésitez pas à <a href="{% url 'core:contact' %}">nous contacter</a>.</p>
+</div>
+{% endblock %}
+
+

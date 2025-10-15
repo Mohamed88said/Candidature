@@ -1,0 +1,450 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Créer une candidature - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div class="create-header">
+                <div class="create-title">
+                    <h1>Créer une candidature</h1>
+                    <p class="create-subtitle">Remplissez les informations pour créer une nouvelle candidature</p>
+                </div>
+                <div class="create-actions">
+                    <a href="{% url 'applications:my_applications' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Retour aux candidatures</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Application Form -->
+            <div class="col-lg-8">
+                <div class="application-form">
+                    <form method="post" enctype="multipart/form-data" class="create-form">
+                        {% csrf_token %}
+                        
+                        <!-- Job Selection -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Offre d'emploi</h3>
+                                <p>Sélectionnez l'offre d'emploi pour laquelle vous souhaitez postuler</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Offre d'emploi *</label>
+                                <select name="job" class="form-select" required>
+                                    <option value="">Sélectionnez une offre</option>
+                                    {% for job in jobs %}
+                                    <option value="{{ job.id }}">{{ job.title }} - {{ job.company.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Application Type -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Type de candidature</h3>
+                                <p>Choisissez le type de candidature qui vous convient le mieux</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Type de candidature *</label>
+                                <div class="application-types">
+                                    <div class="type-option" data-type="standard">
+                                        <div class="type-icon">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                        <div class="type-content">
+                                            <h4>Candidature standard</h4>
+                                            <p>Lettre de motivation classique avec CV</p>
+                                        </div>
+                                        <div class="type-radio">
+                                            <input type="radio" name="application_type" value="standard" checked>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="type-option" data-type="video">
+                                        <div class="type-icon">
+                                            <i class="fas fa-video"></i>
+                                        </div>
+                                        <div class="type-content">
+                                            <h4>Candidature vidéo</h4>
+                                            <p>Présentez-vous en vidéo pour vous démarquer</p>
+                                        </div>
+                                        <div class="type-radio">
+                                            <input type="radio" name="application_type" value="video">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="type-option" data-type="quick">
+                                        <div class="type-icon">
+                                            <i class="fas fa-bolt"></i>
+                                        </div>
+                                        <div class="type-content">
+                                            <h4>Candidature rapide</h4>
+                                            <p>Candidature express en quelques clics</p>
+                                        </div>
+                                        <div class="type-radio">
+                                            <input type="radio" name="application_type" value="quick">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cover Letter -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Lettre de motivation</h3>
+                                <p>Rédigez une lettre de motivation personnalisée</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Lettre de motivation *</label>
+                                <textarea name="cover_letter" class="form-control" rows="8" placeholder="Rédigez votre lettre de motivation..." required></textarea>
+                                <div class="form-help">
+                                    <p>Conseils pour une bonne lettre de motivation :</p>
+                                    <ul>
+                                        <li>Personnalisez votre lettre pour cette entreprise</li>
+                                        <li>Mettez en avant vos compétences pertinentes</li>
+                                        <li>Expliquez pourquoi vous êtes intéressé par ce poste</li>
+                                        <li>Gardez un ton professionnel et enthousiaste</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documents -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Documents</h3>
+                                <p>Joignez vos documents de candidature</p>
+                            </div>
+                            
+                            <div class="documents-section">
+                                <div class="document-upload">
+                                    <div class="upload-area" id="upload-area">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <h4>Glissez vos fichiers ici</h4>
+                                        <p>ou cliquez pour sélectionner</p>
+                                        <input type="file" name="documents" multiple accept=".pdf,.doc,.docx" id="file-input">
+                                    </div>
+                                </div>
+                                
+                                <div class="documents-list" id="documents-list">
+                                    <!-- Documents will be added here -->
+                                </div>
+                                
+                                <div class="form-help">
+                                    <p>Formats acceptés : PDF, DOC, DOCX</p>
+                                    <p>Taille maximale : 10 MB par fichier</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Questions -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Questions personnalisées</h3>
+                                <p>Répondez aux questions spécifiques de l'entreprise</p>
+                            </div>
+                            
+                            <div class="custom-questions" id="custom-questions">
+                                <div class="no-questions">
+                                    <i class="fas fa-question-circle"></i>
+                                    <h4>Sélectionnez d'abord une offre</h4>
+                                    <p>Les questions personnalisées apparaîtront ici</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h3>Informations supplémentaires</h3>
+                                <p>Ajoutez des informations complémentaires si nécessaire</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Informations supplémentaires</label>
+                                <textarea name="additional_info" class="form-control" rows="4" placeholder="Ajoutez des informations complémentaires..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Disponibilité</label>
+                                <input type="date" name="availability_date" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Salaire souhaité</label>
+                                <div class="input-group">
+                                    <input type="number" name="expected_salary" class="form-control" placeholder="Salaire souhaité">
+                                    <span class="input-group-text">€/an</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                                <i class="fas fa-times"></i>
+                                <span>Annuler</span>
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i>
+                                <span>Créer la candidature</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Application Sidebar -->
+            <div class="col-lg-4">
+                <!-- Application Tips -->
+                <div class="tips-card">
+                    <div class="card-header">
+                        <h3>Conseils pour votre candidature</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="tips-list">
+                            <div class="tip-item">
+                                <i class="fas fa-lightbulb"></i>
+                                <div class="tip-content">
+                                    <h4>Personnalisez votre lettre</h4>
+                                    <p>Adaptez votre lettre de motivation à cette entreprise spécifique</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-check-circle"></i>
+                                <div class="tip-content">
+                                    <h4>Vérifiez vos documents</h4>
+                                    <p>Assurez-vous que tous vos documents sont à jour et sans erreurs</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-star"></i>
+                                <div class="tip-content">
+                                    <h4>Mettez en avant vos compétences</h4>
+                                    <p>Insistez sur les compétences qui correspondent au poste</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-clock"></i>
+                                <div class="tip-content">
+                                    <h4>Respectez les délais</h4>
+                                    <p>Envoyez votre candidature dans les temps</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Status -->
+                <div class="status-card">
+                    <div class="card-header">
+                        <h3>Statut de la candidature</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="status-info">
+                            <div class="status-item">
+                                <i class="fas fa-info-circle"></i>
+                                <div class="status-content">
+                                    <h4>Brouillon</h4>
+                                    <p>Votre candidature sera sauvegardée comme brouillon</p>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <i class="fas fa-edit"></i>
+                                <div class="status-content">
+                                    <h4>Modifiable</h4>
+                                    <p>Vous pourrez la modifier avant de l'envoyer</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Applications -->
+                <div class="recent-applications">
+                    <div class="card-header">
+                        <h3>Dernières candidatures</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="applications-list">
+                            {% for app in recent_applications %}
+                            <div class="application-item">
+                                <div class="application-info">
+                                    <h4><a href="{% url 'applications:application_detail' app.id %}">{{ app.job.title }}</a></h4>
+                                    <p>{{ app.job.company.name }}</p>
+                                </div>
+                                <div class="application-status">
+                                    <span class="status-badge status-{{ app.status }}">{{ app.get_status_display }}</span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="no-applications">
+                                <i class="fas fa-inbox"></i>
+                                <p>Aucune candidature récente</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Application type selection
+    document.querySelectorAll('.type-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+    
+    // Job selection change
+    document.querySelector('select[name="job"]').addEventListener('change', function() {
+        const jobId = this.value;
+        if (jobId) {
+            loadJobQuestions(jobId);
+        } else {
+            showNoQuestions();
+        }
+    });
+    
+    // Load job questions
+    function loadJobQuestions(jobId) {
+        // This would typically make an AJAX request to get the questions
+        // For now, we'll show a placeholder
+        const questionsContainer = document.getElementById('custom-questions');
+        questionsContainer.innerHTML = `
+            <div class="loading-questions">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Chargement des questions...</p>
+            </div>
+        `;
+        
+        // Simulate loading
+        setTimeout(() => {
+            questionsContainer.innerHTML = `
+                <div class="no-questions">
+                    <i class="fas fa-question-circle"></i>
+                    <h4>Aucune question personnalisée</h4>
+                    <p>Cette entreprise n'a pas de questions spécifiques</p>
+                </div>
+            `;
+        }, 1000);
+    }
+    
+    // Show no questions
+    function showNoQuestions() {
+        const questionsContainer = document.getElementById('custom-questions');
+        questionsContainer.innerHTML = `
+            <div class="no-questions">
+                <i class="fas fa-question-circle"></i>
+                <h4>Sélectionnez d'abord une offre</h4>
+                <p>Les questions personnalisées apparaîtront ici</p>
+            </div>
+        `;
+    }
+    
+    // File upload
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const documentsList = document.getElementById('documents-list');
+    
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+    
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            if (file.size <= 10 * 1024 * 1024) { // 10MB limit
+                addDocumentToList(file);
+            } else {
+                alert('Le fichier ' + file.name + ' est trop volumineux (max 10MB)');
+            }
+        });
+    }
+    
+    function addDocumentToList(file) {
+        const documentItem = document.createElement('div');
+        documentItem.className = 'document-item';
+        documentItem.innerHTML = `
+            <div class="document-icon">
+                <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="document-info">
+                <h4>${file.name}</h4>
+                <p>${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+            <div class="document-actions">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeDocument(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        documentsList.appendChild(documentItem);
+    }
+    
+    function removeDocument(button) {
+        button.closest('.document-item').remove();
+    }
+    
+    // Form submission
+    document.querySelector('.create-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Création en cours...</span>';
+        submitBtn.disabled = true;
+        
+        // Simulate form submission
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            alert('Candidature créée avec succès !');
+            window.location.href = '{% url "applications:my_applications" %}';
+        }, 2000);
+    });
+</script>
+{% endblock %}
+
+

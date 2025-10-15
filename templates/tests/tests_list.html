@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tests d'évaluation - Liste{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tests.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="tests-list">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Filtres -->
+            <div class="col-md-3">
+                <div class="card filters-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-filter"></i> Filtres</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="filters-form">
+                            <div class="form-group">
+                                <label>Recherche</label>
+                                {{ search_form.search }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Catégorie</label>
+                                {{ search_form.category }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Difficulté</label>
+                                {{ search_form.difficulty }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Type de test</label>
+                                {{ search_form.test_type }}
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-search"></i> Filtrer
+                                </button>
+                                <a href="{% url 'tests:tests_list' %}" class="btn btn-outline-secondary btn-block">
+                                    <i class="fas fa-times"></i> Effacer
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Liste des tests -->
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-clipboard-check"></i> Tests d'évaluation</h4>
+                        <div class="header-actions">
+                            <span class="results-count">{{ page_obj.paginator.count }} test(s) trouvé(s)</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if page_obj %}
+                            <div class="tests-grid">
+                                {% for test in page_obj %}
+                                <div class="test-card">
+                                    <div class="test-header">
+                                        <div class="test-category">
+                                            <i class="{{ test.category.icon }}" style="color: {{ test.category.color }}"></i>
+                                            {{ test.category.name }}
+                                        </div>
+                                        <div class="test-difficulty difficulty-{{ test.difficulty }}">
+                                            {{ test.get_difficulty_display }}
+                                        </div>
+                                    </div>
+                                    
+                                    <h5 class="test-title">{{ test.title }}</h5>
+                                    <p class="test-description">{{ test.description|truncatechars:120 }}</p>
+                                    
+                                    <div class="test-meta">
+                                        <div class="meta-item">
+                                            <i class="fas fa-question-circle"></i>
+                                            <span>{{ test.total_questions }} questions</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span>
+                                                {% if test.time_limit > 0 %}
+                                                    {{ test.time_limit }} min
+                                                {% else %}
+                                                    Illimité
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-percentage"></i>
+                                            <span>{{ test.passing_score }}% pour réussir</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-redo"></i>
+                                            <span>{{ test.max_attempts }} tentative(s)</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="test-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-number">{{ test.total_attempts }}</span>
+                                            <span class="stat-label">Tentatives</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-number">{{ test.average_score|floatformat:1 }}%</span>
+                                            <span class="stat-label">Score moyen</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-number">{{ test.completion_rate|floatformat:1 }}%</span>
+                                            <span class="stat-label">Réussite</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="test-actions">
+                                        <a href="{% url 'tests:test_detail' test.id %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i> Détails
+                                        </a>
+                                        <a href="{% url 'tests:start_test' test.id %}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-play"></i> Commencer
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Pagination -->
+                            {% if page_obj.has_other_pages %}
+                            <nav aria-label="Pagination des tests">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}{% if test_type %}&test_type={{ test_type }}{% endif %}">
+                                                <i class="fas fa-angle-double-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}{% if test_type %}&test_type={{ test_type }}{% endif %}">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}{% if test_type %}&test_type={{ test_type }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}{% if test_type %}&test_type={{ test_type }}{% endif %}">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}{% if test_type %}&test_type={{ test_type }}{% endif %}">
+                                                <i class="fas fa-angle-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        {% else %}
+                            <div class="no-tests">
+                                <i class="fas fa-clipboard-check fa-3x"></i>
+                                <h5>Aucun test trouvé</h5>
+                                <p>
+                                    {% if search_query or category_id or difficulty or test_type %}
+                                        Aucun test ne correspond à vos critères de recherche.
+                                        <br>
+                                        Essayez de modifier vos filtres.
+                                    {% else %}
+                                        Aucun test n'est disponible pour le moment.
+                                    {% endif %}
+                                </p>
+                                {% if search_query or category_id or difficulty or test_type %}
+                                    <a href="{% url 'tests:tests_list' %}" class="btn btn-outline-primary">
+                                        Voir tous les tests
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tests.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Animation des cartes de tests
+    $('.test-card').each(function(index) {
+        $(this).css('animation-delay', (index * 0.1) + 's');
+    });
+    
+    // Gestion des filtres en temps réel
+    $('.filters-form select, .filters-form input').change(function() {
+        // Optionnel: soumettre automatiquement le formulaire
+        // $(this).closest('form').submit();
+    });
+});
+</script>
+{% endblock %}
+
+
+

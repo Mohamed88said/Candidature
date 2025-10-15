@@ -1,192 +1,241 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Conditions d'utilisation - Plateforme de Recrutement{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h1 class="mb-0">
-                        {% if terms_content.title %}{{ terms_content.title }}{% else %}Conditions d'utilisation{% endif %}
-                    </h1>
-                    <small>Dernière mise à jour : {{ last_updated|default:"1er janvier 2024" }}</small>
-                </div>
-                <div class="card-body p-5">
-                    <div class="terms-content">
-                        {% if terms_content.content %}
-                            {{ terms_content.content|linebreaks }}
-                        {% else %}
-                        <h2>1. Acceptation des conditions</h2>
-                        <p>
-                            En accédant et en utilisant cette plateforme de recrutement, vous acceptez d'être lié par ces conditions d'utilisation. 
-                            Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre service.
-                        </p>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Conditions d'utilisation</h1>
+            <p>Dernière mise à jour : {{ last_updated|date:"d F Y" }}</p>
+        </div>
+    </div>
+</div>
 
-                        <h2>2. Description du service</h2>
-                        <p>
-                            Notre plateforme met en relation les candidats à la recherche d'emploi avec les entreprises qui recrutent. 
-                            Nous fournissons des outils pour :
-                        </p>
+<!-- Terms of Service Content -->
+<section class="terms-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="terms-content">
+                    <div class="terms-intro">
+                        <h2>Introduction</h2>
+                        <p>Bienvenue sur RecruitPro. En utilisant notre plateforme, vous acceptez les présentes conditions d'utilisation. Veuillez les lire attentivement avant d'utiliser nos services.</p>
+                        <p>Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre plateforme.</p>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>1. Objet</h2>
+                        <p>Les présentes conditions générales d'utilisation (CGU) ont pour objet de définir les modalités et conditions d'utilisation de la plateforme RecruitPro, ainsi que les droits et obligations des utilisateurs dans ce cadre.</p>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>2. Définitions</h2>
                         <ul>
-                            <li>Créer et gérer des profils candidats</li>
-                            <li>Publier et consulter des offres d'emploi</li>
-                            <li>Postuler aux offres</li>
-                            <li>Gérer le processus de recrutement</li>
+                            <li><strong>Plateforme</strong> : désigne le site internet et l'application mobile RecruitPro</li>
+                            <li><strong>Utilisateur</strong> : désigne toute personne utilisant la Plateforme</li>
+                            <li><strong>Candidat</strong> : désigne un utilisateur à la recherche d'un emploi</li>
+                            <li><strong>Recruteur</strong> : désigne un utilisateur proposant des offres d'emploi</li>
+                            <li><strong>Services</strong> : désigne l'ensemble des fonctionnalités offertes par la Plateforme</li>
                         </ul>
-
-                        <h2>3. Inscription et compte utilisateur</h2>
-                        <h3>3.1 Conditions d'inscription</h3>
-                        <p>
-                            Pour utiliser notre service, vous devez :
-                        </p>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>3. Accès à la Plateforme</h2>
+                        
+                        <h3>3.1 Inscription</h3>
+                        <p>L'utilisation de certains services nécessite la création d'un compte. Lors de l'inscription, vous vous engagez à :</p>
                         <ul>
-                            <li>Être âgé d'au moins 16 ans</li>
-                            <li>Fournir des informations exactes et complètes</li>
-                            <li>Maintenir la sécurité de votre mot de passe</li>
-                            <li>Notifier immédiatement toute utilisation non autorisée</li>
+                            <li>Fournir des informations exactes et à jour</li>
+                            <li>Maintenir la confidentialité de vos identifiants</li>
+                            <li>Informer immédiatement RecruitPro de toute utilisation non autorisée</li>
+                            <li>Ne créer qu'un seul compte par personne</li>
                         </ul>
-
-                        <h3>3.2 Responsabilité du compte</h3>
-                        <p>
-                            Vous êtes responsable de toutes les activités qui se produisent sous votre compte. 
-                            Nous ne sommes pas responsables des pertes résultant de l'utilisation non autorisée de votre compte.
-                        </p>
-
-                        <h2>4. Utilisation acceptable</h2>
-                        <h3>4.1 Comportement autorisé</h3>
-                        <p>Vous pouvez utiliser notre service pour :</p>
+                        
+                        <h3>3.2 Conditions d'accès</h3>
+                        <p>Pour utiliser la Plateforme, vous devez :</p>
                         <ul>
-                            <li>Rechercher des opportunités d'emploi légitimes</li>
-                            <li>Publier des offres d'emploi authentiques</li>
-                            <li>Communiquer professionnellement avec d'autres utilisateurs</li>
+                            <li>Avoir au moins 16 ans</li>
+                            <li>Disposer d'une connexion internet</li>
+                            <li>Accepter les présentes CGU et la politique de confidentialité</li>
+                            <li>Ne pas être en situation d'interdiction légale d'utilisation</li>
                         </ul>
-
-                        <h3>4.2 Comportement interdit</h3>
-                        <p>Il est strictement interdit de :</p>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>4. Utilisation des Services</h2>
+                        
+                        <h3>4.1 Services disponibles</h3>
+                        <p>La Plateforme offre notamment :</p>
                         <ul>
-                            <li>Publier du contenu faux, trompeur ou illégal</li>
-                            <li>Harceler, menacer ou discriminer d'autres utilisateurs</li>
-                            <li>Utiliser le service à des fins de spam ou de sollicitation</li>
-                            <li>Tenter de contourner les mesures de sécurité</li>
-                            <li>Collecter des données d'autres utilisateurs sans autorisation</li>
+                            <li>Recherche et consultation d'offres d'emploi</li>
+                            <li>Publication d'offres d'emploi (pour les recruteurs)</li>
+                            <li>Candidature en ligne</li>
+                            <li>Matching intelligent entre candidats et offres</li>
+                            <li>Messagerie entre candidats et recruteurs</li>
+                            <li>Tests d'évaluation en ligne</li>
+                            <li>Création de CV en ligne</li>
                         </ul>
-
+                        
+                        <h3>4.2 Règles d'utilisation</h3>
+                        <p>Vous vous engagez à :</p>
+                        <ul>
+                            <li>Utiliser la Plateforme de manière loyale et conforme à sa destination</li>
+                            <li>Ne pas porter atteinte aux droits de RecruitPro ou de tiers</li>
+                            <li>Ne pas diffuser de contenu illégal, offensant ou inapproprié</li>
+                            <li>Ne pas tenter de contourner les mesures de sécurité</li>
+                            <li>Ne pas utiliser de robots ou scripts automatisés</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="terms-section">
                         <h2>5. Contenu utilisateur</h2>
-                        <h3>5.1 Propriété du contenu</h3>
-                        <p>
-                            Vous conservez la propriété du contenu que vous publiez sur notre plateforme. 
-                            Cependant, vous nous accordez une licence pour utiliser, afficher et distribuer ce contenu 
-                            dans le cadre de notre service.
-                        </p>
-
-                        <h3>5.2 Responsabilité du contenu</h3>
-                        <p>
-                            Vous êtes seul responsable du contenu que vous publiez. Nous nous réservons le droit 
-                            de supprimer tout contenu qui viole ces conditions ou qui est inapproprié.
-                        </p>
-
-                        <h2>6. Confidentialité et données personnelles</h2>
-                        <p>
-                            La collecte et l'utilisation de vos données personnelles sont régies par notre 
-                            <a href="{% url 'core:privacy' %}">Politique de confidentialité</a>, 
-                            qui fait partie intégrante de ces conditions.
-                        </p>
-
-                        <h2>7. Services payants</h2>
-                        <p>
-                            Certains services peuvent être payants. Les conditions de paiement, 
-                            de remboursement et d'annulation seront clairement indiquées avant tout achat.
-                        </p>
-
-                        <h2>8. Limitation de responsabilité</h2>
-                        <p>
-                            Notre service est fourni "en l'état". Nous ne garantissons pas que le service sera 
-                            ininterrompu ou exempt d'erreurs. Notre responsabilité est limitée dans la mesure 
-                            permise par la loi.
-                        </p>
-
-                        <h2>9. Résiliation</h2>
-                        <h3>9.1 Résiliation par l'utilisateur</h3>
-                        <p>
-                            Vous pouvez fermer votre compte à tout moment en nous contactant ou 
-                            en utilisant les paramètres de votre compte.
-                        </p>
-
-                        <h3>9.2 Résiliation par nous</h3>
-                        <p>
-                            Nous pouvons suspendre ou fermer votre compte si vous violez ces conditions 
-                            ou si nous cessons d'offrir le service.
-                        </p>
-
-                        <h2>10. Modifications des conditions</h2>
-                        <p>
-                            Nous nous réservons le droit de modifier ces conditions à tout moment. 
-                            Les modifications importantes vous seront notifiées par email ou 
-                            via une notification sur la plateforme.
-                        </p>
-
-                        <h2>11. Droit applicable</h2>
-                        <p>
-                            Ces conditions sont régies par le droit français. Tout litige sera soumis 
-                            à la juridiction des tribunaux français.
-                        </p>
-
-                        <h2>12. Contact</h2>
-                        <p>
-                            Pour toute question concernant ces conditions d'utilisation, 
-                            vous pouvez nous contacter :
-                        </p>
+                        
+                        <h3>5.1 Responsabilité du contenu</h3>
+                        <p>Vous êtes seul responsable du contenu que vous publiez sur la Plateforme, notamment :</p>
                         <ul>
-                            <li>Par email : legal@recrutementpro.com</li>
-                            <li>Par courrier : Service Juridique, 123 Avenue des Champs-Élysées, 75008 Paris</li>
-                            <li>Via notre <a href="{% url 'core:contact' %}">formulaire de contact</a></li>
+                            <li>Informations de profil</li>
+                            <li>CV et lettres de motivation</li>
+                            <li>Messages et communications</li>
+                            <li>Avis et commentaires</li>
                         </ul>
-                        {% endif %}
+                        
+                        <h3>5.2 Licence d'utilisation</h3>
+                        <p>En publiant du contenu, vous accordez à RecruitPro une licence non exclusive, transférable, sous-licensable, gratuite et mondiale pour utiliser, reproduire, distribuer et afficher ce contenu dans le cadre de nos services.</p>
+                        
+                        <h3>5.3 Modération</h3>
+                        <p>RecruitPro se réserve le droit de modérer, supprimer ou refuser tout contenu :</p>
+                        <ul>
+                            <li>Contraire aux présentes CGU</li>
+                            <li>Illégal ou offensant</li>
+                            <li>Portant atteinte aux droits de tiers</li>
+                            <li>De nature commerciale non autorisée</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>6. Propriété intellectuelle</h2>
+                        
+                        <h3>6.1 Droits de RecruitPro</h3>
+                        <p>La Plateforme et tous ses éléments sont protégés par le droit d'auteur et autres droits de propriété intellectuelle. Vous ne pouvez pas :</p>
+                        <ul>
+                            <li>Copier, modifier ou distribuer le contenu de la Plateforme</li>
+                            <li>Utiliser les marques ou logos de RecruitPro</li>
+                            <li>Créer des œuvres dérivées</li>
+                            <li>Utiliser le contenu à des fins commerciales sans autorisation</li>
+                        </ul>
+                        
+                        <h3>6.2 Droits des utilisateurs</h3>
+                        <p>Vous conservez tous les droits sur le contenu que vous publiez, sous réserve de la licence accordée à RecruitPro.</p>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>7. Responsabilité</h2>
+                        
+                        <h3>7.1 Limitation de responsabilité</h3>
+                        <p>RecruitPro ne peut être tenu responsable de :</p>
+                        <ul>
+                            <li>L'exactitude ou la qualité du contenu publié par les utilisateurs</li>
+                            <li>Les relations entre candidats et recruteurs</li>
+                            <li>Les interruptions ou dysfonctionnements du service</li>
+                            <li>Les dommages indirects ou consécutifs</li>
+                        </ul>
+                        
+                        <h3>7.2 Garanties</h3>
+                        <p>La Plateforme est fournie "en l'état" sans garantie d'aucune sorte. RecruitPro s'efforce de fournir un service de qualité mais ne garantit pas :</p>
+                        <ul>
+                            <li>La disponibilité permanente du service</li>
+                            <li>L'absence d'erreurs ou de bugs</li>
+                            <li>La compatibilité avec tous les appareils</li>
+                            <li>L'obtention de résultats spécifiques</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>8. Résiliation</h2>
+                        
+                        <h3>8.1 Par l'utilisateur</h3>
+                        <p>Vous pouvez résilier votre compte à tout moment via les paramètres de votre profil. La suppression est définitive et irréversible.</p>
+                        
+                        <h3>8.2 Par RecruitPro</h3>
+                        <p>RecruitPro peut suspendre ou résilier votre compte en cas de :</p>
+                        <ul>
+                            <li>Violation des présentes CGU</li>
+                            <li>Comportement inapproprié ou frauduleux</li>
+                            <li>Inactivité prolongée</li>
+                            <li>Demande des autorités compétentes</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>9. Modifications</h2>
+                        <p>RecruitPro se réserve le droit de modifier les présentes CGU à tout moment. Les modifications entrent en vigueur dès leur publication. L'utilisation continue de la Plateforme après modification vaut acceptation des nouvelles conditions.</p>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>10. Loi applicable et juridiction</h2>
+                        <p>Les présentes CGU sont régies par le droit français. Tout litige relatif à leur interprétation ou leur exécution relève de la compétence exclusive des tribunaux français.</p>
+                    </div>
+                    
+                    <div class="terms-section">
+                        <h2>11. Contact</h2>
+                        <p>Pour toute question concernant ces conditions d'utilisation, vous pouvez nous contacter :</p>
+                        <ul>
+                            <li>Email : legal@recruitpro.com</li>
+                            <li>Téléphone : +33 1 23 45 67 89</li>
+                            <li>Adresse : 123 Rue de la Paix, 75001 Paris, France</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.terms-content h2 {
-    color: #007bff;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 0.5rem;
-}
-
-.terms-content h3 {
-    color: #495057;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-}
-
-.terms-content p {
-    line-height: 1.6;
-    margin-bottom: 1rem;
-}
-
-.terms-content ul {
-    margin-bottom: 1rem;
-}
-
-.terms-content li {
-    margin-bottom: 0.5rem;
-}
-
-.card {
-    border-radius: 15px;
-}
-
-.card-header {
-    border-radius: 15px 15px 0 0 !important;
-}
-</style>
+{% block extra_js %}
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Add table of contents
+    function generateTableOfContents() {
+        const headings = document.querySelectorAll('.terms-content h2');
+        const toc = document.createElement('div');
+        toc.className = 'table-of-contents';
+        toc.innerHTML = '<h3>Table des matières</h3><ul></ul>';
+        
+        headings.forEach((heading, index) => {
+            const id = `section-${index + 1}`;
+            heading.id = id;
+            
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = `#${id}`;
+            a.textContent = heading.textContent;
+            li.appendChild(a);
+            toc.querySelector('ul').appendChild(li);
+        });
+        
+        document.querySelector('.terms-content').insertBefore(toc, document.querySelector('.terms-content').firstChild);
+    }
+    
+    // Generate table of contents when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        generateTableOfContents();
+    });
+</script>
 {% endblock %}

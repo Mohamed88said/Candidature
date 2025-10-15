@@ -1,0 +1,394 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Programme de parrainage - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Programme de parrainage</h1>
+            <p>Invitez vos amis et gagnez des récompenses pour chaque parrainage réussi</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Referral Stats -->
+            <div class="col-12">
+                <div class="referral-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_referrals }}</h3>
+                            <p>Parrainages</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ successful_referrals }}</h3>
+                            <p>Parrainages réussis</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_rewards }}</h3>
+                            <p>Récompenses gagnées</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ total_points }}</h3>
+                            <p>Points accumulés</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Referral Code -->
+            <div class="col-lg-4">
+                <div class="referral-code">
+                    <div class="code-header">
+                        <h3>Votre code de parrainage</h3>
+                    </div>
+                    
+                    <div class="code-content">
+                        <div class="code-display">
+                            <input type="text" class="form-control" value="{{ user.referral_code }}" readonly id="referral-code">
+                            <button class="btn btn-outline-primary" onclick="copyCode()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="code-share">
+                            <h4>Partager votre code</h4>
+                            <div class="share-buttons">
+                                <button class="btn btn-social btn-facebook" onclick="shareOnFacebook()">
+                                    <i class="fab fa-facebook"></i>
+                                    <span>Facebook</span>
+                                </button>
+                                <button class="btn btn-social btn-twitter" onclick="shareOnTwitter()">
+                                    <i class="fab fa-twitter"></i>
+                                    <span>Twitter</span>
+                                </button>
+                                <button class="btn btn-social btn-linkedin" onclick="shareOnLinkedIn()">
+                                    <i class="fab fa-linkedin"></i>
+                                    <span>LinkedIn</span>
+                                </button>
+                                <button class="btn btn-social btn-whatsapp" onclick="shareOnWhatsApp()">
+                                    <i class="fab fa-whatsapp"></i>
+                                    <span>WhatsApp</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="referral-link">
+                            <h4>Lien de parrainage</h4>
+                            <div class="link-display">
+                                <input type="text" class="form-control" value="{{ referral_link }}" readonly id="referral-link">
+                                <button class="btn btn-outline-primary" onclick="copyLink()">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Referral Program -->
+            <div class="col-lg-8">
+                <div class="referral-program">
+                    <div class="program-header">
+                        <h3>Comment ça marche</h3>
+                    </div>
+                    
+                    <div class="program-steps">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Partagez votre code</h4>
+                                <p>Partagez votre code de parrainage unique avec vos amis et collègues</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Ils s'inscrivent</h4>
+                                <p>Vos amis s'inscrivent sur la plateforme en utilisant votre code</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Gagnez des récompenses</h4>
+                                <p>Recevez des points et des récompenses pour chaque parrainage réussi</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rewards-info">
+                        <h3>Récompenses disponibles</h3>
+                        <div class="rewards-list">
+                            {% for reward in rewards %}
+                            <div class="reward-item">
+                                <div class="reward-icon">
+                                    <i class="{{ reward.icon }}"></i>
+                                </div>
+                                <div class="reward-content">
+                                    <h4>{{ reward.name }}</h4>
+                                    <p>{{ reward.description }}</p>
+                                    <div class="reward-meta">
+                                        <span class="reward-points">{{ reward.points_required }} points</span>
+                                        <span class="reward-type">{{ reward.get_type_display }}</span>
+                                    </div>
+                                </div>
+                                <div class="reward-actions">
+                                    {% if user.points >= reward.points_required %}
+                                    <button class="btn btn-primary btn-sm" onclick="claimReward({{ reward.id }})">
+                                        <i class="fas fa-gift"></i>
+                                        <span>Réclamer</span>
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-outline-secondary btn-sm" disabled>
+                                        <i class="fas fa-lock"></i>
+                                        <span>Insuffisant</span>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="no-rewards">
+                                <div class="no-rewards-icon">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                                <h3>Aucune récompense disponible</h3>
+                                <p>Les récompenses seront bientôt disponibles</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Referral History -->
+        <div class="row">
+            <div class="col-12">
+                <div class="referral-history">
+                    <div class="history-header">
+                        <h3>Historique des parrainages</h3>
+                        <div class="history-filters">
+                            <select class="form-select" id="status-filter">
+                                <option value="">Tous les statuts</option>
+                                <option value="pending">En attente</option>
+                                <option value="completed">Terminé</option>
+                                <option value="cancelled">Annulé</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="history-list">
+                        {% for referral in referrals %}
+                        <div class="referral-item" data-referral-id="{{ referral.id }}">
+                            <div class="referral-avatar">
+                                {% if referral.referred_user.candidate_profile.photo %}
+                                    <img src="{{ referral.referred_user.candidate_profile.photo.url }}" alt="{{ referral.referred_user.get_full_name }}">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="referral-content">
+                                <div class="referral-header">
+                                    <h4>{{ referral.referred_user.get_full_name|default:referral.referred_user.username }}</h4>
+                                    <span class="referral-status status-{{ referral.status }}">
+                                        {{ referral.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="referral-details">
+                                    <div class="referral-detail">
+                                        <i class="fas fa-envelope"></i>
+                                        <span>{{ referral.referred_user.email }}</span>
+                                    </div>
+                                    <div class="referral-detail">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>Inscrit {{ referral.created_at|timesince }} ago</span>
+                                    </div>
+                                    {% if referral.completed_at %}
+                                    <div class="referral-detail">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Terminé {{ referral.completed_at|timesince }} ago</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="referral-reward">
+                                {% if referral.status == 'completed' %}
+                                <div class="reward-earned">
+                                    <span class="reward-points">+{{ referral.reward_points }} points</span>
+                                    <span class="reward-amount">+{{ referral.reward_amount }}€</span>
+                                </div>
+                                {% else %}
+                                <div class="reward-pending">
+                                    <span class="reward-points">En attente</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-referrals">
+                            <div class="no-referrals-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3>Aucun parrainage</h3>
+                            <p>Commencez par partager votre code de parrainage</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if referrals.has_other_pages %}
+                    <nav class="pagination-nav">
+                        <ul class="pagination">
+                            {% if referrals.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ referrals.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in referrals.paginator.page_range %}
+                            {% if referrals.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > referrals.number|add:'-3' and num < referrals.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if referrals.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ referrals.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Copy referral code
+    function copyCode() {
+        const codeInput = document.getElementById('referral-code');
+        codeInput.select();
+        codeInput.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        
+        // Show success message
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-primary');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+        }, 2000);
+    }
+    
+    // Copy referral link
+    function copyLink() {
+        const linkInput = document.getElementById('referral-link');
+        linkInput.select();
+        linkInput.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        
+        // Show success message
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-primary');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+        }, 2000);
+    }
+    
+    // Share on social media
+    function shareOnFacebook() {
+        const url = encodeURIComponent(document.getElementById('referral-link').value);
+        const text = encodeURIComponent('Rejoignez-moi sur RecruitPro !');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank');
+    }
+    
+    function shareOnTwitter() {
+        const url = encodeURIComponent(document.getElementById('referral-link').value);
+        const text = encodeURIComponent('Rejoignez-moi sur RecruitPro !');
+        window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+    }
+    
+    function shareOnLinkedIn() {
+        const url = encodeURIComponent(document.getElementById('referral-link').value);
+        const text = encodeURIComponent('Rejoignez-moi sur RecruitPro !');
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+    }
+    
+    function shareOnWhatsApp() {
+        const url = encodeURIComponent(document.getElementById('referral-link').value);
+        const text = encodeURIComponent('Rejoignez-moi sur RecruitPro !');
+        window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+    }
+    
+    // Claim reward
+    function claimReward(rewardId) {
+        if (confirm('Êtes-vous sûr de vouloir réclamer cette récompense ?')) {
+            // Implementation for claiming reward
+            console.log('Claiming reward:', rewardId);
+        }
+    }
+    
+    // Status filter
+    document.getElementById('status-filter').addEventListener('change', function() {
+        const status = this.value;
+        const url = new URL(window.location);
+        if (status) {
+            url.searchParams.set('status', status);
+        } else {
+            url.searchParams.delete('status');
+        }
+        window.location.href = url.toString();
+    });
+</script>
+{% endblock %}
+
+

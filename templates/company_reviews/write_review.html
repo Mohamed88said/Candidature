@@ -1,0 +1,439 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Écrire un avis - {{ company.name }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="page-header text-center mb-4">
+                <h1 class="page-title">
+                    <i class="fas fa-star"></i>
+                    Écrire un avis
+                </h1>
+                <p class="page-subtitle">Partagez votre expérience chez {{ company.name }}</p>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Informations sur l'emploi -->
+                        <div class="section-header">
+                            <h5><i class="fas fa-briefcase"></i> Informations sur votre emploi</h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.job_title.id_for_label }}" class="form-label">
+                                        Poste occupé <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.job_title }}
+                                    {% if form.job_title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.job_title.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.employment_status.id_for_label }}" class="form-label">
+                                        Statut d'emploi <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.employment_status }}
+                                    {% if form.employment_status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.employment_status.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.employment_start_date.id_for_label }}" class="form-label">
+                                        Date de début <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.employment_start_date }}
+                                    {% if form.employment_start_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.employment_start_date.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.employment_end_date.id_for_label }}" class="form-label">
+                                        Date de fin
+                                    </label>
+                                    {{ form.employment_end_date }}
+                                    {% if form.employment_end_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.employment_end_date.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <div class="form-check">
+                                {{ form.is_current_employee }}
+                                <label class="form-check-label" for="{{ form.is_current_employee.id_for_label }}">
+                                    Je travaille actuellement dans cette entreprise
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes détaillées -->
+                        <div class="section-header">
+                            <h5><i class="fas fa-star"></i> Notes détaillées</h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.overall_rating.id_for_label }}" class="form-label">
+                                        Note globale <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.overall_rating }}
+                                    {% if form.overall_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.overall_rating.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.work_life_balance.id_for_label }}" class="form-label">
+                                        Équilibre vie professionnelle/personnelle <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.work_life_balance }}
+                                    {% if form.work_life_balance.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.work_life_balance.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.salary_benefits.id_for_label }}" class="form-label">
+                                        Salaire et avantages <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.salary_benefits }}
+                                    {% if form.salary_benefits.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.salary_benefits.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.job_security.id_for_label }}" class="form-label">
+                                        Sécurité de l'emploi <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.job_security }}
+                                    {% if form.job_security.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.job_security.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.management.id_for_label }}" class="form-label">
+                                        Management <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.management }}
+                                    {% if form.management.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.management.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.culture.id_for_label }}" class="form-label">
+                                        Culture d'entreprise <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.culture }}
+                                    {% if form.culture.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.culture.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="{{ form.career_opportunities.id_for_label }}" class="form-label">
+                                        Opportunités de carrière <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.career_opportunities }}
+                                    {% if form.career_opportunities.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.career_opportunities.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contenu de l'avis -->
+                        <div class="section-header">
+                            <h5><i class="fas fa-comment"></i> Votre avis</h5>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.pros.id_for_label }}" class="form-label">
+                                Points positifs <span class="text-danger">*</span>
+                            </label>
+                            {{ form.pros }}
+                            {% if form.pros.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.pros.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Décrivez ce que vous avez aimé dans cette entreprise.</div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.cons.id_for_label }}" class="form-label">
+                                Points négatifs <span class="text-danger">*</span>
+                            </label>
+                            {{ form.cons }}
+                            {% if form.cons.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.cons.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Décrivez ce que vous n'avez pas aimé dans cette entreprise.</div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.advice_to_management.id_for_label }}" class="form-label">
+                                Conseils à la direction
+                            </label>
+                            {{ form.advice_to_management }}
+                            {% if form.advice_to_management.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.advice_to_management.errors.0 }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Conseils que vous donneriez à la direction pour améliorer l'entreprise.</div>
+                        </div>
+                        
+                        <!-- Recommandation -->
+                        <div class="form-group mb-4">
+                            <div class="form-check">
+                                {{ form.would_recommend }}
+                                <label class="form-check-label" for="{{ form.would_recommend.id_for_label }}">
+                                    Je recommanderais cette entreprise à un ami
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Options -->
+                        <div class="form-group mb-4">
+                            <div class="form-check">
+                                {{ form.is_anonymous }}
+                                <label class="form-check-label" for="{{ form.is_anonymous.id_for_label }}">
+                                    Publier cet avis de manière anonyme
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Boutons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'company_reviews:company_detail' company.slug %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Publier l'avis
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-header {
+    margin: 2rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.section-header h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-check-input {
+    margin-top: 0.25rem;
+}
+
+.form-check-label {
+    margin-left: 0.5rem;
+    color: #2c3e50;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+    border-color: #545b62;
+    transform: translateY(-1px);
+}
+
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc3545;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .section-header {
+        margin: 1.5rem 0 1rem 0;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+// Validation côté client
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Gestion de la date de fin
+document.addEventListener('DOMContentLoaded', function() {
+    const isCurrentEmployeeCheckbox = document.getElementById('{{ form.is_current_employee.id_for_label }}');
+    const endDateField = document.getElementById('{{ form.employment_end_date.id_for_label }}');
+    
+    function toggleEndDate() {
+        if (isCurrentEmployeeCheckbox.checked) {
+            endDateField.disabled = true;
+            endDateField.value = '';
+        } else {
+            endDateField.disabled = false;
+        }
+    }
+    
+    isCurrentEmployeeCheckbox.addEventListener('change', toggleEndDate);
+    toggleEndDate(); // Initial call
+});
+</script>
+{% endblock %}
+
+

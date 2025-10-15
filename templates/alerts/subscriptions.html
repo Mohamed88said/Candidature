@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Abonnements d'alertes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="alerts-subscriptions">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <h1><i class="fas fa-bell"></i> Mes abonnements d'alertes</h1>
+                    <p>Gérez vos abonnements pour recevoir des alertes personnalisées</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Liste des abonnements -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-list"></i> Mes abonnements</h4>
+                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#newSubscriptionModal">
+                            <i class="fas fa-plus"></i> Nouvel abonnement
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% if subscriptions %}
+                            <div class="subscriptions-list">
+                                {% for subscription in subscriptions %}
+                                <div class="subscription-item {% if not subscription.is_active %}inactive{% endif %}">
+                                    <div class="subscription-header">
+                                        <div class="subscription-info">
+                                            <h5>{{ subscription.alert_type.name }}</h5>
+                                            <span class="subscription-frequency">{{ subscription.get_frequency_display }}</span>
+                                        </div>
+                                        <div class="subscription-status">
+                                            {% if subscription.is_active %}
+                                                <span class="status-badge active">Actif</span>
+                                            {% else %}
+                                                <span class="status-badge inactive">Inactif</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subscription-details">
+                                        {% if subscription.keywords %}
+                                        <div class="detail-item">
+                                            <strong>Mots-clés :</strong>
+                                            <span class="keywords">
+                                                {% for keyword in subscription.keywords %}
+                                                    <span class="keyword-tag">{{ keyword }}</span>
+                                                {% endfor %}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if subscription.locations %}
+                                        <div class="detail-item">
+                                            <strong>Localisations :</strong>
+                                            <span class="locations">
+                                                {% for location in subscription.locations %}
+                                                    <span class="location-tag">{{ location }}</span>
+                                                {% endfor %}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if subscription.job_types %}
+                                        <div class="detail-item">
+                                            <strong>Types d'emploi :</strong>
+                                            <span class="job-types">
+                                                {% for job_type in subscription.job_types %}
+                                                    <span class="job-type-tag">{{ job_type }}</span>
+                                                {% endfor %}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if subscription.industries %}
+                                        <div class="detail-item">
+                                            <strong>Secteurs :</strong>
+                                            <span class="industries">
+                                                {% for industry in subscription.industries %}
+                                                    <span class="industry-tag">{{ industry }}</span>
+                                                {% endfor %}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if subscription.salary_range %}
+                                        <div class="detail-item">
+                                            <strong>Salaire :</strong>
+                                            <span class="salary-range">
+                                                {% if subscription.salary_range.min %}
+                                                    {{ subscription.salary_range.min|floatformat:0 }}€
+                                                {% endif %}
+                                                {% if subscription.salary_range.min and subscription.salary_range.max %}
+                                                    -
+                                                {% endif %}
+                                                {% if subscription.salary_range.max %}
+                                                    {{ subscription.salary_range.max|floatformat:0 }}€
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="subscription-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-number">{{ subscription.total_alerts_received }}</span>
+                                            <span class="stat-label">Alertes reçues</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-number">
+                                                {% if subscription.last_alert_sent %}
+                                                    {{ subscription.last_alert_sent|timesince }} ago
+                                                {% else %}
+                                                    Jamais
+                                                {% endif %}
+                                            </span>
+                                            <span class="stat-label">Dernière alerte</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="subscription-actions">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editSubscription({{ subscription.id }})">
+                                            <i class="fas fa-edit"></i> Modifier
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-{% if subscription.is_active %}warning{% else %}success{% endif %}" 
+                                                onclick="toggleSubscription({{ subscription.id }})">
+                                            <i class="fas fa-{% if subscription.is_active %}pause{% else %}play{% endif %}"></i>
+                                            {% if subscription.is_active %}Désactiver{% else %}Activer{% endif %}
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteSubscription({{ subscription.id }})">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="no-subscriptions">
+                                <i class="fas fa-bell-slash fa-3x"></i>
+                                <h5>Aucun abonnement</h5>
+                                <p>Vous n'avez pas encore d'abonnements d'alertes.</p>
+                                <button class="btn btn-primary" data-toggle="modal" data-target="#newSubscriptionModal">
+                                    <i class="fas fa-plus"></i> Créer mon premier abonnement
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Statistiques -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-summary">
+                            <div class="stat-item">
+                                <span class="stat-number">{{ subscriptions.count }}</span>
+                                <span class="stat-label">Abonnements</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ subscriptions|length|add:"-1"|add:"1" }}</span>
+                                <span class="stat-label">Actifs</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">
+                                    {% for subscription in subscriptions %}
+                                        {{ subscription.total_alerts_received|add:0 }}
+                                    {% empty %}
+                                        0
+                                    {% endfor %}
+                                </span>
+                                <span class="stat-label">Alertes reçues</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conseils -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-lightbulb"></i> Conseils</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="tips">
+                            <div class="tip-item">
+                                <i class="fas fa-search text-info"></i>
+                                <p>Utilisez des mots-clés spécifiques pour des alertes plus précises</p>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-map-marker-alt text-warning"></i>
+                                <p>Définissez plusieurs localisations pour élargir vos opportunités</p>
+                            </div>
+                            <div class="tip-item">
+                                <i class="fas fa-clock text-success"></i>
+                                <p>Réglez la fréquence selon vos besoins (quotidien, hebdomadaire)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour nouveau abonnement -->
+<div class="modal fade" id="newSubscriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nouvel abonnement d'alerte</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="newSubscriptionForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.alert_type.id_for_label }}">Type d'alerte</label>
+                                {{ form.alert_type }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.frequency.id_for_label }}">Fréquence</label>
+                                {{ form.frequency }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.keywords.id_for_label }}">Mots-clés</label>
+                                {{ form.keywords }}
+                                <small class="form-text text-muted">Séparer par des virgules</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.locations.id_for_label }}">Localisations</label>
+                                {{ form.locations }}
+                                <small class="form-text text-muted">Séparer par des virgules</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.job_types.id_for_label }}">Types d'emploi</label>
+                                {{ form.job_types }}
+                                <small class="form-text text-muted">Séparer par des virgules</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.industries.id_for_label }}">Secteurs</label>
+                                {{ form.industries }}
+                                <small class="form-text text-muted">Séparer par des virgules</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                Activer immédiatement
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="submitNewSubscription()">Créer l'abonnement</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editSubscription(subscriptionId) {
+    // Implémenter l'édition d'abonnement
+    console.log('Éditer abonnement:', subscriptionId);
+}
+
+function toggleSubscription(subscriptionId) {
+    if (confirm('Êtes-vous sûr de vouloir modifier le statut de cet abonnement ?')) {
+        // Implémenter le toggle d'abonnement
+        console.log('Toggle abonnement:', subscriptionId);
+    }
+}
+
+function deleteSubscription(subscriptionId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet abonnement ?')) {
+        // Implémenter la suppression d'abonnement
+        console.log('Supprimer abonnement:', subscriptionId);
+    }
+}
+
+function submitNewSubscription() {
+    const form = document.getElementById('newSubscriptionForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "alerts:subscriptions" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erreur lors de la création de l\'abonnement.');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la création de l\'abonnement.');
+    });
+}
+
+$(document).ready(function() {
+    // Animation des abonnements
+    $('.subscription-item').each(function(index) {
+        $(this).css('animation-delay', (index * 0.1) + 's');
+    });
+});
+</script>
+{% endblock %}
+
+
+

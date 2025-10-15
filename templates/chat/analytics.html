@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - Analytics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-analytics">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-chart-bar"></i> Analytics du Chat</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Statistiques générales -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>{{ total_rooms }}</h3>
+                                        <p>Conversations totales</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-comment"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>{{ total_messages }}</h3>
+                                        <p>Messages totales</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>{{ active_rooms }}</h3>
+                                        <p>Conversations actives</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>{{ total_rooms|add:active_rooms }}</h3>
+                                        <p>Utilisateurs actifs</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistiques par type de salle -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Conversations par type</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="roomTypeChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Messages par jour (7 derniers jours)</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="dailyMessagesChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tableau des statistiques détaillées -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Statistiques détaillées</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Type de conversation</th>
+                                                        <th>Nombre</th>
+                                                        <th>Pourcentage</th>
+                                                        <th>Messages moyens</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for stat in room_type_stats %}
+                                                    <tr>
+                                                        <td>{{ stat.room_type|title }}</td>
+                                                        <td>{{ stat.count }}</td>
+                                                        <td>
+                                                            <div class="progress">
+                                                                <div class="progress-bar" 
+                                                                     style="width: {{ stat.count|floatformat:0|div:total_rooms|mul:100 }}%">
+                                                                    {{ stat.count|floatformat:0|div:total_rooms|mul:100|floatformat:1 }}%
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>{{ stat.count|floatformat:0|div:total_messages|mul:100|floatformat:1 }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Graphique des types de conversations
+    const roomTypeCtx = document.getElementById('roomTypeChart').getContext('2d');
+    const roomTypeData = {
+        labels: [
+            {% for stat in room_type_stats %}
+                '{{ stat.room_type|title }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for stat in room_type_stats %}
+                    {{ stat.count }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#007bff',
+                '#28a745',
+                '#ffc107',
+                '#dc3545',
+                '#6c757d'
+            ]
+        }]
+    };
+    
+    new Chart(roomTypeCtx, {
+        type: 'doughnut',
+        data: roomTypeData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+    
+    // Graphique des messages par jour
+    const dailyMessagesCtx = document.getElementById('dailyMessagesChart').getContext('2d');
+    const dailyMessagesData = {
+        labels: [
+            {% for day in daily_messages %}
+                '{{ day.day }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Messages',
+            data: [
+                {% for day in daily_messages %}
+                    {{ day.count }},
+                {% endfor %}
+            ],
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            tension: 0.4
+        }]
+    };
+    
+    new Chart(dailyMessagesCtx, {
+        type: 'line',
+        data: dailyMessagesData,
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+
+
+

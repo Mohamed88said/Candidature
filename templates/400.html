@@ -1,0 +1,67 @@
+{% extends 'base_error.html' %}
+{% load static %}
+
+{% block title %}Requête invalide - Plateforme de Recrutement{% endblock %}
+
+{% block error_icon %}
+<i class="fas fa-exclamation-circle"></i>
+{% endblock %}
+
+{% block error_title %}400 - Requête invalide{% endblock %}
+
+{% block error_subtitle %}La requête que vous avez envoyée est invalide ou malformée.{% endblock %}
+
+{% block error_content %}
+<div class="error-actions">
+    <a href="{% url 'core:home' %}" class="btn btn-primary">
+        <i class="fas fa-home"></i>
+        <span>Retour à l'accueil</span>
+    </a>
+    <button class="btn btn-outline-primary" onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i>
+        <span>Page précédente</span>
+    </button>
+</div>
+
+<div class="error-info">
+    <div class="info-item">
+        <i class="fas fa-info-circle"></i>
+        <div class="info-content">
+            <h4>Pourquoi cette erreur ?</h4>
+            <p>La requête contient des données invalides ou manquantes.</p>
+        </div>
+    </div>
+    <div class="info-item">
+        <i class="fas fa-refresh"></i>
+        <div class="info-content">
+            <h4>Solution</h4>
+            <p>Essayez de recharger la page ou de refaire votre action.</p>
+        </div>
+    </div>
+    <div class="info-item">
+        <i class="fas fa-envelope"></i>
+        <div class="info-content">
+            <h4>Besoin d'aide ?</h4>
+            <p>Contactez-nous si le problème persiste.</p>
+        </div>
+    </div>
+</div>
+
+<div class="error-suggestions">
+    <h4>Que pouvez-vous faire ?</h4>
+    <ul>
+        <li><a href="{% url 'core:home' %}">Retourner à la page d'accueil</a></li>
+        <li><a href="{% url 'jobs:job_list' %}">Parcourir les offres d'emploi</a></li>
+        <li><a href="{% url 'core:contact' %}">Nous contacter</a></li>
+        <li><a href="{% url 'core:faq' %}">Consulter la FAQ</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block error_footer %}
+<div class="error-footer-content">
+    <p>Si le problème persiste, contactez notre <a href="{% url 'core:contact' %}">équipe de support</a>.</p>
+</div>
+{% endblock %}
+
+

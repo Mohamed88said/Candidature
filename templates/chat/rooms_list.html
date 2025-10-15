@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - Toutes les conversations{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-rooms-list">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <h4><i class="fas fa-comments"></i> Conversations</h4>
+                    <div class="chat-actions">
+                        <a href="{% url 'chat:create_room' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Nouvelle
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Filtres et recherche -->
+                <div class="chat-filters">
+                    <form method="get" class="search-form">
+                        <div class="form-group">
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Rechercher..." value="{{ search_query }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <select name="room_type" class="form-control">
+                                <option value="">Tous les types</option>
+                                <option value="general" {% if room_type == 'general' %}selected{% endif %}>Général</option>
+                                <option value="application" {% if room_type == 'application' %}selected{% endif %}>Candidature</option>
+                                <option value="interview" {% if room_type == 'interview' %}selected{% endif %}>Entretien</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                            <i class="fas fa-search"></i> Filtrer
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Statistiques -->
+                <div class="chat-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_rooms }}</span>
+                        <span class="stat-label">Conversations</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Liste principale -->
+            <div class="col-md-9 chat-main">
+                <div class="chat-main-header">
+                    <h3>Toutes les conversations</h3>
+                    <div class="header-actions">
+                        <a href="{% url 'chat:dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Liste des conversations -->
+                <div class="conversations-list">
+                    {% for room in page_obj %}
+                    <div class="conversation-item {% if room.has_unread_messages %}unread{% endif %}" 
+                         data-room-id="{{ room.id }}">
+                        <div class="conversation-avatar">
+                            {% if room.get_other_participant == room.candidate %}
+                                {% if room.candidate.candidate_profile.profile_picture %}
+                                    <img src="{{ room.candidate.candidate_profile.profile_picture.url }}" 
+                                         alt="{{ room.candidate.full_name }}">
+                                {% else %}
+                                    <div class="avatar-placeholder">
+                                        {{ room.candidate.first_name|first }}{{ room.candidate.last_name|first }}
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                {% if room.recruiter.candidate_profile.profile_picture %}
+                                    <img src="{{ room.recruiter.candidate_profile.profile_picture.url }}" 
+                                         alt="{{ room.recruiter.full_name }}">
+                                {% else %}
+                                    <div class="avatar-placeholder">
+                                        {{ room.recruiter.first_name|first }}{{ room.recruiter.last_name|first }}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="conversation-content">
+                            <div class="conversation-header">
+                                <h6 class="conversation-title">
+                                    {% if room.title %}
+                                        {{ room.title }}
+                                    {% else %}
+                                        {{ room.get_other_participant.full_name }}
+                                    {% endif %}
+                                </h6>
+                                <span class="conversation-time">
+                                    {{ room.last_message_at|timesince }} ago
+                                </span>
+                            </div>
+                            
+                            <div class="conversation-preview">
+                                {% if room.last_message %}
+                                    <span class="last-message">
+                                        {% if room.last_message.sender == request.user %}
+                                            Vous: 
+                                        {% endif %}
+                                        {{ room.last_message.content|truncatechars:100 }}
+                                    </span>
+                                {% else %}
+                                    <span class="no-message">Aucun message</span>
+                                {% endif %}
+                                
+                                {% if room.has_unread_messages %}
+                                    <span class="unread-badge">
+                                        {{ room.get_unread_count }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="conversation-meta">
+                                <span class="room-type badge badge-{{ room.room_type }}">
+                                    {{ room.get_room_type_display }}
+                                </span>
+                                {% if room.job %}
+                                    <span class="job-link">
+                                        <i class="fas fa-briefcase"></i>
+                                        {{ room.job.title|truncatechars:30 }}
+                                    </span>
+                                {% endif %}
+                                <span class="message-count">
+                                    <i class="fas fa-comment"></i>
+                                    {{ room.message_count }} messages
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="conversation-actions">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                        type="button" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{% url 'chat:room_detail' room.id %}">
+                                        <i class="fas fa-eye"></i> Ouvrir
+                                    </a>
+                                    <a class="dropdown-item" href="{% url 'chat:report_user' room.get_other_participant.id %}">
+                                        <i class="fas fa-flag"></i> Signaler
+                                    </a>
+                                    <a class="dropdown-item" href="{% url 'chat:block_user' room.get_other_participant.id %}">
+                                        <i class="fas fa-ban"></i> Bloquer
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item text-danger" href="#" onclick="archiveRoom({{ room.id }})">
+                                        <i class="fas fa-archive"></i> Archiver
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-conversations">
+                        <i class="fas fa-comments fa-3x"></i>
+                        <p>Aucune conversation trouvée</p>
+                        {% if search_query or room_type %}
+                            <p>Essayez de modifier vos critères de recherche</p>
+                            <a href="{% url 'chat:rooms_list' %}" class="btn btn-outline-primary">
+                                Voir toutes les conversations
+                            </a>
+                        {% else %}
+                            <a href="{% url 'chat:create_room' %}" class="btn btn-primary">
+                                Démarrer une conversation
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Pagination des conversations">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if room_type %}&room_type={{ room_type }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if room_type %}&room_type={{ room_type }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if room_type %}&room_type={{ room_type }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if room_type %}&room_type={{ room_type }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if room_type %}&room_type={{ room_type }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/chat.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Gestion des clics sur les conversations
+    $('.conversation-item').click(function() {
+        var roomId = $(this).data('room-id');
+        window.location.href = '/chat/room/' + roomId + '/';
+    });
+    
+    // Auto-refresh
+    setInterval(function() {
+        updateChatNotifications();
+    }, 30000);
+});
+
+function archiveRoom(roomId) {
+    if (confirm('Êtes-vous sûr de vouloir archiver cette conversation ?')) {
+        // AJAX call pour archiver la conversation
+        $.post('/chat/api/room/' + roomId + '/archive/', {
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        }, function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur lors de l\'archivage');
+            }
+        });
+    }
+}
+
+function updateChatNotifications() {
+    $.get('/chat/api/notifications/', function(data) {
+        if (data.unread_count > 0) {
+            $('.unread-badge').text(data.unread_count);
+        }
+    });
+}
+</script>
+{% endblock %}
+
+
+

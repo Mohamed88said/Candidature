@@ -1,0 +1,307 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Messages - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Messages</h1>
+            <p>Communiquez directement avec les recruteurs et candidats</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Chat Sidebar -->
+            <div class="col-lg-4">
+                <div class="chat-sidebar">
+                    <div class="chat-sidebar-header">
+                        <h3>Conversations</h3>
+                        <button class="btn btn-sm btn-primary" id="new-conversation-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>Nouveau</span>
+                        </button>
+                    </div>
+                    
+                    <div class="chat-search">
+                        <input type="text" class="form-control" placeholder="Rechercher une conversation..." id="chat-search">
+                    </div>
+                    
+                    <div class="chat-conversations">
+                        {% for conversation in conversations %}
+                        <div class="conversation-item {% if conversation.id == active_conversation.id %}active{% endif %}" data-conversation-id="{{ conversation.id }}">
+                            <div class="conversation-avatar">
+                                {% if conversation.other_user.candidate_profile.photo %}
+                                    <img src="{{ conversation.other_user.candidate_profile.photo.url }}" alt="{{ conversation.other_user.get_full_name }}">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="conversation-content">
+                                <div class="conversation-header">
+                                    <h4>{{ conversation.other_user.get_full_name|default:conversation.other_user.username }}</h4>
+                                    <span class="conversation-time">{{ conversation.last_message.created_at|timesince }} ago</span>
+                                </div>
+                                <div class="conversation-preview">
+                                    <p>{{ conversation.last_message.content|truncatewords:10 }}</p>
+                                </div>
+                                {% if conversation.unread_count > 0 %}
+                                <div class="conversation-unread">
+                                    <span class="unread-badge">{{ conversation.unread_count }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-conversations">
+                            <div class="no-conversations-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h3>Aucune conversation</h3>
+                            <p>Commencez une nouvelle conversation</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Main -->
+            <div class="col-lg-8">
+                <div class="chat-main">
+                    {% if active_conversation %}
+                    <div class="chat-header">
+                        <div class="chat-user-info">
+                            <div class="chat-user-avatar">
+                                {% if active_conversation.other_user.candidate_profile.photo %}
+                                    <img src="{{ active_conversation.other_user.candidate_profile.photo.url }}" alt="{{ active_conversation.other_user.get_full_name }}">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="chat-user-details">
+                                <h4>{{ active_conversation.other_user.get_full_name|default:active_conversation.other_user.username }}</h4>
+                                <p>{{ active_conversation.other_user.email }}</p>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="btn btn-outline-primary btn-sm" onclick="videoCall()">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="voiceCall()">
+                                <i class="fas fa-phone"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="shareConversation()">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        {% for message in active_conversation.messages.all %}
+                        <div class="message {% if message.sender == user %}message-sent{% else %}message-received{% endif %}">
+                            <div class="message-content">
+                                <div class="message-text">
+                                    <p>{{ message.content }}</p>
+                                </div>
+                                <div class="message-meta">
+                                    <span class="message-time">{{ message.created_at|date:"H:i" }}</span>
+                                    {% if message.sender == user %}
+                                    <span class="message-status">
+                                        {% if message.is_read %}
+                                            <i class="fas fa-check-double text-primary"></i>
+                                        {% else %}
+                                            <i class="fas fa-check text-muted"></i>
+                                        {% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="chat-input">
+                        <form method="post" class="message-form" id="message-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="conversation_id" value="{{ active_conversation.id }}">
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" onclick="attachFile()">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <input type="text" name="content" class="form-control" placeholder="Tapez votre message..." id="message-input" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="sendEmoji()">
+                                    <i class="fas fa-smile"></i>
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="chat-empty">
+                        <div class="chat-empty-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>Sélectionnez une conversation</h3>
+                        <p>Choisissez une conversation dans la liste pour commencer à discuter</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Conversation Modal -->
+<div class="modal fade" id="newConversationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nouvelle conversation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" class="new-conversation-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">Rechercher un utilisateur</label>
+                        <input type="text" class="form-control" placeholder="Nom d'utilisateur ou email..." id="user-search">
+                        <div class="user-search-results" id="user-search-results"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message initial</label>
+                        <textarea class="form-control" name="initial_message" placeholder="Votre message..." rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="createConversation()">Créer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Emoji Picker -->
+<div class="emoji-picker" id="emoji-picker">
+    <div class="emoji-picker-content">
+        <div class="emoji-categories">
+            <button class="emoji-category active" data-category="smileys">
+                <i class="fas fa-smile"></i>
+            </button>
+            <button class="emoji-category" data-category="people">
+                <i class="fas fa-user"></i>
+            </button>
+            <button class="emoji-category" data-category="nature">
+                <i class="fas fa-leaf"></i>
+            </button>
+            <button class="emoji-category" data-category="food">
+                <i class="fas fa-apple-alt"></i>
+            </button>
+            <button class="emoji-category" data-category="activities">
+                <i class="fas fa-futbol"></i>
+            </button>
+            <button class="emoji-category" data-category="travel">
+                <i class="fas fa-car"></i>
+            </button>
+            <button class="emoji-category" data-category="objects">
+                <i class="fas fa-lightbulb"></i>
+            </button>
+            <button class="emoji-category" data-category="symbols">
+                <i class="fas fa-heart"></i>
+            </button>
+        </div>
+        <div class="emoji-grid" id="emoji-grid">
+            <!-- Emojis will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Chat functionality
+    const chatMessages = document.getElementById('chat-messages');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    
+    // Auto-scroll to bottom
+    function scrollToBottom() {
+        if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }
+    
+    // Send message
+    messageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const content = messageInput.value.trim();
+        if (content) {
+            // Implementation for sending message
+            console.log('Sending message:', content);
+            messageInput.value = '';
+            scrollToBottom();
+        }
+    });
+    
+    // New conversation
+    document.getElementById('new-conversation-btn').addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('newConversationModal'));
+        modal.show();
+    });
+    
+    // User search
+    document.getElementById('user-search').addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length > 2) {
+            // Implementation for user search
+            console.log('Searching users:', query);
+        }
+    });
+    
+    // Create conversation
+    function createConversation() {
+        // Implementation for creating conversation
+        console.log('Creating conversation');
+    }
+    
+    // Video call
+    function videoCall() {
+        // Implementation for video call
+        console.log('Starting video call');
+    }
+    
+    // Voice call
+    function voiceCall() {
+        // Implementation for voice call
+        console.log('Starting voice call');
+    }
+    
+    // Share conversation
+    function shareConversation() {
+        // Implementation for sharing conversation
+        console.log('Sharing conversation');
+    }
+    
+    // Attach file
+    function attachFile() {
+        // Implementation for file attachment
+        console.log('Attaching file');
+    }
+    
+    // Send emoji
+    function sendEmoji() {
+        const emojiPicker = document.getElementById('emoji-picker');
+        emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
+    }
+    
+    // Initialize
+    scrollToBottom();
+</script>
+{% endblock %}

@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ alert.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="alert-detail">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <a href="{% url 'alerts:alerts_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour aux alertes
+                    </a>
+                    <h1>{{ alert.title }}</h1>
+                    <p class="alert-meta">
+                        <span class="alert-type" style="color: {{ alert.alert_type.color }}">
+                            <i class="{{ alert.alert_type.icon }}"></i> {{ alert.alert_type.name }}
+                        </span>
+                        <span class="alert-time">{{ alert.created_at|date:"d/m/Y à H:i" }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Contenu principal -->
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Score de correspondance -->
+                        <div class="alert-match-score">
+                            <div class="score-circle {% if alert.match_score >= 80 %}high{% elif alert.match_score >= 60 %}medium{% else %}low{% endif %}">
+                                {{ alert.match_score|floatformat:0 }}%
+                            </div>
+                            <h4>Score de correspondance</h4>
+                            <p>Cette offre correspond à {{ alert.match_score|floatformat:0 }}% à votre profil</p>
+                        </div>
+                        
+                        <!-- Message de l'alerte -->
+                        <div class="alert-message">
+                            <h5>Message de l'alerte</h5>
+                            <div class="message-content">
+                                {{ alert.message|linebreaks }}
+                            </div>
+                        </div>
+                        
+                        <!-- Raisons de correspondance -->
+                        {% if alert.match_reasons %}
+                        <div class="match-reasons">
+                            <h5>Pourquoi cette offre vous correspond</h5>
+                            <ul class="reasons-list">
+                                {% for reason in alert.match_reasons %}
+                                <li class="reason-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    {{ reason }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Détails de l'offre -->
+                        <div class="job-details">
+                            <h5>Détails de l'offre</h5>
+                            <div class="job-info-grid">
+                                <div class="info-item">
+                                    <i class="fas fa-building"></i>
+                                    <strong>Entreprise :</strong>
+                                    <span>{{ alert.job.company }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <strong>Localisation :</strong>
+                                    <span>{{ alert.job.location }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-briefcase"></i>
+                                    <strong>Type :</strong>
+                                    <span>{{ alert.job.get_job_type_display }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <strong>Expérience :</strong>
+                                    <span>{{ alert.job.get_experience_level_display }}</span>
+                                </div>
+                                {% if alert.job.salary_min and alert.job.salary_max %}
+                                <div class="info-item">
+                                    <i class="fas fa-euro-sign"></i>
+                                    <strong>Salaire :</strong>
+                                    <span>{{ alert.job.salary_min|floatformat:0 }} - {{ alert.job.salary_max|floatformat:0 }} {{ alert.job.currency }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="info-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <strong>Publiée le :</strong>
+                                    <span>{{ alert.job.created_at|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Description de l'offre -->
+                        <div class="job-description">
+                            <h5>Description de l'offre</h5>
+                            <div class="description-content">
+                                {{ alert.job.description|truncatewords:100 }}
+                            </div>
+                            <a href="{% url 'jobs:job_detail' alert.job.slug %}" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt"></i> Voir l'offre complète
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Actions</h5>
+                        <div class="action-buttons">
+                            <a href="{% url 'jobs:job_detail' alert.job.slug %}" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Postuler maintenant
+                            </a>
+                            <button class="btn btn-outline-secondary" onclick="markAsRead({{ alert.id }})">
+                                <i class="fas fa-check"></i> Marquer comme lue
+                            </button>
+                            <button class="btn btn-outline-info" onclick="shareAlert({{ alert.id }})">
+                                <i class="fas fa-share"></i> Partager
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteAlert({{ alert.id }})">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Commentaires -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vos commentaires sur cette alerte</h5>
+                        <form class="feedback-form" onsubmit="submitFeedback(event)">
+                            <input type="hidden" name="alert_id" value="{{ alert.id }}">
+                            
+                            <div class="form-group">
+                                <label>Cette alerte était-elle pertinente ?</label>
+                                <div class="rating-stars">
+                                    <span class="rating-star" data-rating="1">★</span>
+                                    <span class="rating-star" data-rating="2">★</span>
+                                    <span class="rating-star" data-rating="3">★</span>
+                                    <span class="rating-star" data-rating="4">★</span>
+                                    <span class="rating-star" data-rating="5">★</span>
+                                </div>
+                                <input type="hidden" name="rating" value="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reason">Raison (optionnel)</label>
+                                <select name="reason" class="form-control">
+                                    <option value="">Sélectionner une raison</option>
+                                    <option value="not_relevant">Pas pertinent pour mon profil</option>
+                                    <option value="wrong_location">Mauvaise localisation</option>
+                                    <option value="wrong_salary">Salaire inapproprié</option>
+                                    <option value="wrong_experience">Niveau d'expérience incorrect</option>
+                                    <option value="already_applied">J'ai déjà postulé</option>
+                                    <option value="not_interested">Pas intéressé par ce type d'emploi</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="feedback">Commentaires (optionnel)</label>
+                                <textarea name="feedback" class="form-control" rows="3" placeholder="Vos commentaires sur cette alerte..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Envoyer les commentaires
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Statut de l'alerte -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle"></i> Statut</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert-status">
+                            <div class="status-item">
+                                <strong>Statut :</strong>
+                                <span class="status-badge {% if alert.status == 'delivered' %}unread{% elif alert.status == 'opened' %}read{% elif alert.status == 'clicked' %}clicked{% endif %}">
+                                    {% if alert.status == 'delivered' %}Non lue
+                                    {% elif alert.status == 'opened' %}Lue
+                                    {% elif alert.status == 'clicked' %}Cliquée
+                                    {% else %}{{ alert.get_status_display }}{% endif %}
+                                </span>
+                            </div>
+                            <div class="status-item">
+                                <strong>Envoyée le :</strong>
+                                <span>{{ alert.created_at|date:"d/m/Y à H:i" }}</span>
+                            </div>
+                            {% if alert.opened_at %}
+                            <div class="status-item">
+                                <strong>Lue le :</strong>
+                                <span>{{ alert.opened_at|date:"d/m/Y à H:i" }}</span>
+                            </div>
+                            {% endif %}
+                            {% if alert.clicked_at %}
+                            <div class="status-item">
+                                <strong>Cliquée le :</strong>
+                                <span>{{ alert.clicked_at|date:"d/m/Y à H:i" }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alertes similaires -->
+                {% if similar_alerts %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bell"></i> Alertes similaires</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="similar-alerts">
+                            {% for similar_alert in similar_alerts %}
+                            <div class="similar-alert-item">
+                                <h6>{{ similar_alert.job.title }}</h6>
+                                <p class="company">{{ similar_alert.job.company }}</p>
+                                <p class="location">{{ similar_alert.job.location }}</p>
+                                <div class="match-score">
+                                    <span class="score-badge">{{ similar_alert.match_score|floatformat:0 }}%</span>
+                                </div>
+                                <a href="{% url 'alerts:alert_detail' similar_alert.id %}" class="btn btn-sm btn-outline-primary">
+                                    Voir
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Statistiques -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">{{ alert.user.alert_notifications.count }}</span>
+                                <span class="stat-label">Alertes reçues</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ alert.user.alert_notifications.filter(status='clicked').count }}</span>
+                                <span class="stat-label">Alertes cliquées</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ alert.user.alert_notifications.filter(alert_type=alert.alert_type).count }}</span>
+                                <span class="stat-label">Ce type d'alerte</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function markAsRead(alertId) {
+    fetch(`/alerts/alert/${alertId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function shareAlert(alertId) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Alerte d\'emploi',
+            text: 'Regardez cette offre d\'emploi qui pourrait vous intéresser',
+            url: window.location.href
+        });
+    } else {
+        // Fallback : copier le lien
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Lien copié dans le presse-papiers !');
+        });
+    }
+}
+
+function deleteAlert(alertId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
+        fetch(`/alerts/alert/${alertId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '{% url "alerts:alerts_list" %}';
+            }
+        });
+    }
+}
+
+function submitFeedback(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    fetch('/alerts/alert/{{ alert.id }}/feedback/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Merci pour vos commentaires !');
+            form.reset();
+            $('.rating-star').removeClass('active');
+        } else {
+            alert('Erreur lors de l\'envoi des commentaires.');
+        }
+    });
+}
+
+$(document).ready(function() {
+    // Gestion des étoiles de notation
+    $('.rating-star').click(function() {
+        const rating = $(this).data('rating');
+        $('.rating-star').removeClass('active');
+        $(this).addClass('active');
+        $(this).prevAll().addClass('active');
+        $('input[name="rating"]').val(rating);
+    });
+    
+    // Animation des éléments
+    $('.card').each(function(index) {
+        $(this).css('animation-delay', (index * 0.1) + 's');
+    });
+});
+</script>
+{% endblock %}
+
+
+

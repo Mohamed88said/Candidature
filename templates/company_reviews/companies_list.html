@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Avis entreprises - Plateforme de Recrutement{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Avis entreprises</h1>
+            <p>Découvrez les avis authentiques des employés et candidats sur les entreprises</p>
+        </div>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="container">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <div class="filters-sidebar">
+                    <div class="filters-header">
+                        <h3>Filtres</h3>
+                        <button class="btn btn-sm btn-outline-primary" id="clear-filters">
+                            <i class="fas fa-times"></i>
+                            <span>Effacer</span>
+                        </button>
+                    </div>
+                    
+                    <form method="get" class="filters-form">
+                        <div class="filter-group">
+                            <label class="filter-label">Recherche</label>
+                            <input type="text" name="search" class="form-control" placeholder="Nom de l'entreprise..." value="{{ request.GET.search }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Localisation</label>
+                            <input type="text" name="location" class="form-control" placeholder="Ville, région..." value="{{ request.GET.location }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Secteur d'activité</label>
+                            <select name="industry" class="form-select">
+                                <option value="">Tous les secteurs</option>
+                                {% for industry in industries %}
+                                <option value="{{ industry.id }}" {% if request.GET.industry == industry.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ industry.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Taille de l'entreprise</label>
+                            <select name="company_size" class="form-select">
+                                <option value="">Toutes les tailles</option>
+                                <option value="startup" {% if request.GET.company_size == 'startup' %}selected{% endif %}>Startup (1-10)</option>
+                                <option value="small" {% if request.GET.company_size == 'small' %}selected{% endif %}>Petite (11-50)</option>
+                                <option value="medium" {% if request.GET.company_size == 'medium' %}selected{% endif %}>Moyenne (51-200)</option>
+                                <option value="large" {% if request.GET.company_size == 'large' %}selected{% endif %}>Grande (201-1000)</option>
+                                <option value="enterprise" {% if request.GET.company_size == 'enterprise' %}selected{% endif %}>Entreprise (1000+)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Note minimum</label>
+                            <input type="range" name="min_rating" class="form-range" min="1" max="5" value="{{ request.GET.min_rating|default:1 }}" id="rating-range">
+                            <div class="range-value">
+                                <span id="rating-value">{{ request.GET.min_rating|default:1 }} étoiles</span>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Type d'avis</label>
+                            <select name="review_type" class="form-select">
+                                <option value="">Tous les types</option>
+                                <option value="employee" {% if request.GET.review_type == 'employee' %}selected{% endif %}>Employé</option>
+                                <option value="candidate" {% if request.GET.review_type == 'candidate' %}selected{% endif %}>Candidat</option>
+                                <option value="former_employee" {% if request.GET.review_type == 'former_employee' %}selected{% endif %}>Ancien employé</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Date de l'avis</label>
+                            <select name="date_range" class="form-select">
+                                <option value="">Toutes les dates</option>
+                                <option value="week" {% if request.GET.date_range == 'week' %}selected{% endif %}>Cette semaine</option>
+                                <option value="month" {% if request.GET.date_range == 'month' %}selected{% endif %}>Ce mois</option>
+                                <option value="quarter" {% if request.GET.date_range == 'quarter' %}selected{% endif %}>Ce trimestre</option>
+                                <option value="year" {% if request.GET.date_range == 'year' %}selected{% endif %}>Cette année</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-filter">
+                            <i class="fas fa-search"></i>
+                            <span>Appliquer les filtres</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Companies List -->
+            <div class="col-lg-9">
+                <div class="companies-content">
+                    <div class="companies-header">
+                        <div class="companies-count">
+                            <h3>{{ companies|length }} entreprise{{ companies|length|pluralize }} trouvée{{ companies|length|pluralize }}</h3>
+                        </div>
+                        <div class="companies-sort">
+                            <select class="form-select" id="sort-select">
+                                <option value="rating">Par note</option>
+                                <option value="reviews">Par nombre d'avis</option>
+                                <option value="name">Par nom</option>
+                                <option value="newest">Plus récentes</option>
+                                <option value="oldest">Plus anciennes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="companies-list">
+                        {% for company in companies %}
+                        <div class="company-card" data-company-id="{{ company.id }}">
+                            <div class="company-card-header">
+                                <div class="company-logo">
+                                    {% if company.logo %}
+                                        <img src="{{ company.logo.url }}" alt="{{ company.name }}">
+                                    {% else %}
+                                        <div class="logo-placeholder">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="company-info">
+                                    <h4><a href="{% url 'company_reviews:company_detail' company.id %}">{{ company.name }}</a></h4>
+                                    <p class="company-industry">{{ company.industry }}</p>
+                                    <div class="company-location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>{{ company.location }}</span>
+                                    </div>
+                                </div>
+                                <div class="company-rating">
+                                    <div class="rating-stars">
+                                        {% for i in "12345" %}
+                                        <i class="fas fa-star {% if forloop.counter <= company.average_rating %}star-filled{% endif %}"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="rating-value">{{ company.average_rating|floatformat:1 }}</div>
+                                    <div class="rating-count">{{ company.reviews_count }} avis</div>
+                                </div>
+                            </div>
+                            
+                            <div class="company-card-body">
+                                <div class="company-description">
+                                    <p>{{ company.description|truncatewords:30 }}</p>
+                                </div>
+                                
+                                <div class="company-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">Taille</span>
+                                        <span class="stat-value">{{ company.get_size_display }}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">Fondée</span>
+                                        <span class="stat-value">{{ company.founded_year }}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">Site web</span>
+                                        <span class="stat-value">
+                                            {% if company.website %}
+                                                <a href="{{ company.website }}" target="_blank">{{ company.website|truncatechars:20 }}</a>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="rating-breakdown">
+                                    <h5>Détail des notes</h5>
+                                    <div class="breakdown-items">
+                                        <div class="breakdown-item">
+                                            <span class="breakdown-label">Environnement de travail</span>
+                                            <div class="breakdown-bar">
+                                                <div class="breakdown-fill" style="width: {{ company.work_environment_rating|floatformat:0 }}%"></div>
+                                            </div>
+                                            <span class="breakdown-value">{{ company.work_environment_rating|floatformat:1 }}</span>
+                                        </div>
+                                        <div class="breakdown-item">
+                                            <span class="breakdown-label">Salaire et avantages</span>
+                                            <div class="breakdown-bar">
+                                                <div class="breakdown-fill" style="width: {{ company.salary_benefits_rating|floatformat:0 }}%"></div>
+                                            </div>
+                                            <span class="breakdown-value">{{ company.salary_benefits_rating|floatformat:1 }}</span>
+                                        </div>
+                                        <div class="breakdown-item">
+                                            <span class="breakdown-label">Équilibre vie pro/perso</span>
+                                            <div class="breakdown-bar">
+                                                <div class="breakdown-fill" style="width: {{ company.work_life_balance_rating|floatformat:0 }}%"></div>
+                                            </div>
+                                            <span class="breakdown-value">{{ company.work_life_balance_rating|floatformat:1 }}</span>
+                                        </div>
+                                        <div class="breakdown-item">
+                                            <span class="breakdown-label">Management</span>
+                                            <div class="breakdown-bar">
+                                                <div class="breakdown-fill" style="width: {{ company.management_rating|floatformat:0 }}%"></div>
+                                            </div>
+                                            <span class="breakdown-value">{{ company.management_rating|floatformat:1 }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="recent-reviews">
+                                    <h5>Derniers avis</h5>
+                                    <div class="reviews-list">
+                                        {% for review in company.recent_reviews %}
+                                        <div class="review-item">
+                                            <div class="review-header">
+                                                <div class="reviewer-info">
+                                                    <div class="reviewer-avatar">
+                                                        {% if review.reviewer.candidate_profile.photo %}
+                                                            <img src="{{ review.reviewer.candidate_profile.photo.url }}" alt="{{ review.reviewer.get_full_name }}">
+                                                        {% else %}
+                                                            <i class="fas fa-user"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="reviewer-details">
+                                                        <h6>{{ review.reviewer.get_full_name|default:review.reviewer.username }}</h6>
+                                                        <p>{{ review.get_review_type_display }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="review-rating">
+                                                    <div class="rating-stars">
+                                                        {% for i in "12345" %}
+                                                        <i class="fas fa-star {% if forloop.counter <= review.overall_rating %}star-filled{% endif %}"></i>
+                                                        {% endfor %}
+                                                    </div>
+                                                    <span class="rating-value">{{ review.overall_rating }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="review-content">
+                                                <p>{{ review.comment|truncatewords:20 }}</p>
+                                            </div>
+                                            <div class="review-meta">
+                                                <span class="review-date">{{ review.created_at|timesince }} ago</span>
+                                                {% if review.is_verified %}
+                                                <span class="review-verified">
+                                                    <i class="fas fa-check-circle"></i>
+                                                    Vérifié
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="company-card-footer">
+                                <div class="company-actions">
+                                    <a href="{% url 'company_reviews:company_detail' company.id %}" class="btn btn-primary">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Voir les avis</span>
+                                    </a>
+                                    {% if user.is_authenticated %}
+                                    <button class="btn btn-outline-primary" onclick="writeReview({{ company.id }})">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Écrire un avis</span>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-outline-secondary" onclick="shareCompany({{ company.id }})">
+                                        <i class="fas fa-share"></i>
+                                        <span>Partager</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-companies">
+                            <div class="no-companies-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <h3>Aucune entreprise trouvée</h3>
+                            <p>Essayez de modifier vos critères de recherche</p>
+                            <a href="{% url 'company_reviews:companies_list' %}" class="btn btn-primary">
+                                <i class="fas fa-refresh"></i>
+                                <span>Voir toutes les entreprises</span>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if companies.has_other_pages %}
+                    <nav class="pagination-nav">
+                        <ul class="pagination">
+                            {% if companies.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ companies.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in companies.paginator.page_range %}
+                            {% if companies.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > companies.number|add:'-3' and num < companies.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if companies.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ companies.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Rating range
+    const ratingRange = document.getElementById('rating-range');
+    const ratingValue = document.getElementById('rating-value');
+    
+    ratingRange.addEventListener('input', function() {
+        ratingValue.textContent = this.value + ' étoiles';
+    });
+    
+    // Write review
+    function writeReview(companyId) {
+        // Implementation for writing review
+        console.log('Writing review for company:', companyId);
+    }
+    
+    // Share company
+    function shareCompany(companyId) {
+        // Implementation for sharing company
+        console.log('Sharing company:', companyId);
+    }
+    
+    // Sort functionality
+    document.getElementById('sort-select').addEventListener('change', function() {
+        const sortValue = this.value;
+        const url = new URL(window.location);
+        url.searchParams.set('sort', sortValue);
+        window.location.href = url.toString();
+    });
+    
+    // Clear filters
+    document.getElementById('clear-filters').addEventListener('click', function() {
+        const form = document.querySelector('.filters-form');
+        form.reset();
+        form.submit();
+    });
+</script>
+{% endblock %}

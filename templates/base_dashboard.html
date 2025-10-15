@@ -1,0 +1,288 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Tableau de bord - Plateforme de recrutement{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}tableau de bord, dashboard, recrutement{% endblock %}">
+    <meta name="author" content="Recruitment Platform">
+    
+    <title>{% block title %}Tableau de bord - Plateforme de Recrutement{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/modern-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    {% block extra_css %}{% endblock %}
+    
+    <!-- CSRF Token -->
+    {% csrf_token %}
+</head>
+<body class="dashboard-page">
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner">
+        <div class="spinner">
+            <div class="spinner-inner"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar" id="dashboard-sidebar">
+            <div class="sidebar-header">
+                <a href="{% url 'core:home' %}" class="sidebar-brand">
+                    <i class="fas fa-briefcase"></i>
+                    <span>RecruitPro</span>
+                </a>
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="{% url 'accounts:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'accounts:profile' %}" class="nav-link {% if 'profile' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-user"></i>
+                            <span>Mon profil</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'jobs:job_list' %}" class="nav-link {% if 'jobs' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-search"></i>
+                            <span>Offres d'emploi</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'applications:my_applications' %}" class="nav-link {% if 'applications' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Mes candidatures</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'matching:dashboard' %}" class="nav-link {% if 'matching' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-magic"></i>
+                            <span>Matching intelligent</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cv_builder:dashboard' %}" class="nav-link {% if 'cv_builder' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-file-alt"></i>
+                            <span>CV Builder</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'chat:dashboard' %}" class="nav-link {% if 'chat' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-comments"></i>
+                            <span>Messages</span>
+                            <span class="notification-badge" id="chat-notifications" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'alerts:dashboard' %}" class="nav-link {% if 'alerts' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-bell"></i>
+                            <span>Alertes emploi</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'tests:dashboard' %}" class="nav-link {% if 'tests' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-clipboard-check"></i>
+                            <span>Tests en ligne</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'maps:dashboard' %}" class="nav-link {% if 'maps' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Carte des emplois</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'referrals:dashboard' %}" class="nav-link {% if 'referrals' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-users"></i>
+                            <span>Parrainage</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'company_reviews:companies_list' %}" class="nav-link {% if 'company_reviews' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-star"></i>
+                            <span>Avis entreprises</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'gamification:dashboard' %}" class="nav-link {% if 'gamification' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-trophy"></i>
+                            <span>Gamification</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'push_notifications:dashboard' %}" class="nav-link {% if 'push_notifications' in request.resolver_match.namespace %}active{% endif %}">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {% if user.candidate_profile.photo %}
+                            <img src="{{ user.candidate_profile.photo.url }}" alt="{{ user.get_full_name }}">
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <div class="user-details">
+                        <h4>{{ user.get_full_name|default:user.username }}</h4>
+                        <p>{{ user.email }}</p>
+                    </div>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Top Bar -->
+            <header class="dashboard-topbar">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle-mobile" id="sidebar-toggle-mobile">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        {% block breadcrumb %}{% endblock %}
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <!-- Notifications -->
+                    <div class="notification-dropdown">
+                        <button class="notification-btn" id="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
+                        </button>
+                        <div class="notification-dropdown-menu" id="notification-menu">
+                            <div class="notification-header">
+                                <h4>Notifications</h4>
+                                <a href="{% url 'push_notifications:dashboard' %}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                            </div>
+                            <div class="notification-list" id="notification-list">
+                                <div class="notification-empty">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>Aucune notification</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Menu -->
+                    <div class="user-dropdown">
+                        <button class="user-btn" id="user-btn">
+                            <div class="user-avatar">
+                                {% if user.candidate_profile.photo %}
+                                    <img src="{{ user.candidate_profile.photo.url }}" alt="{{ user.get_full_name }}">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown-menu" id="user-menu">
+                            <div class="user-info">
+                                <div class="user-avatar-large">
+                                    {% if user.candidate_profile.photo %}
+                                        <img src="{{ user.candidate_profile.photo.url }}" alt="{{ user.get_full_name }}">
+                                    {% else %}
+                                        <i class="fas fa-user"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="user-details">
+                                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                                    <p>{{ user.email }}</p>
+                                </div>
+                            </div>
+                            <div class="user-menu-items">
+                                <a href="{% url 'accounts:profile' %}" class="menu-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>Mon profil</span>
+                                </a>
+                                <a href="{% url 'accounts:settings' %}" class="menu-item">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Paramètres</span>
+                                </a>
+                                <div class="menu-divider"></div>
+                                <a href="{% url 'accounts:logout' %}" class="menu-item logout">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Déconnexion</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <div class="alert-content">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Page Content -->
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="back-to-top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/modern-ui.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+
+
